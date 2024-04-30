@@ -3,3 +3,6 @@
 *.mp4
 *.osd
 .DS_Store
+artifacts
+ext/ffmpeg/macos-arm/ffmpeg
+ext/ffmpeg/macos-arm/ffprobe
