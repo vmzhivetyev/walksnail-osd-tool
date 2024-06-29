@@ -45,14 +45,14 @@ impl<'a> FrameOverlayIter<'a> {
         srt_options: &SrtOptions,
         ffmpeg_sender: Sender<FromFfmpegMessage>,
         ffmpeg_receiver: Receiver<ToFfmpegMessage>,
-        chroma_key: Option<[f32; 3]>,
+        chroma_key: Option<[f32; 4]>,
     ) -> Self {
         let mut osd_frames_iter = osd_frames.into_iter();
         let mut srt_frames_iter = srt_frames.into_iter();
         let first_osd_frame = osd_frames_iter.next().unwrap();
         let first_srt_frame = srt_frames_iter.next().unwrap();
         let chroma_key =
-            chroma_key.map(|c| Rgba([(c[0] * 255.0) as u8, (c[1] * 255.0) as u8, (c[2] * 255.0) as u8, 255]));
+            chroma_key.map(|c| Rgba([(c[0] * 255.0) as u8, (c[1] * 255.0) as u8, (c[2] * 255.0) as u8, (c[3] * 255.0) as u8]));
         Self {
             decoder_iter,
             decoder_process,
@@ -100,6 +100,7 @@ impl Iterator for FrameOverlayIter<'_> {
                 }
 
                 let mut frame_image = if let Some(chroma_key) = self.chroma_key {
+                    // this should support alpha
                     RgbaImage::from_pixel(video_frame.width, video_frame.height, chroma_key)
                 } else {
                     RgbaImage::from_raw(video_frame.width, video_frame.height, video_frame.data).unwrap()

@@ -388,7 +388,7 @@ impl WalksnailOsdTool {
                         ui.label("Chroma key").on_hover_text(tooltip_text("Render the video with a chroma key instead of the input video so the OSD can be overlay in video editing software."));
                         ui.horizontal(|ui| {
                             changed |= ui.add(Checkbox::without_text(&mut self.render_settings.use_chroma_key)).changed();
-                            changed |= ui.color_edit_button_rgb(&mut self.render_settings.chroma_key).changed();
+                            changed |= ui.color_edit_button_rgba_unmultiplied(&mut self.render_settings.chroma_key).changed();
                         });
                         ui.end_row();
                     });

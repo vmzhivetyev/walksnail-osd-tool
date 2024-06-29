@@ -1,7 +1,5 @@
 use std::{
-    io::{self, Write},
-    path::PathBuf,
-    thread,
+    env::args, io::{self, Write}, path::PathBuf, thread
 };
 
 use crossbeam_channel::{Receiver, Sender};
@@ -45,6 +43,11 @@ pub fn start_video_render(
         output_video,
         render_settings.upscale,
         render_settings.rescale_to_4x3_aspect,
+        if render_settings.use_chroma_key {
+            Some(render_settings.chroma_key)
+        } else {
+            None
+        },
     )?;
 
     // Channels to communicate with ffmpeg handler thread
@@ -122,8 +125,10 @@ pub fn spawn_encoder(
     output_video: &PathBuf,
     upscale: bool,
     rescale_to_4x3_aspect: bool,
+    chroma_key: Option<[f32; 4]>,
 ) -> Result<FfmpegChild, io::Error> {
     let mut encoder_command = FfmpegCommand::new_with_path(ffmpeg_path);
+    let mut output_video = output_video.clone();
 
     encoder_command
         .create_no_window()
@@ -145,12 +150,36 @@ pub fn spawn_encoder(
     }
 
     encoder_command
-        .pix_fmt("yuv420p")
         .codec_video(&video_encoder.name)
         .args(["-b:v", &format!("{}M", bitrate_mbps)])
-        .args(&video_encoder.extra_args)
+        .args(&video_encoder.extra_args);
+
+    // if let Some(chroma_color) = chroma_key {
+    //     if chroma_color[3] > 0.99 {
+    //         encoder_command
+    //             .pix_fmt("yuv420p");
+    //     } else {
+    //         encoder_command
+    //             .pix_fmt("yuva420p")
+    //             .args(["-alpha_quality", "1", "-f", "webm"]);
+
+    //         output_video.set_extension("webm");
+    //     }
+    // } else { 
+    //     encoder_command
+    //         .pix_fmt("yuv420p");
+    // }
+
+    if &video_encoder.name == "prores_ks" {
+        output_video.set_extension("mov");
+    }
+
+    encoder_command
         .overwrite()
         .output(output_video.to_str().unwrap());
+
+    println!("✅✅✅✅✅✅✅");
+    encoder_command.print_command();
 
     let encoder = encoder_command.spawn()?;
     Ok(encoder)

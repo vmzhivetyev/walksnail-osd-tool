@@ -1,4 +1,4 @@
-use std::{fmt::Display, path::PathBuf, process::Command};
+use std::{fmt::{write, Display}, path::PathBuf, process::Command};
 
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -7,6 +7,8 @@ use serde::{Deserialize, Serialize};
 pub enum Codec {
     H264,
     H265,
+    VP9,
+    PRORES,
 }
 
 impl Display for Codec {
@@ -14,6 +16,8 @@ impl Display for Codec {
         match self {
             Codec::H264 => write!(f, "H.264"),
             Codec::H265 => write!(f, "H.265"),
+            Codec::VP9 => write!(f, "VP9"),
+            Codec::PRORES => write!(f, "PRORES"),
         }
     }
 }
@@ -86,6 +90,13 @@ impl Encoder {
             Encoder::new_with_extra_args(
                 "hevc_videotoolbox", Codec::H265, true, 
                 &["-tag:v", "hvc1"] // Apple QuickTime player on Mac only supports hvc1
+            ),
+
+            Encoder::new("libvpx-vp9", Codec::VP9, false),
+
+            Encoder::new_with_extra_args("prores_ks", Codec::PRORES, true,
+                // &["-profile:v", "5", "-bits_per_mb", "8000", "-pix_fmt", "yuva422p10le"]
+                &["-profile:v", "4", "-pix_fmt", "yuva422p10le", "-alpha_bits", "8", "-vendor", "apl0"]
             ),
         ];
 
