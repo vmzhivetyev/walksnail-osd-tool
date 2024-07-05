@@ -38,6 +38,7 @@ pub fn start_video_render(
         video_info.width,
         video_info.height,
         video_info.frame_rate,
+        video_info.time_base,
         render_settings.bitrate_mbps,
         &render_settings.encoder,
         output_video,
@@ -120,6 +121,7 @@ pub fn spawn_encoder(
     width: u32,
     height: u32,
     frame_rate: f32,
+    time_base: u32,
     bitrate_mbps: u32,
     video_encoder: &Encoder,
     output_video: &PathBuf,
@@ -152,7 +154,8 @@ pub fn spawn_encoder(
     encoder_command
         .codec_video(&video_encoder.name)
         .args(["-b:v", &format!("{}M", bitrate_mbps)])
-        .args(&video_encoder.extra_args);
+        .args(&video_encoder.extra_args)
+		.args(["-video_track_timescale", time_base.to_string().as_str()]);
 
     // if let Some(chroma_color) = chroma_key {
     //     if chroma_color[3] > 0.99 {
