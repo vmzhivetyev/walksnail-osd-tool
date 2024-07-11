@@ -34,17 +34,25 @@ pub fn overlay_osd(image: &mut RgbaImage, osd_frame: &osd::Frame, font: &font::F
             // INFO
             // HD OSD defaults to a 53 column x 20 row grid of OSD elements.
             // When the VTX is online BetaFlight will query via MSP Displayport to determine the optimum grid size and may update the grid to match what is supported by the digital VTX system
-            const ROW_COUNT: f32 = 20.0;
-            const COL_COUNT: f32 = 53.0;
+            const ROW_COUNT: u32 = 20;
+            const COL_COUNT: u32 = 53;
 
-            let scale_height = image.height() as f32 / ROW_COUNT;
-            let scale_width = image.width() as f32 / COL_COUNT;
+            // Important: integer division here.
+            let single_glyph_x_offset = image.width() / COL_COUNT;
+            let single_glyph_y_offset = image.height() / ROW_COUNT;
+            let remainder_x_offset = image.width() % COL_COUNT / 2;
+            let remainder_y_offset = image.height() % ROW_COUNT / 2;
+            
+            let x_raw = remainder_x_offset + grid_position.x * single_glyph_x_offset;
+            let y_raw = remainder_y_offset + grid_position.y * single_glyph_y_offset;
+            let x = (x_raw as i32 + osd_options.position.x) as i64;
+            let y = (y_raw as i32 + osd_options.position.y) as i64;
 
             overlay(
                 image,
                 &character_image,
-                (grid_position.x as f32 * scale_width + osd_options.position.x as f32) as i64,
-                (grid_position.y as f32 * scale_height + osd_options.position.y as f32) as i64,
+                x,
+                y,
             )
         }
     }
