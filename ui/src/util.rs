@@ -166,6 +166,7 @@ impl Into<AppConfig> for &mut WalksnailOsdTool {
             app_update: backend::util::AppUpdate {
                 check_on_startup: self.app_update.check_on_startup,
             },
+            dark_mode: self.dark_mode,
             font_path: self
                 .font_file
                 .as_ref()
