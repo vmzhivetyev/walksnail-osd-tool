@@ -5,12 +5,24 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Run & Debug",
+            "name": "Run Debug",
             "type": "lldb",
             "request": "launch",
             "cargo": {
                 "args": [
                     "build", "--profile", "dev"
+                ]
+            },
+            "args": [],
+            "sourceLanguages": ["rust"]
+        },
+        {
+            "name": "Run Optimized",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "build", "--profile", "devoptimized"
                 ]
             },
             "args": [],

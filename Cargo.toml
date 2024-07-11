@@ -3,7 +3,27 @@ members = ["ui", "backend"]
 resolver = "2"
 
 [profile.dev]
-opt-level = 3
+opt-level = 0
+debug = "full"
+strip = "none"
+lto = "off"
+panic = "unwind"
+incremental = true
+codegen-units = 256
+rpath = false
+
+[profile.devoptimized]
+inherits = "dev"
+opt-level = 1
 
 [profile.release]
 lto = "fat"
+opt-level = 3
+debug = false
+debug-assertions = false
+strip = "none"
+overflow-checks = false
+panic = "unwind"
+incremental = false
+codegen-units = 16
+rpath = false
