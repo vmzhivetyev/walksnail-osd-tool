@@ -235,6 +235,7 @@ pub mod build_info {
     use semver::Version;
 
     pub enum Build {
+        #[allow(dead_code)]
         Release { version: Version, commit: String },
         Dev { commit: String },
         Unknown,
