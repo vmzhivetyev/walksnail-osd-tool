@@ -36,3 +36,25 @@ pub struct AppUpdate {
     #[derivative(Default(value = "true"))]
     pub check_on_startup: bool,
 }
+
+pub fn command_to_cli(cmd: &std::process::Command) -> String {
+    use std::ffi::OsStr;
+    let cli_args: Vec<String> = cmd
+        .get_args()
+        .collect::<Vec<&OsStr>>()
+        .into_iter()
+        .map(|s| {
+            let s = s.to_string_lossy().to_string();
+            if s.contains(' ') {
+                format!("\"{}\"", s)
+            } else {
+                s
+            }
+        })
+        .collect();
+    format!(
+        "{} {}",
+        cmd.get_program().to_string_lossy(),
+        cli_args.join(" ")
+    )
+}

@@ -181,9 +181,8 @@ pub fn spawn_encoder(
         .overwrite()
         .output(output_video.to_str().unwrap());
 
-    println!("✅✅✅✅✅✅✅");
-    encoder_command.print_command();
-
+    tracing::info!("✅✅✅✅✅✅✅ {}", crate::util::command_to_cli(encoder_command.as_inner()));
+ 
     let encoder = encoder_command.spawn()?;
     Ok(encoder)
 }
