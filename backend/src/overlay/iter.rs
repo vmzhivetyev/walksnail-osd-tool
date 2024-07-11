@@ -126,6 +126,8 @@ impl Iterator for FrameOverlayIter<'_> {
                 Some(video_frame)
             }
             other_event => {
+                tracing::trace!("{:?}", &other_event);
+                // dbg!("🌤️🌤️🌤️", &other_event);
                 handle_decoder_events(other_event, &self.ffmpeg_sender);
                 None
             }
