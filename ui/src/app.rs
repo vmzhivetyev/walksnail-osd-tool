@@ -99,6 +99,7 @@ impl WalksnailOsdTool {
             app_update,
             app_version,
             target,
+            render_settings: saved_settings.render_options,
             dark_mode: start_in_dark_mode,
             ..Default::default()
         }
