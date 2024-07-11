@@ -2,7 +2,7 @@ use std::time::Instant;
 
 use backend::{ffmpeg::{Codec, Encoder}, font::CharacterSize, util::Coordinates};
 use egui::{
-    plot::Text, vec2, Button, CentralPanel, Checkbox, CollapsingHeader, Color32, CursorIcon, Grid, Image, Label, Rect, RichText, ScrollArea, Sense, Slider, Stroke, TextStyle, Ui
+    vec2, Button, CentralPanel, Checkbox, CollapsingHeader, Color32, CursorIcon, Grid, Image, Rect, RichText, ScrollArea, Sense, Slider, Stroke, TextStyle, Ui
 };
 
 use crate::{

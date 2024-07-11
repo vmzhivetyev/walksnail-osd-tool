@@ -1,5 +1,5 @@
 use std::{
-    env::args, io::{self, Write}, path::PathBuf, thread
+    io::{self, Write}, path::PathBuf, thread
 };
 
 use crossbeam_channel::{Receiver, Sender};

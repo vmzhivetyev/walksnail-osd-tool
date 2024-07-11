@@ -1,4 +1,4 @@
-use std::{fmt::{write, Display}, path::PathBuf, process::Command};
+use std::{fmt::Display, path::PathBuf, process::Command};
 
 use rayon::prelude::*;
 use serde::{Deserialize, Serialize};
