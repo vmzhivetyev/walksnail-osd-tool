@@ -1,4 +1,4 @@
-use std::{iter::Peekable, vec::IntoIter};
+use std::{iter::Peekable, path::Path, vec::IntoIter};
 
 use crossbeam_channel::{Receiver, Sender};
 use ffmpeg_sidecar::{
@@ -30,6 +30,7 @@ pub struct FrameOverlayIter<'a> {
     ffmpeg_sender: Sender<FromFfmpegMessage>,
     ffmpeg_receiver: Receiver<ToFfmpegMessage>,
     chroma_key: Option<Rgba<u8>>,
+    frame_index: i64,
 }
 
 impl<'a> FrameOverlayIter<'a> {
@@ -71,6 +72,7 @@ impl<'a> FrameOverlayIter<'a> {
             ffmpeg_sender,
             ffmpeg_receiver,
             chroma_key,
+            frame_index: 0,
         }
     }
 }
@@ -121,6 +123,13 @@ impl Iterator for FrameOverlayIter<'_> {
                 if let Some(srt_data) = &self.current_srt_frame.data {
                     overlay_srt_data(&mut frame_image, srt_data, &self.srt_font, &self.srt_options);
                 }
+
+                if self.frame_index % 100 == 0 {
+                    let path = Path::new("/Volumes/PortableSSD/FOOTAGE/WS_COMBINED/may 10 (galovica goggles only)/frames/")
+                        .join(format!("frame_{}.jpg", self.frame_index));
+                    let _ = frame_image.save_with_format(path, image::ImageFormat::Jpeg);
+                }
+                self.frame_index += 1;
 
                 video_frame.data = frame_image.as_raw().to_vec();
                 Some(video_frame)

@@ -1,3 +1,4 @@
+use rand::Rng;
 use image::{imageops::overlay, RgbaImage};
 
 use crate::{
@@ -48,9 +49,20 @@ pub fn overlay_osd(image: &mut RgbaImage, osd_frame: &osd::Frame, font: &font::F
             let x = (x_raw as i32 + osd_options.position.x) as i64;
             let y = (y_raw as i32 + osd_options.position.y) as i64;
 
+            let fake_pixel: image::Rgba<u8> = image::Rgba([
+                rand::thread_rng().gen_range(0..=255),
+                rand::thread_rng().gen_range(0..=255),
+                rand::thread_rng().gen_range(0..=255),
+                100
+            ]);
+
+            let mut color_img = RgbaImage::from_pixel(character_image.width(), character_image.height(), fake_pixel);
+
+            overlay(&mut color_img, &character_image, 0, 0);
+
             overlay(
                 image,
-                &character_image,
+                &color_img,
                 x,
                 y,
             )
