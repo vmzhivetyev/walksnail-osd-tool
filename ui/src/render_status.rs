@@ -64,6 +64,7 @@ impl RenderStatus {
                 Status::InProgress { progress_pct, .. },
                 FromFfmpegMessage::DecoderFatalError(e) | FromFfmpegMessage::EncoderFatalError(e),
             ) => {
+                dbg!("🌤️🌤️🌤️", e);
                 self.status = Status::Error {
                     progress_pct: *progress_pct,
                     error: e.clone(),
@@ -76,6 +77,7 @@ impl RenderStatus {
                 let progress_pct = frame / total_frames;
                 let frames_remaining = total_frames - frame;
                 let time_remaining_secs = frames_remaining / p.fps;
+                // dbg!("🌤️🌤️🌤️", frame, total_frames, progress_pct, frames_remaining, time_remaining_secs);
                 self.status = Status::InProgress {
                     time_remaining: if time_remaining_secs.is_finite() && time_remaining_secs.is_sign_positive() {
                         Some(Duration::from_secs_f32(time_remaining_secs))

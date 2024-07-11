@@ -8,16 +8,16 @@ pub enum Codec {
     H264,
     H265,
     VP9,
-    PRORES,
+    ProRes,
 }
 
 impl Display for Codec {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Codec::H264 => write!(f, "H.264"),
-            Codec::H265 => write!(f, "H.265"),
+            Codec::H265 => write!(f, "H.265 (HEVC)"),
             Codec::VP9 => write!(f, "VP9"),
-            Codec::PRORES => write!(f, "PRORES"),
+            Codec::ProRes => write!(f, "Apple ProRes"),
         }
     }
 }
@@ -89,15 +89,19 @@ impl Encoder {
             #[cfg(target_os = "macos")]
             Encoder::new_with_extra_args(
                 "hevc_videotoolbox", Codec::H265, true, 
-                &["-tag:v", "hvc1"] // Apple QuickTime player on Mac only supports hvc1
+                &["-tag:v", "hvc1"] // Apple QuickTime player on Mac supports hvc1. It doesn't support hev1 which is the default.
             ),
 
             Encoder::new("libvpx-vp9", Codec::VP9, false),
 
-            Encoder::new_with_extra_args("prores_ks", Codec::PRORES, true,
-                // &["-profile:v", "5", "-bits_per_mb", "8000", "-pix_fmt", "yuva422p10le"]
+            Encoder::new_with_extra_args("prores_ks", Codec::ProRes, false,
                 &["-profile:v", "4", "-pix_fmt", "yuva422p10le", "-alpha_bits", "8", "-vendor", "apl0"]
             ),
+
+            #[cfg(target_os = "macos")]
+            Encoder::new_with_extra_args("prores_videotoolbox", Codec::ProRes, true,
+                &["-profile:v", "4", "-pix_fmt", "yuva422p10le", "-alpha_bits", "8", "-vendor", "apl0"]
+            ),            
         ];
 
         all_encoders

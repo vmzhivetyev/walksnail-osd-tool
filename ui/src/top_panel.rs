@@ -1,3 +1,5 @@
+use std::time::Instant;
+
 use egui::{vec2, Align2, Button, Frame, Label, RichText, Sense, Ui, Visuals, Window};
 
 use super::WalksnailOsdTool;
@@ -86,6 +88,7 @@ impl WalksnailOsdTool {
             visuals.indent_has_left_vline = false;
             ctx.set_visuals(visuals);
             self.dark_mode = !self.dark_mode;
+            self.config_changed = Some(Instant::now());
         }
     }
 

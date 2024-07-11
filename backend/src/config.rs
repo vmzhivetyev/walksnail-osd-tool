@@ -12,6 +12,16 @@ pub struct AppConfig {
     pub render_options: RenderSettings,
     pub app_update: AppUpdate,
     pub font_path: String,
+    pub dark_mode: bool,
+}
+
+impl AppConfig {
+    fn clean_start() -> Self {
+        AppConfig {
+            dark_mode: true,
+            ..Default::default()
+        }
+    }
 }
 
 const CONFIG_NAME: &str = "saved_settings";
@@ -22,9 +32,8 @@ impl AppConfig {
         let config: Result<Self, _> = confy::load(NAMESPACE, CONFIG_NAME);
         if let Err(ConfyError::BadRonData(_)) = config {
             tracing::warn!("Invalid config found, resetting to default");
-            let default_config = AppConfig::default();
+            let default_config = AppConfig::clean_start();
             tracing::debug!("Default config: {:?}", default_config);
-            default_config.save();
             default_config
         } else {
             config

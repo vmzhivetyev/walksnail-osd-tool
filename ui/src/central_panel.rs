@@ -1,9 +1,8 @@
 use std::time::Instant;
 
-use backend::{font::CharacterSize, util::Coordinates};
+use backend::{ffmpeg::{Codec, Encoder}, font::CharacterSize, util::Coordinates};
 use egui::{
-    vec2, Button, CentralPanel, Checkbox, CollapsingHeader, Color32, CursorIcon, Grid, Image, Rect, RichText,
-    ScrollArea, Sense, Slider, Stroke, Ui,
+    plot::Text, vec2, Button, CentralPanel, Checkbox, CollapsingHeader, Color32, CursorIcon, Grid, Image, Label, Rect, RichText, ScrollArea, Sense, Slider, Stroke, TextStyle, Ui
 };
 
 use crate::{
@@ -373,11 +372,7 @@ impl WalksnailOsdTool {
         CollapsingHeader::new(RichText::new("Rendering Options").heading())
             .default_open(true)
             .show_unindented(ui, |ui| {
-                let selectable_encoders = self
-                    .encoders
-                    .iter()
-                    .filter(|e| self.render_settings.show_undetected_encoders || e.detected)
-                    .collect::<Vec<_>>();
+                let selectable_encoders = Self::sort_and_filter_encoders(&self.encoders, self.render_settings.show_undetected_encoders);
 
                 Grid::new("render_options")
                     .min_col_width(self.ui_dimensions.options_column1_width)
@@ -405,6 +400,7 @@ impl WalksnailOsdTool {
 
                             if ui
                                 .add(Checkbox::without_text(&mut self.render_settings.show_undetected_encoders))
+                                .on_hover_text(tooltip_text("Show undetected encoders."))
                                 .changed() {
                                     self.render_settings.selected_encoder_idx = 0;
                                     self.render_settings.encoder =
@@ -433,10 +429,35 @@ impl WalksnailOsdTool {
                         });
                         ui.end_row();
                     });
+
+                ui.label(RichText::new("Note: Apple ProRes codec supports transparency.").text_style(TextStyle::Name("Tooltip".into())).weak());
             });
 
         if changed {
             self.config_changed = Some(Instant::now());
         }
+    }
+
+    fn sort_and_filter_encoders(encoders: &Vec<Encoder>, show_undetected_encoders: bool) -> Vec<&Encoder> {
+        let mut filtered_encoders: Vec<&Encoder> = encoders
+            .iter()
+            .filter(|e| e.detected || show_undetected_encoders)
+            .collect();
+    
+        filtered_encoders.sort_by(|a, b| {
+            const CODEC_PRIORITY: [Codec; 4] = [Codec::H265, Codec::H264, Codec::VP9, Codec::ProRes];
+    
+            let a_priority = CODEC_PRIORITY.iter().position(|c| *c == a.codec).unwrap_or(CODEC_PRIORITY.len());
+            let b_priority = CODEC_PRIORITY.iter().position(|c| *c == b.codec).unwrap_or(CODEC_PRIORITY.len());
+            let type_cmp = a_priority.cmp(&b_priority);
+
+            let hardware_cmp = b.hardware.cmp(&a.hardware);
+
+            let name_cmp = a.name.cmp(&b.name);
+
+            hardware_cmp.then_with(||type_cmp).then_with(||name_cmp)
+        });
+
+        filtered_encoders
     }
 }
