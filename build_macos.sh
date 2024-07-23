@@ -8,7 +8,7 @@ set -euo pipefail
 PROJECT_DIR="$(pwd)"
 TARGET_NAME="macos-arm"
 BUILD_TARGET_ARCH="aarch64-apple-darwin"
-CONFIG_NAME="debug" # debug or release
+CONFIG_NAME="release" # debug or release
 
 if [ $CONFIG_NAME == 'debug' ]; then
 	RELEASE_OPT=""
