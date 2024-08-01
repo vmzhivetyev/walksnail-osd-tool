@@ -22,7 +22,7 @@ pub struct SrtFrameData {
 }
 
 #[derive(Debug, FromStr, Clone, PartialEq)]
-#[display("CH:{channel} MCS:{signal} SP[ {sp1} {sp2}  {sp3} {sp4}] GP[ {gp1}  {gp2}  {gp3}  {gp4}] GTP:{gtp} GTP0:{gtp0} STP:{stp} STP0:{stp0} GSNR:{gsnr} SSNR:{ssnr} Gtemp:{gtemp} Stemp:{stemp} Delay:{latency}ms Frame:{frame}  Gerr:{gerr} SErr:{serr} {serr_ext}, [iso:{iso},mode={iso_mode}, exp:{iso_exp}] [gain:{gain} exp:{gain_exp}ms]")]
+#[display("CH:{channel} MCS:{signal} SP[ {sp1} {sp2}  {sp3} {sp4}] GP[ {gp1}  {gp2}  {gp3}  {gp4}] GTP:{gtp} GTP0:{gtp0} STP:{stp} STP0:{stp0} GSNR:{gsnr} SSNR:{ssnr} Gtemp:{gtemp} Stemp:{stemp} Delay:{latency}ms Frame:{frame}  Gerr:{gerr} SErr:{serr} {serr_ext}, [iso:{iso},mode={iso_mode}, exp:{iso_exp}] [gain:{gain} exp:{gain_exp}ms, Lx:{gain_lx}] [cct:{cct}, rb:{rb} {rb_ext}]")]  
 pub struct SrtDebugFrameData {
     pub signal: u8,
     pub channel: u8,
@@ -57,6 +57,10 @@ pub struct SrtDebugFrameData {
     pub iso_exp: u32,
     pub gain: f32,
     pub gain_exp: f32,
+    pub gain_lx: u16,
+    pub cct: u16,
+    pub rb: f32,
+    pub rb_ext: f32,
 }
 
 #[cfg(test)]
@@ -103,7 +107,7 @@ mod tests {
 
     #[test]
     fn parse_v37_42_3_debug_src_frame_data() {
-        let line = "CH:1 MCS:4 SP[ 45 152  47 149] GP[ 49  48  45  47] GTP:27 GTP0:00 STP:24 STP0:00 GSNR:25.9 SSNR:17.8 Gtemp:50 Stemp:82 Delay:31ms Frame:60  Gerr:0 SErr:0 42, [iso:0,mode=max, exp:0] [gain:0.00 exp:0.000ms]";
+        let line = "CH:1 MCS:4 SP[ 45 152  47 149] GP[ 49  48  45  47] GTP:27 GTP0:00 STP:24 STP0:00 GSNR:25.9 SSNR:17.8 Gtemp:50 Stemp:82 Delay:31ms Frame:60  Gerr:0 SErr:0 42, [iso:0,mode=max, exp:0] [gain:0.00 exp:0.000ms, Lx:0] [cct:0, rb:0.000 0.000]";
         let parsed = line.parse::<SrtDebugFrameData>();
         assert_eq!(
             parsed.expect("Failed to parse SRT frame data"),
@@ -140,7 +144,11 @@ mod tests {
                 iso_mode: "max".to_string(),
                 iso_exp: 0,
                 gain: 0.0,
-                gain_exp: 0.0
+                gain_exp: 0.0,
+                gain_lx: 0,
+                cct: 0,
+                rb: 0.0,
+                rb_ext: 0.0,
             }
         )
     }
