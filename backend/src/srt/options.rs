@@ -43,14 +43,14 @@ impl Default for SrtOptions {
             // debug srt data
             show_channel: true,
             show_snr: true,
-            show_g_temp: true,
+            show_g_temp: false,
             show_s_temp: true,
-            show_frame: true,
+            show_frame: false,
             show_err: true,
-            show_iso: true,
+            show_iso: false,
             show_gain: true,
-            show_cct: true,
-            show_rb: true,
+            show_cct: false,
+            show_rb: false,
         }
     }
 }

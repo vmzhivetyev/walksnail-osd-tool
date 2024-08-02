@@ -238,6 +238,7 @@ impl WalksnailOsdTool {
                         ));
                         let options = &mut self.srt_options;
                         let has_distance = self.srt_file.as_ref().map(|s| s.has_distance).unwrap_or(true);
+                        let has_debug = self.srt_file.as_ref().map(|s| s.has_debug).unwrap_or(false);
                         Grid::new("srt_selection").show(ui, |ui| {
                             changed |= ui.checkbox(&mut options.show_time, "Time").changed();
                             changed |= ui.checkbox(&mut options.show_sbat, "SBat").changed();
@@ -251,6 +252,23 @@ impl WalksnailOsdTool {
                                 .add_enabled(has_distance, Checkbox::new(&mut options.show_distance, "Distance"))
                                 .changed();
                             ui.end_row();
+
+                            // debug srt data
+                            if has_debug {
+                                changed |= ui.checkbox(&mut options.show_channel, "Channel").changed();
+                                changed |= ui.checkbox(&mut options.show_snr, "SNR").on_hover_text("Signal to noise ratio. A GSNR value of around 23 is excellent.").changed();
+                                changed |= ui.checkbox(&mut options.show_g_temp, "GTemp").on_hover_text("Ground temperature").changed();
+                                changed |= ui.checkbox(&mut options.show_s_temp, "STemp").on_hover_text("Sky temperature").changed();
+                                ui.end_row();
+                                changed |= ui.checkbox(&mut options.show_frame, "Frame").on_hover_text("Frame number").changed();
+                                changed |= ui.checkbox(&mut options.show_err, "Errors").on_hover_text("Error count").changed();
+                                changed |= ui.checkbox(&mut options.show_iso, "ISO").on_hover_text("ISO sensitivity").changed();
+                                changed |= ui.checkbox(&mut options.show_gain, "Gain").on_hover_text("Gain value").changed();
+                                ui.end_row();
+                                changed |= ui.checkbox(&mut options.show_cct, "CCT").on_hover_text("Correlated Color Temperature").changed();
+                                changed |= ui.checkbox(&mut options.show_rb, "Red Balance").on_hover_text("Red Balance values").changed();
+                                ui.end_row();
+                            }
                         });
                         ui.end_row();
                     });
