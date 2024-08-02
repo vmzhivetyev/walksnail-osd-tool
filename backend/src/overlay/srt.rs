@@ -132,7 +132,7 @@ pub fn overlay_srt_debug_data(
         srt_string.push_str(&format!("FPS:{} ", srt_debug_data.fps));
     }
     if srt_options.show_err {
-        srt_string.push_str(&format!("Gerr:{} SErr:{} {} ", srt_debug_data.gerr, srt_debug_data.serr, srt_debug_data.serr_ext));
+        srt_string.push_str(&format!("GErr:{} SErr:{} {} ", srt_debug_data.gerr, srt_debug_data.serr, srt_debug_data.serr_ext));
     }
     if srt_options.show_settings_cam {
         srt_string.push_str(&format!("[ISO:{} Mode:{} Exp:{}] ", srt_debug_data.iso, srt_debug_data.iso_mode, srt_debug_data.iso_exp));
