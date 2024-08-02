@@ -23,6 +23,7 @@ pub struct SrtFrameData {
     pub distance: u32,
 }
 
+// See https://walksnail.wiki/en/Debug
 #[derive(Debug, Clone, PartialEq)]
 pub struct SrtDebugFrameData {
     pub signal: i8,
