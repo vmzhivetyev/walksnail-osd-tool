@@ -37,6 +37,12 @@ pub fn overlay_srt_data(
         "".into()
     };
 
+    let channel_str = if srt_options.show_channel {
+        format!("Ch:{}  ", srt_data.channel)
+    } else {
+        "".into()
+    };
+
     let latency_str = if srt_options.show_latency {
         format!("Latency:{: >3}ms  ", srt_data.latency)
     } else {
@@ -61,7 +67,7 @@ pub fn overlay_srt_data(
         "".into()
     };
 
-    let srt_string = format!("{time_str}{sbat_str}{gbat_str}{signal_str}{latency_str}{bitrate_str}{distance_str}");
+    let srt_string = format!("{signal_str}{channel_str}{time_str}{gbat_str}{sbat_str}{latency_str}{bitrate_str}{distance_str}");
 
     let image_dimensions = image.dimensions();
 
@@ -89,11 +95,23 @@ pub fn overlay_srt_debug_data(
 ) {
     let mut srt_string = String::new();
 
-    if srt_options.show_signal {
-        srt_string.push_str(&format!("Signal:{} ", srt_debug_data.signal));
-    }
     if srt_options.show_channel {
         srt_string.push_str(&format!("CH:{} ", srt_debug_data.channel));
+    }
+    if srt_options.show_signal {
+        srt_string.push_str(&format!("MCS:{} ", srt_debug_data.signal));
+    }
+    if srt_options.show_gp {
+        srt_string.push_str(&format!("GP[{} {} {} {}] ", srt_debug_data.gp1, srt_debug_data.gp2, srt_debug_data.gp3, srt_debug_data.gp4))
+    }
+    if srt_options.show_sp {
+        srt_string.push_str(&format!("SP[{} {} {} {}] ", srt_debug_data.sp1, srt_debug_data.sp2, srt_debug_data.sp3, srt_debug_data.sp4))
+    }
+    if srt_options.show_gtp {
+        srt_string.push_str(&format!("GTP:{} ", srt_debug_data.gtp))
+    }
+    if srt_options.show_stp {
+        srt_string.push_str(&format!("STP:{} ", srt_debug_data.stp))
     }
     if srt_options.show_gsnr {
         srt_string.push_str(&format!("GSNR:{:.1} ", srt_debug_data.gsnr));
@@ -102,10 +120,13 @@ pub fn overlay_srt_debug_data(
         srt_string.push_str(&format!("SSNR:{:.1} ", srt_debug_data.ssnr));
     }
     if srt_options.show_gtemp {
-        srt_string.push_str(&format!("G:{:.1}°C ", srt_debug_data.gtemp));
+        srt_string.push_str(&format!("GTemp:{:.1}°C ", srt_debug_data.gtemp));
     }
     if srt_options.show_stemp {
-        srt_string.push_str(&format!("S:{:.1}°C ", srt_debug_data.stemp));
+        srt_string.push_str(&format!("STemp:{:.1}°C ", srt_debug_data.stemp));
+    }
+    if srt_options.show_latency {
+        srt_string.push_str(&format!("Delay:{} ", srt_debug_data.latency));
     }
     if srt_options.show_fps {
         srt_string.push_str(&format!("FPS:{} ", srt_debug_data.fps));
@@ -117,25 +138,13 @@ pub fn overlay_srt_debug_data(
         srt_string.push_str(&format!("[ISO:{} Mode:{} Exp:{}] ", srt_debug_data.iso, srt_debug_data.iso_mode, srt_debug_data.iso_exp));
     }
     if srt_options.show_actual_cam {
-        srt_string.push_str(&format!("[ExpGain:{:.2} Exp:{:.3}ms Lx:{}] ", srt_debug_data.gain, srt_debug_data.gain_exp, srt_debug_data.gain_lx));
+        srt_string.push_str(&format!("[ISO_Gain:{:.2} Exp:{:.3}ms Lx:{}] ", srt_debug_data.gain, srt_debug_data.gain_exp, srt_debug_data.gain_lx));
     }
     if srt_options.show_cct {
         srt_string.push_str(&format!("[CCT:{}] ", srt_debug_data.cct));
     }
     if srt_options.show_rb {
         srt_string.push_str(&format!("[RB:{:.2} {:.2}] ", srt_debug_data.rb, srt_debug_data.rb_ext));
-    }
-    if srt_options.show_sp {
-        srt_string.push_str(&format!("SP[{} {} {} {}] ", srt_debug_data.sp1, srt_debug_data.sp2, srt_debug_data.sp3, srt_debug_data.sp4))
-    }
-    if srt_options.show_gp {
-        srt_string.push_str(&format!("GP[{} {} {} {}] ", srt_debug_data.gp1, srt_debug_data.gp2, srt_debug_data.gp3, srt_debug_data.gp4))
-    }
-    if srt_options.show_stp {
-        srt_string.push_str(&format!("STP:{} ", srt_debug_data.stp))
-    }
-    if srt_options.show_gtp {
-        srt_string.push_str(&format!("GTP:{} ", srt_debug_data.gtp))
     }
 
     overlay_string(image, &srt_string, font, srt_options)
