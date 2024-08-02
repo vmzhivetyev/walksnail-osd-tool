@@ -8,7 +8,7 @@ use ffmpeg_sidecar::{
 };
 use image::{Rgba, RgbaImage};
 
-use super::{overlay_osd, overlay_srt_data};
+use super::{overlay_osd, overlay_srt_data, overlay_srt_debug_data};
 use crate::{
     ffmpeg::{handle_decoder_events, FromFfmpegMessage, ToFfmpegMessage},
     font,
@@ -120,6 +120,10 @@ impl Iterator for FrameOverlayIter<'_> {
 
                 if let Some(srt_data) = &self.current_srt_frame.data {
                     overlay_srt_data(&mut frame_image, srt_data, &self.srt_font, &self.srt_options);
+                }
+
+                if let Some(srt_debug_data) = &self.current_srt_frame.debug_data {
+                    overlay_srt_debug_data(&mut frame_image, srt_debug_data, &self.srt_font, &self.srt_options)
                 }
 
                 video_frame.data = frame_image.as_raw().to_vec();

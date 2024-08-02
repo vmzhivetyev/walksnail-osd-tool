@@ -13,6 +13,18 @@ pub struct SrtOptions {
     pub show_latency: bool,
     pub show_bitrate: bool,
     pub show_distance: bool,
+    
+    // debug srt data
+    pub show_channel: bool,
+    pub show_snr: bool,
+    pub show_g_temp: bool,
+    pub show_s_temp: bool,
+    pub show_frame: bool,
+    pub show_err: bool,
+    pub show_iso: bool,
+    pub show_gain: bool,
+    pub show_cct: bool,
+    pub show_rb: bool,
 }
 
 impl Default for SrtOptions {
@@ -27,6 +39,18 @@ impl Default for SrtOptions {
             show_latency: true,
             show_bitrate: true,
             show_distance: true,
+
+            // debug srt data
+            show_channel: true,
+            show_snr: true,
+            show_g_temp: true,
+            show_s_temp: true,
+            show_frame: true,
+            show_err: true,
+            show_iso: true,
+            show_gain: true,
+            show_cct: true,
+            show_rb: true,
         }
     }
 }

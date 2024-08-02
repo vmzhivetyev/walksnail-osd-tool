@@ -1,4 +1,6 @@
 use parse_display::FromStr;
+use std::str::FromStr;
+use regex::Regex;
 
 #[derive(Debug, Clone)]
 pub struct SrtFrame {
@@ -21,46 +23,108 @@ pub struct SrtFrameData {
     pub distance: u32,
 }
 
-#[derive(Debug, FromStr, Clone, PartialEq)]
-#[display("CH:{channel} MCS:{signal} SP[ {sp1} {sp2}  {sp3} {sp4}] GP[ {gp1}  {gp2}  {gp3}  {gp4}] GTP:{gtp} GTP0:{gtp0} STP:{stp} STP0:{stp0} GSNR:{gsnr} SSNR:{ssnr} Gtemp:{gtemp} Stemp:{stemp} Delay:{latency}ms Frame:{frame}  Gerr:{gerr} SErr:{serr} {serr_ext}, [iso:{iso},mode={iso_mode}, exp:{iso_exp}] [gain:{gain} exp:{gain_exp}ms, Lx:{gain_lx}] [cct:{cct}, rb:{rb} {rb_ext}]")]  
+#[derive(Debug, Clone, PartialEq)]
 pub struct SrtDebugFrameData {
-    pub signal: u8,
-    pub channel: u8,
+    pub signal: i8,
+    pub channel: i8,
     //pub flight_time: u32,
     //pub sky_bat: f32,
     //pub ground_bat: f32,
-    pub latency: u32,
+    pub latency: i32,
     //pub bitrate_mbps: f32,
     //pub distance: u32,
-    pub sp1: u16,
-    pub sp2: u16,
-    pub sp3: u16,
-    pub sp4: u16,
-    pub gp1: u16,
-    pub gp2: u16,
-    pub gp3: u16,
-    pub gp4: u16,
-    pub gtp: u16,
-    pub gtp0: u16,
-    pub stp: u16,
-    pub stp0: u16,
+    pub sp1: i16,
+    pub sp2: i16,
+    pub sp3: i16,
+    pub sp4: i16,
+    pub gp1: i16,
+    pub gp2: i16,
+    pub gp3: i16,
+    pub gp4: i16,
+    pub gtp: i16,
+    pub gtp0: i16,
+    pub stp: i16,
+    pub stp0: i16,
     pub gsnr: f32,
     pub ssnr: f32,
     pub gtemp: f32,
     pub stemp: f32,
-    pub frame: u16,
-    pub gerr: u16,
-    pub serr: u16,
-    pub serr_ext: u16,
-    pub iso: u32,
+    pub frame: i16,
+    pub gerr: i16,
+    pub serr: i16,
+    pub serr_ext: i16,
+    pub iso: i32,
     pub iso_mode: String,
-    pub iso_exp: u32,
+    pub iso_exp: i32,
     pub gain: f32,
     pub gain_exp: f32,
-    pub gain_lx: u16,
-    pub cct: u16,
+    pub gain_lx: i16,
+    pub cct: i16,
     pub rb: f32,
     pub rb_ext: f32,
+}
+
+impl FromStr for SrtDebugFrameData {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        lazy_static::lazy_static! {
+            static ref RE_CHANNEL_SIGNAL: Regex = Regex::new(r"CH:\s*(\d+)\s*MCS:\s*(\d+)").unwrap();
+            static ref RE_SP: Regex = Regex::new(r"SP\[\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*\]").unwrap();
+            static ref RE_GP: Regex = Regex::new(r"GP\[\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*\]").unwrap();
+            static ref RE_GTP_STP: Regex = Regex::new(r"GTP:\s*(\d+)\s*GTP0:\s*(\d+)\s*STP:\s*(\d+)\s*STP0:\s*([-]?\d+)").unwrap();
+            static ref RE_SNR_TEMP: Regex = Regex::new(r"GSNR:\s*([\d.]+)\s*SSNR:\s*([\d.]+)\s*Gtemp:\s*([\d.]+)\s*Stemp:\s*([\d.]+)").unwrap();
+            static ref RE_MISC: Regex = Regex::new(r"Delay:\s*(\d+)ms\s*Frame:\s*(\d+)\s*Gerr:\s*(\d+)\s*SErr:\s*(\d+)\s*(\d+)").unwrap();
+            static ref RE_ISO: Regex = Regex::new(r"\[iso:(\d+),mode=(\w+),\s*exp:(\d+)\]").unwrap();
+            static ref RE_GAIN: Regex = Regex::new(r"\[gain:([\d.]+)\s*exp:([\d.]+)ms,\s*Lx:(\d+)\]").unwrap();
+            static ref RE_CCT_RB: Regex = Regex::new(r"\[cct:(\d+),\s*rb:([\d.]+)\s*([\d.]+)\]").unwrap();
+        }
+
+        let channel_signal = RE_CHANNEL_SIGNAL.captures(s).ok_or("Failed to match channel and signal")?;
+        let sp = RE_SP.captures(s).ok_or("Failed to match SP values")?;
+        let gp = RE_GP.captures(s).ok_or("Failed to match GP values")?;
+        let gtp_stp = RE_GTP_STP.captures(s).ok_or("Failed to match GTP and STP values")?;
+        let snr_temp = RE_SNR_TEMP.captures(s).ok_or("Failed to match SNR and temperature values")?;
+        let misc = RE_MISC.captures(s).ok_or("Failed to match miscellaneous values")?;
+        let iso = RE_ISO.captures(s).ok_or("Failed to match ISO values")?;
+        let gain = RE_GAIN.captures(s).ok_or("Failed to match gain values")?;
+        let cct_rb = RE_CCT_RB.captures(s).ok_or("Failed to match CCT and RB values")?;
+
+        Ok(SrtDebugFrameData {
+            channel: channel_signal[1].parse().map_err(|_| "Invalid channel")?,
+            signal: channel_signal[2].parse().map_err(|_| "Invalid signal")?,
+            sp1: sp[1].parse().map_err(|_| "Invalid sp1")?,
+            sp2: sp[2].parse().map_err(|_| "Invalid sp2")?,
+            sp3: sp[3].parse().map_err(|_| "Invalid sp3")?,
+            sp4: sp[4].parse().map_err(|_| "Invalid sp4")?,
+            gp1: gp[1].parse().map_err(|_| "Invalid gp1")?,
+            gp2: gp[2].parse().map_err(|_| "Invalid gp2")?,
+            gp3: gp[3].parse().map_err(|_| "Invalid gp3")?,
+            gp4: gp[4].parse().map_err(|_| "Invalid gp4")?,
+            gtp: gtp_stp[1].parse().map_err(|_| "Invalid gtp")?,
+            gtp0: gtp_stp[2].parse().map_err(|_| "Invalid gtp0")?,
+            stp: gtp_stp[3].parse().map_err(|_| "Invalid stp")?,
+            stp0: gtp_stp[4].parse().map_err(|_| "Invalid stp0")?,
+            gsnr: snr_temp[1].parse().map_err(|_| "Invalid gsnr")?,
+            ssnr: snr_temp[2].parse().map_err(|_| "Invalid ssnr")?,
+            gtemp: snr_temp[3].parse().map_err(|_| "Invalid gtemp")?,
+            stemp: snr_temp[4].parse().map_err(|_| "Invalid stemp")?,
+            latency: misc[1].parse().map_err(|_| "Invalid latency")?,
+            frame: misc[2].parse().map_err(|_| "Invalid frame")?,
+            gerr: misc[3].parse().map_err(|_| "Invalid gerr")?,
+            serr: misc[4].parse().map_err(|_| "Invalid serr")?,
+            serr_ext: misc[5].parse().map_err(|_| "Invalid serr_ext")?,
+            iso: iso[1].parse().map_err(|_| "Invalid iso")?,
+            iso_mode: iso[2].to_string(),
+            iso_exp: iso[3].parse().map_err(|_| "Invalid iso_exp")?,
+            gain: gain[1].parse().map_err(|_| "Invalid gain")?,
+            gain_exp: gain[2].parse().map_err(|_| "Invalid gain_exp")?,
+            gain_lx: gain[3].parse().map_err(|_| "Invalid gain_lx")?,
+            cct: cct_rb[1].parse().map_err(|_| "Invalid cct")?,
+            rb: cct_rb[2].parse().map_err(|_| "Invalid rb")?,
+            rb_ext: cct_rb[3].parse().map_err(|_| "Invalid rb_ext")?,
+        })
+    }
 }
 
 #[cfg(test)]
@@ -107,49 +171,11 @@ mod tests {
 
     #[test]
     fn parse_v37_42_3_debug_src_frame_data() {
-        let line = "CH:1 MCS:4 SP[ 45 152  47 149] GP[ 49  48  45  47] GTP:27 GTP0:00 STP:24 STP0:00 GSNR:25.9 SSNR:17.8 Gtemp:50 Stemp:82 Delay:31ms Frame:60  Gerr:0 SErr:0 42, [iso:0,mode=max, exp:0] [gain:0.00 exp:0.000ms, Lx:0] [cct:0, rb:0.000 0.000]";
+        let line = "CH:4 MCS:4 SP[ 74 152 152 152] GP[ 59  65  53  60] GTP:10 GTP0:00 STP:09 STP0:-1 GSNR:21.4 SSNR:21.6 Gtemp:35 Stemp:56 Delay:35ms Frame:60  Gerr:0 SErr:0 24, [iso:0,mode=max, exp:0] [gain:0.00 exp:0.000ms, Lx:0] [cct:0, rb:0.000 0.000]";
         let parsed = line.parse::<SrtDebugFrameData>();
         assert_eq!(
             parsed.expect("Failed to parse SRT frame data"),
-            SrtDebugFrameData {
-                signal: 4,
-                channel: 1,
-                //flight_time: 0,
-                //sky_bat: 0,
-                //ground_bat: 0,
-                latency: 31,
-                //bitrate_mbps: 0,
-                //distance: 0,
-                sp1: 45,
-                sp2: 152,
-                sp3: 47,
-                sp4: 149,
-                gp1: 49,
-                gp2: 48,
-                gp3: 45,
-                gp4: 47,
-                gtp: 27,
-                gtp0: 0,
-                stp: 24,
-                stp0: 0,
-                gsnr: 25.9,
-                ssnr: 17.8,
-                gtemp: 50.0,
-                stemp: 82.0,
-                frame: 60,
-                gerr: 0,
-                serr: 0,
-                serr_ext: 42,
-                iso: 0,
-                iso_mode: "max".to_string(),
-                iso_exp: 0,
-                gain: 0.0,
-                gain_exp: 0.0,
-                gain_lx: 0,
-                cct: 0,
-                rb: 0.0,
-                rb_ext: 0.0,
-            }
+            SrtDebugFrameData { signal: 4, channel: 4, latency: 35, sp1: 74, sp2: 152, sp3: 152, sp4: 152, gp1: 59, gp2: 65, gp3: 53, gp4: 60, gtp: 10, gtp0: 0, stp: 9, stp0: -1, gsnr: 21.4, ssnr: 21.6, gtemp: 35.0, stemp: 56.0, frame: 60, gerr: 0, serr: 0, serr_ext: 24, iso: 0, iso_mode: "max".to_string(), iso_exp: 0, gain: 0.0, gain_exp: 0.0, gain_lx: 0, cct: 0, rb: 0.0, rb_ext: 0.0 }
         )
     }
 }

@@ -1,7 +1,7 @@
 use backend::{
     font,
     osd::{self, OsdOptions},
-    overlay::{overlay_osd, overlay_srt_data},
+    overlay::{overlay_osd, overlay_srt_data, overlay_srt_debug_data},
     srt::{self, SrtOptions},
 };
 use image::RgbaImage;
@@ -22,6 +22,10 @@ pub fn create_osd_preview(
     overlay_osd(&mut image, osd_frame, font, osd_options);
     if let Some(srt_data) = &srt_frame.data {
         overlay_srt_data(&mut image, srt_data, srt_font, srt_options);
+    }
+
+    if let Some(srt_debug_data) = &srt_frame.debug_data {
+        overlay_srt_debug_data(&mut image, srt_debug_data, srt_font, srt_options)
     }
 
     image
