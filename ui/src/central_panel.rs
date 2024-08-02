@@ -132,6 +132,15 @@ impl WalksnailOsdTool {
                         });
                         ui.end_row();
 
+                        ui.label("Disable OSD rendering")
+                            .on_hover_text(tooltip_text("Do not render OSD."));
+                        ui.horizontal(|ui| {
+                            changed |= ui
+                                .add(Checkbox::without_text(&mut self.osd_options.no_osd))
+                                .changed()
+                        });
+                        ui.end_row();
+
                         // Enable playback offset only if playback speed adjustment is disabled, since it tries to fix basically the same problem
                         if !self.osd_options.adjust_playback_speed && self.video_info.is_some() {
                             ui.label("Adjust playback offset")

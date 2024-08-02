@@ -111,12 +111,14 @@ impl Iterator for FrameOverlayIter<'_> {
                     RgbaImage::from_raw(video_frame.width, video_frame.height, video_frame.data).unwrap()
                 };
 
-                overlay_osd(
-                    &mut frame_image,
-                    &self.current_osd_frame,
-                    &self.font_file,
-                    &self.osd_options,
-                );
+                if !self.osd_options.no_osd {
+                    overlay_osd(
+                        &mut frame_image,
+                        &self.current_osd_frame,
+                        &self.font_file,
+                        &self.osd_options,
+                    );
+                }
 
                 if let Some(srt_data) = &self.current_srt_frame.data {
                     overlay_srt_data(&mut frame_image, srt_data, &self.srt_font, &self.srt_options);
