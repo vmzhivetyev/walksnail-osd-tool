@@ -74,7 +74,7 @@ impl FromStr for SrtDebugFrameData {
             static ref RE_SP: Regex = Regex::new(r"SP\[\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*\]").unwrap();
             static ref RE_GP: Regex = Regex::new(r"GP\[\s*(\d+)\s*(\d+)\s*(\d+)\s*(\d+)\s*\]").unwrap();
             static ref RE_GTP_STP: Regex = Regex::new(r"GTP:\s*(\d+)\s*GTP0:\s*(\d+)\s*STP:\s*(\d+)\s*STP0:\s*([-]?\d+)").unwrap();
-            static ref RE_SNR_TEMP: Regex = Regex::new(r"GSNR:\s*([\d.]+)\s*SSNR:\s*([\d.]+)\s*Gtemp:\s*([\d.]+)\s*Stemp:\s*([\d.]+)").unwrap();
+            static ref RE_SNR_TEMP: Regex = Regex::new(r"GSNR:\s*(-?[\d.]+)\s*SSNR:\s*(-?[\d.]+)\s*Gtemp:\s*(-?[\d.]+)\s*Stemp:\s*(-?[\d.]+)").unwrap();
             static ref RE_MISC: Regex = Regex::new(r"Delay:\s*(\d+)ms\s*Frame:\s*(\d+)\s*Gerr:\s*(\d+)\s*SErr:\s*(\d+)\s*(\d+)").unwrap();
             static ref RE_ISO: Regex = Regex::new(r"\[iso:(\d+),mode=(\w+),\s*exp:(\d+)\]").unwrap();
             static ref RE_GAIN: Regex = Regex::new(r"\[gain:([\d.]+)\s*exp:([\d.]+)ms,\s*Lx:(\d+)\]").unwrap();
