@@ -89,6 +89,9 @@ pub fn overlay_srt_debug_data(
 ) {
     let mut srt_string = String::new();
 
+    if srt_options.show_signal {
+        srt_string.push_str(&format!("Signal:{} ", srt_debug_data.signal));
+    }
     if srt_options.show_channel {
         srt_string.push_str(&format!("CH:{} ", srt_debug_data.channel));
     }
