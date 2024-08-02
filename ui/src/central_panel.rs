@@ -267,16 +267,16 @@ impl WalksnailOsdTool {
                                 
                                 ui.end_row();
                                 
-                                changed |= ui.checkbox(&mut options.show_gp, "GP").on_hover_text("Ground RSSI dBm. -130 is low").changed();
-                                changed |= ui.checkbox(&mut options.show_sp, "SP").on_hover_text("Sky RSSI dBm. -130 is low").changed();
+                                changed |= ui.checkbox(&mut options.show_gp, "GP").on_hover_text("Ground RSSI -dBm. 40-60 is good, 130 is low").changed();
+                                changed |= ui.checkbox(&mut options.show_sp, "SP").on_hover_text("Sky RSSI -dBm. 40-60 is good, 130 is low").changed();
                                 changed |= ui.checkbox(&mut options.show_gtp, "GTP").on_hover_text("Ground transmit dBm").changed();
                                 changed |= ui.checkbox(&mut options.show_stp, "STP").on_hover_text("Sky transmit dBm").changed();
                                 ui.end_row();
 
-                                changed |= ui.checkbox(&mut options.show_gsnr, "GSNR").on_hover_text("Ground signal to noise ratio. A GSNR value of around 23 is excellent.").changed();
-                                changed |= ui.checkbox(&mut options.show_ssnr, "SSNR").on_hover_text("Sky signal to noise ratio").changed();
-                                changed |= ui.checkbox(&mut options.show_gtemp, "GTemp").on_hover_text("Ground temperature").changed();
-                                changed |= ui.checkbox(&mut options.show_stemp, "STemp").on_hover_text("Sky temperature").changed();
+                                changed |= ui.checkbox(&mut options.show_gsnr, "GSNR").on_hover_text("Ground signal to noise ratio. 23 is excellent.").changed();
+                                changed |= ui.checkbox(&mut options.show_ssnr, "SSNR").on_hover_text("Sky signal to noise ratio. 23 is excellent.").changed();
+                                changed |= ui.checkbox(&mut options.show_gtemp, "GTemp").on_hover_text("Ground temperature. 75 is hot.").changed();
+                                changed |= ui.checkbox(&mut options.show_stemp, "STemp").on_hover_text("Sky temperature. 75 is hot.").changed();
                                 ui.end_row();
 
                                 changed |= ui.checkbox(&mut options.show_fps, "FPS").on_hover_text("Frames received per second").changed();
