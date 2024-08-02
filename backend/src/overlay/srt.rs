@@ -90,34 +90,49 @@ pub fn overlay_srt_debug_data(
     let mut srt_string = String::new();
 
     if srt_options.show_channel {
-        srt_string.push_str(&format!("CH:{}  ", srt_debug_data.channel));
+        srt_string.push_str(&format!("CH:{} ", srt_debug_data.channel));
     }
-    if srt_options.show_snr {
-        srt_string.push_str(&format!("GSNR:{:.1} SSNR:{:.1}  ", srt_debug_data.gsnr, srt_debug_data.ssnr));
+    if srt_options.show_gsnr {
+        srt_string.push_str(&format!("GSNR:{:.1} ", srt_debug_data.gsnr));
     }
-    if srt_options.show_g_temp {
+    if srt_options.show_ssnr {
+        srt_string.push_str(&format!("SSNR:{:.1} ", srt_debug_data.ssnr));
+    }
+    if srt_options.show_gtemp {
         srt_string.push_str(&format!("G:{:.1}°C ", srt_debug_data.gtemp));
     }
-    if srt_options.show_s_temp {
-        srt_string.push_str(&format!("S:{:.1}°C  ", srt_debug_data.stemp));
+    if srt_options.show_stemp {
+        srt_string.push_str(&format!("S:{:.1}°C ", srt_debug_data.stemp));
     }
-    if srt_options.show_frame {
-        srt_string.push_str(&format!("FPS:{}  ", srt_debug_data.fps));
+    if srt_options.show_fps {
+        srt_string.push_str(&format!("FPS:{} ", srt_debug_data.fps));
     }
     if srt_options.show_err {
-        srt_string.push_str(&format!("Gerr:{} SErr:{} {}  ", srt_debug_data.gerr, srt_debug_data.serr, srt_debug_data.serr_ext));
+        srt_string.push_str(&format!("Gerr:{} SErr:{} {} ", srt_debug_data.gerr, srt_debug_data.serr, srt_debug_data.serr_ext));
     }
-    if srt_options.show_iso {
-        srt_string.push_str(&format!("[ISO:{} Mode:{} Exp:{}]  ", srt_debug_data.iso, srt_debug_data.iso_mode, srt_debug_data.iso_exp));
+    if srt_options.show_settings_cam {
+        srt_string.push_str(&format!("[ISO:{} Mode:{} Exp:{}] ", srt_debug_data.iso, srt_debug_data.iso_mode, srt_debug_data.iso_exp));
     }
-    if srt_options.show_gain {
-        srt_string.push_str(&format!("[Gain:{:.2} Exp:{:.3}ms Lx:{}]  ", srt_debug_data.gain, srt_debug_data.gain_exp, srt_debug_data.gain_lx));
+    if srt_options.show_actual_cam {
+        srt_string.push_str(&format!("[ExpGain:{:.2} Exp:{:.3}ms Lx:{}] ", srt_debug_data.gain, srt_debug_data.gain_exp, srt_debug_data.gain_lx));
     }
     if srt_options.show_cct {
-        srt_string.push_str(&format!("[CCT:{}]  ", srt_debug_data.cct));
+        srt_string.push_str(&format!("[CCT:{}] ", srt_debug_data.cct));
     }
     if srt_options.show_rb {
-        srt_string.push_str(&format!("[RB:{:.2} {:.2}]  ", srt_debug_data.rb, srt_debug_data.rb_ext));
+        srt_string.push_str(&format!("[RB:{:.2} {:.2}] ", srt_debug_data.rb, srt_debug_data.rb_ext));
+    }
+    if srt_options.show_sp {
+        srt_string.push_str(&format!("SP[{} {} {} {}] ", srt_debug_data.sp1, srt_debug_data.sp2, srt_debug_data.sp3, srt_debug_data.sp4))
+    }
+    if srt_options.show_gp {
+        srt_string.push_str(&format!("GP[{} {} {} {}] ", srt_debug_data.gp1, srt_debug_data.gp2, srt_debug_data.gp3, srt_debug_data.gp4))
+    }
+    if srt_options.show_stp {
+        srt_string.push_str(&format!("STP:{} ", srt_debug_data.stp))
+    }
+    if srt_options.show_gtp {
+        srt_string.push_str(&format!("GTP:{} ", srt_debug_data.gtp))
     }
 
     overlay_string(image, &srt_string, font, srt_options)

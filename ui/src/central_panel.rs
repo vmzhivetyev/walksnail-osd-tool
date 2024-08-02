@@ -256,17 +256,26 @@ impl WalksnailOsdTool {
                             // debug srt data
                             if has_debug {
                                 changed |= ui.checkbox(&mut options.show_channel, "Channel").changed();
-                                changed |= ui.checkbox(&mut options.show_snr, "SNR").on_hover_text("Signal to noise ratio. A GSNR value of around 23 is excellent.").changed();
-                                changed |= ui.checkbox(&mut options.show_g_temp, "GTemp").on_hover_text("Ground temperature").changed();
-                                changed |= ui.checkbox(&mut options.show_s_temp, "STemp").on_hover_text("Sky temperature").changed();
                                 ui.end_row();
-                                changed |= ui.checkbox(&mut options.show_frame, "FPS").on_hover_text("Frames received per second").changed();
-                                changed |= ui.checkbox(&mut options.show_err, "Errors").on_hover_text("Error count").changed();
-                                changed |= ui.checkbox(&mut options.show_iso, "ISO").on_hover_text("ISO sensitivity").changed();
-                                changed |= ui.checkbox(&mut options.show_gain, "Gain").on_hover_text("Gain value").changed();
-                                ui.end_row();
+                                changed |= ui.checkbox(&mut options.show_settings_cam, "CameraSet").on_hover_text("Camera parameters as set").changed();
+                                changed |= ui.checkbox(&mut options.show_actual_cam, "CameraAct").on_hover_text("Actual camera parameters").changed();
                                 changed |= ui.checkbox(&mut options.show_cct, "CCT").on_hover_text("Correlated Color Temperature").changed();
                                 changed |= ui.checkbox(&mut options.show_rb, "Red Balance").on_hover_text("Red Balance values").changed();
+                                ui.end_row();
+                                changed |= ui.checkbox(&mut options.show_gsnr, "GSNR").on_hover_text("Ground signal to noise ratio. A GSNR value of around 23 is excellent.").changed();
+                                changed |= ui.checkbox(&mut options.show_ssnr, "SSNR").on_hover_text("Sky signal to noise ratio").changed();
+                                ui.end_row();
+                                changed |= ui.checkbox(&mut options.show_gtp, "GTP").on_hover_text("Ground transmit dBm").changed();
+                                changed |= ui.checkbox(&mut options.show_stp, "STP").on_hover_text("Sky transmit dBm").changed();
+                                ui.end_row();
+                                changed |= ui.checkbox(&mut options.show_gp, "GP").on_hover_text("Ground RSSI dBm").changed();
+                                changed |= ui.checkbox(&mut options.show_sp, "SP").on_hover_text("Sky RSSI dBm").changed();
+                                ui.end_row();
+                                changed |= ui.checkbox(&mut options.show_gtemp, "GTemp").on_hover_text("Ground temperature").changed();
+                                changed |= ui.checkbox(&mut options.show_stemp, "STemp").on_hover_text("Sky temperature").changed();
+                                ui.end_row();
+                                changed |= ui.checkbox(&mut options.show_fps, "FPS").on_hover_text("Frames received per second").changed();
+                                changed |= ui.checkbox(&mut options.show_err, "Errors").on_hover_text("Error count").changed();
                                 ui.end_row();
                             }
                         });

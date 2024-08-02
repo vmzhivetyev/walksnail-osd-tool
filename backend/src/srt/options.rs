@@ -16,15 +16,20 @@ pub struct SrtOptions {
     
     // debug srt data
     pub show_channel: bool,
-    pub show_snr: bool,
-    pub show_g_temp: bool,
-    pub show_s_temp: bool,
-    pub show_frame: bool,
+    pub show_gsnr: bool,
+    pub show_ssnr: bool,
+    pub show_gtemp: bool,
+    pub show_stemp: bool,
+    pub show_fps: bool,
     pub show_err: bool,
-    pub show_iso: bool,
-    pub show_gain: bool,
+    pub show_settings_cam: bool,
+    pub show_actual_cam: bool,
     pub show_cct: bool,
     pub show_rb: bool,
+    pub show_sp: bool,
+    pub show_gp: bool,
+    pub show_stp: bool,
+    pub show_gtp: bool,
 }
 
 impl Default for SrtOptions {
@@ -42,15 +47,20 @@ impl Default for SrtOptions {
 
             // debug srt data
             show_channel: true,
-            show_snr: true,
-            show_g_temp: false,
-            show_s_temp: true,
-            show_frame: false,
+            show_gsnr: true,
+            show_ssnr: true,
+            show_gtemp: false,
+            show_stemp: true,
+            show_fps: false,
             show_err: true,
-            show_iso: false,
-            show_gain: true,
+            show_settings_cam: false,
+            show_actual_cam: true,
             show_cct: false,
             show_rb: false,
+            show_sp: false,
+            show_gp: false,
+            show_stp: false,
+            show_gtp: false,
         }
     }
 }
