@@ -49,7 +49,7 @@ pub struct SrtDebugFrameData {
     pub ssnr: f32,
     pub gtemp: f32,
     pub stemp: f32,
-    pub frame: i16,
+    pub fps: i16,
     pub gerr: i16,
     pub serr: i16,
     pub serr_ext: i16,
@@ -110,7 +110,7 @@ impl FromStr for SrtDebugFrameData {
             gtemp: snr_temp[3].parse().map_err(|_| "Invalid gtemp")?,
             stemp: snr_temp[4].parse().map_err(|_| "Invalid stemp")?,
             latency: misc[1].parse().map_err(|_| "Invalid latency")?,
-            frame: misc[2].parse().map_err(|_| "Invalid frame")?,
+            fps: misc[2].parse().map_err(|_| "Invalid frame")?,
             gerr: misc[3].parse().map_err(|_| "Invalid gerr")?,
             serr: misc[4].parse().map_err(|_| "Invalid serr")?,
             serr_ext: misc[5].parse().map_err(|_| "Invalid serr_ext")?,
@@ -175,7 +175,7 @@ mod tests {
         let parsed = line.parse::<SrtDebugFrameData>();
         assert_eq!(
             parsed.expect("Failed to parse SRT frame data"),
-            SrtDebugFrameData { signal: 4, channel: 4, latency: 35, sp1: 74, sp2: 152, sp3: 152, sp4: 152, gp1: 59, gp2: 65, gp3: 53, gp4: 60, gtp: 10, gtp0: 0, stp: 9, stp0: -1, gsnr: 21.4, ssnr: 21.6, gtemp: 35.0, stemp: 56.0, frame: 60, gerr: 0, serr: 0, serr_ext: 24, iso: 0, iso_mode: "max".to_string(), iso_exp: 0, gain: 0.0, gain_exp: 0.0, gain_lx: 0, cct: 0, rb: 0.0, rb_ext: 0.0 }
+            SrtDebugFrameData { signal: 4, channel: 4, latency: 35, sp1: 74, sp2: 152, sp3: 152, sp4: 152, gp1: 59, gp2: 65, gp3: 53, gp4: 60, gtp: 10, gtp0: 0, stp: 9, stp0: -1, gsnr: 21.4, ssnr: 21.6, gtemp: 35.0, stemp: 56.0, fps: 60, gerr: 0, serr: 0, serr_ext: 24, iso: 0, iso_mode: "max".to_string(), iso_exp: 0, gain: 0.0, gain_exp: 0.0, gain_lx: 0, cct: 0, rb: 0.0, rb_ext: 0.0 }
         )
     }
 }

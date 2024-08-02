@@ -102,7 +102,7 @@ pub fn overlay_srt_debug_data(
         srt_string.push_str(&format!("S:{:.1}°C  ", srt_debug_data.stemp));
     }
     if srt_options.show_frame {
-        srt_string.push_str(&format!("Frame:{}  ", srt_debug_data.frame));
+        srt_string.push_str(&format!("FPS:{}  ", srt_debug_data.fps));
     }
     if srt_options.show_err {
         srt_string.push_str(&format!("Gerr:{} SErr:{} {}  ", srt_debug_data.gerr, srt_debug_data.serr, srt_debug_data.serr_ext));

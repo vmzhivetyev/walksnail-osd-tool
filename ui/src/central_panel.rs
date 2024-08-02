@@ -260,7 +260,7 @@ impl WalksnailOsdTool {
                                 changed |= ui.checkbox(&mut options.show_g_temp, "GTemp").on_hover_text("Ground temperature").changed();
                                 changed |= ui.checkbox(&mut options.show_s_temp, "STemp").on_hover_text("Sky temperature").changed();
                                 ui.end_row();
-                                changed |= ui.checkbox(&mut options.show_frame, "Frame").on_hover_text("Frame number").changed();
+                                changed |= ui.checkbox(&mut options.show_frame, "FPS").on_hover_text("Frames received per second").changed();
                                 changed |= ui.checkbox(&mut options.show_err, "Errors").on_hover_text("Error count").changed();
                                 changed |= ui.checkbox(&mut options.show_iso, "ISO").on_hover_text("ISO sensitivity").changed();
                                 changed |= ui.checkbox(&mut options.show_gain, "Gain").on_hover_text("Gain value").changed();
