@@ -102,37 +102,37 @@ pub fn overlay_srt_debug_data(
         srt_string.push_str(&format!("MCS:{} ", srt_debug_data.signal));
     }
     if srt_options.show_gp {
-        srt_string.push_str(&format!("GP[{} {} {} {}] ", srt_debug_data.gp1, srt_debug_data.gp2, srt_debug_data.gp3, srt_debug_data.gp4))
+        srt_string.push_str(&format!("GP[{:>3} {:>3} {:>3} {:>3}] ", srt_debug_data.gp1, srt_debug_data.gp2, srt_debug_data.gp3, srt_debug_data.gp4))
     }
     if srt_options.show_sp {
-        srt_string.push_str(&format!("SP[{} {} {} {}] ", srt_debug_data.sp1, srt_debug_data.sp2, srt_debug_data.sp3, srt_debug_data.sp4))
+        srt_string.push_str(&format!("SP[{:>3} {:>3} {:>3} {:>3}] ", srt_debug_data.sp1, srt_debug_data.sp2, srt_debug_data.sp3, srt_debug_data.sp4))
     }
     if srt_options.show_gtp {
-        srt_string.push_str(&format!("GTP:{} ", srt_debug_data.gtp))
+        srt_string.push_str(&format!("GTP:{:>2} ", srt_debug_data.gtp))
     }
     if srt_options.show_stp {
-        srt_string.push_str(&format!("STP:{} ", srt_debug_data.stp))
+        srt_string.push_str(&format!("STP:{:>2} ", srt_debug_data.stp))
     }
     if srt_options.show_gsnr {
-        srt_string.push_str(&format!("GSNR:{:.1} ", srt_debug_data.gsnr));
+        srt_string.push_str(&format!("GSNR:{:>4.1} ", srt_debug_data.gsnr));
     }
     if srt_options.show_ssnr {
-        srt_string.push_str(&format!("SSNR:{:.1} ", srt_debug_data.ssnr));
+        srt_string.push_str(&format!("SSNR:{:>4.1} ", srt_debug_data.ssnr));
     }
     if srt_options.show_gtemp {
-        srt_string.push_str(&format!("GTemp:{:.1}°C ", srt_debug_data.gtemp));
+        srt_string.push_str(&format!("GTemp:{:>3} ", srt_debug_data.gtemp as i32));
     }
     if srt_options.show_stemp {
-        srt_string.push_str(&format!("STemp:{:.1}°C ", srt_debug_data.stemp));
+        srt_string.push_str(&format!("STemp:{:>3} ", srt_debug_data.stemp as i32));
     }
     if srt_options.show_latency {
-        srt_string.push_str(&format!("Delay:{} ", srt_debug_data.latency));
+        srt_string.push_str(&format!("Delay:{:>3} ", srt_debug_data.latency));
     }
     if srt_options.show_fps {
-        srt_string.push_str(&format!("FPS:{} ", srt_debug_data.fps));
+        srt_string.push_str(&format!("FPS:{:>2} ", srt_debug_data.fps));
     }
     if srt_options.show_err {
-        srt_string.push_str(&format!("GErr:{} SErr:{} {} ", srt_debug_data.gerr, srt_debug_data.serr, srt_debug_data.serr_ext));
+        srt_string.push_str(&format!("GErr:{:>2} SErr:{:>2} {:>2} ", srt_debug_data.gerr, srt_debug_data.serr, srt_debug_data.serr_ext));
     }
     if srt_options.show_settings_cam {
         srt_string.push_str(&format!("[ISO:{} Mode:{} Exp:{}] ", srt_debug_data.iso, srt_debug_data.iso_mode, srt_debug_data.iso_exp));
@@ -167,7 +167,7 @@ fn overlay_string(
     }
 
     let max_width = image_dimensions.0 as f32;
-    let words: Vec<&str> = srt_string.split_whitespace().collect();
+    let words: Vec<&str> = srt_string.split(' ').collect(); // Preserve spaces
     let mut line1 = String::new();
     let mut line2 = String::new();
     let mut on_first_line = true;
