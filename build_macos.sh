@@ -29,12 +29,14 @@ cargo build $RELEASE_OPT --target ${BUILD_TARGET_ARCH} --features macos-app-bund
 
 echo "🌱 Packing the app..."
 
-cd ./ui
 cargo bundle $RELEASE_OPT --target ${BUILD_TARGET_ARCH} --features macos-app-bundle
-cp ${PROJECT_DIR}/ext/ffmpeg/${TARGET_NAME}/ffmpeg ${PROJECT_DIR}/target/${BUILD_TARGET_ARCH}/$CONFIG_NAME/bundle/osx/Walksnail\ OSD\ Tool.app/Contents/MacOS/ffmpeg
-cp ${PROJECT_DIR}/ext/ffmpeg/${TARGET_NAME}/ffprobe ${PROJECT_DIR}/target/${BUILD_TARGET_ARCH}/$CONFIG_NAME/bundle/osx/Walksnail\ OSD\ Tool.app/Contents/MacOS/ffprobe
-cd ${PROJECT_DIR}/target/${BUILD_TARGET_ARCH}/$CONFIG_NAME/bundle/osx/
 
+BUILT_APP_PATH="./target/$BUILD_TARGET_ARCH/$CONFIG_NAME/bundle/osx/Walksnail OSD Tool.app"
+
+cp ${PROJECT_DIR}/ext/ffmpeg/${TARGET_NAME}/ffmpeg "$BUILT_APP_PATH/Contents/MacOS/ffmpeg"
+cp ${PROJECT_DIR}/ext/ffmpeg/${TARGET_NAME}/ffprobe "$BUILT_APP_PATH/Contents/MacOS/ffprobe"
+
+cd "$BUILT_APP_PATH/.."
 codesign --force -s - Walksnail\ OSD\ Tool.app/Contents/MacOS/ffmpeg
 codesign --force -s - Walksnail\ OSD\ Tool.app/Contents/MacOS/ffprobe
 codesign --force -s - Walksnail\ OSD\ Tool.app/Contents/MacOS/walksnail-osd-tool
