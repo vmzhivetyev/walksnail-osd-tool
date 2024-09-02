@@ -9,8 +9,9 @@ use crate::{font::CharacterSize, util::Coordinates};
 #[derivative(Default, Debug)]
 pub struct OsdOptions {
     pub position: Coordinates<i32>,
-    #[derivative(Default(value = "true"))]
+    #[derivative(Default(value = "false"))]
     pub adjust_playback_speed: bool,
+    pub no_osd: bool,
     #[derivative(Default(value = "1.0"))]
     #[serde(skip)]
     pub osd_playback_speed_factor: f32,

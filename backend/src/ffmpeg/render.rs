@@ -49,6 +49,7 @@ pub fn start_video_render(
         } else {
             None
         },
+        input_video
     )?;
 
     // Channels to communicate with ffmpeg handler thread
@@ -128,6 +129,7 @@ pub fn spawn_encoder(
     upscale: bool,
     rescale_to_4x3_aspect: bool,
     chroma_key: Option<[f32; 4]>,
+    original_file: &PathBuf,
 ) -> Result<FfmpegChild, io::Error> {
     let mut encoder_command = FfmpegCommand::new_with_path(ffmpeg_path);
     let mut output_video = output_video.clone();
@@ -139,6 +141,11 @@ pub fn spawn_encoder(
         .size(width, height)
         .rate(frame_rate)
         .input("-");
+
+    encoder_command
+        .input(original_file.to_str().unwrap())
+        .map("0").map("1:a?")
+        .codec_audio("copy");
 
     if upscale {
         encoder_command.args(["-vf", "scale=2560x1440:flags=bicubic"]);

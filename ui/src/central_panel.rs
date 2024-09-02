@@ -132,6 +132,15 @@ impl WalksnailOsdTool {
                         });
                         ui.end_row();
 
+                        ui.label("Disable OSD rendering")
+                            .on_hover_text(tooltip_text("Do not render OSD."));
+                        ui.horizontal(|ui| {
+                            changed |= ui
+                                .add(Checkbox::without_text(&mut self.osd_options.no_osd))
+                                .changed()
+                        });
+                        ui.end_row();
+
                         // Enable playback offset only if playback speed adjustment is disabled, since it tries to fix basically the same problem
                         if !self.osd_options.adjust_playback_speed && self.video_info.is_some() {
                             ui.label("Adjust playback offset")
@@ -238,19 +247,59 @@ impl WalksnailOsdTool {
                         ));
                         let options = &mut self.srt_options;
                         let has_distance = self.srt_file.as_ref().map(|s| s.has_distance).unwrap_or(true);
+                        let has_debug = self.srt_file.as_ref().map(|s| s.has_debug).unwrap_or(false);
                         Grid::new("srt_selection").show(ui, |ui| {
-                            changed |= ui.checkbox(&mut options.show_time, "Time").changed();
-                            changed |= ui.checkbox(&mut options.show_sbat, "SBat").changed();
-                            changed |= ui.checkbox(&mut options.show_gbat, "GBat").changed();
-                            changed |= ui.checkbox(&mut options.show_signal, "Signal").changed();
+                            changed |= ui.checkbox(&mut options.show_signal, "Signal/MCS").changed();
+                            changed |= ui
+                                .add_enabled(!has_debug, Checkbox::new(&mut options.show_time, "Time"))
+                                .changed();
+                            changed |= ui.checkbox(&mut options.show_channel, "Channel").changed();
+                            changed |= ui
+                                .add_enabled(!has_debug, Checkbox::new(&mut options.show_gbat, "GBat"))
+                                .changed();
+                            changed |= ui
+                                .add_enabled(!has_debug, Checkbox::new(&mut options.show_sbat, "SBat"))
+                                .changed();
                             ui.end_row();
 
-                            changed |= ui.checkbox(&mut options.show_latency, "Latency").changed();
-                            changed |= ui.checkbox(&mut options.show_bitrate, "Bitrate").changed();
+                            changed |= ui.checkbox(&mut options.show_latency, "Delay").changed();
+                            changed |= ui
+                                .add_enabled(!has_debug, Checkbox::new(&mut options.show_bitrate, "Bitrate"))
+                                .changed();
                             changed |= ui
                                 .add_enabled(has_distance, Checkbox::new(&mut options.show_distance, "Distance"))
                                 .changed();
                             ui.end_row();
+
+                            // debug srt data
+                            if has_debug {
+                                
+                                ui.end_row();
+                                
+                                changed |= ui.checkbox(&mut options.show_gp, "GP").on_hover_text("Ground RSSI -dBm. 40-60 is good, 130 is low").changed();
+                                changed |= ui.checkbox(&mut options.show_sp, "SP").on_hover_text("Sky RSSI -dBm. 40-60 is good, 130 is low").changed();
+                                changed |= ui.checkbox(&mut options.show_gtp, "GTP").on_hover_text("Ground transmit dBm").changed();
+                                changed |= ui.checkbox(&mut options.show_stp, "STP").on_hover_text("Sky transmit dBm").changed();
+                                ui.end_row();
+
+                                changed |= ui.checkbox(&mut options.show_gsnr, "GSNR").on_hover_text("Ground signal to noise ratio. 23 is excellent.").changed();
+                                changed |= ui.checkbox(&mut options.show_ssnr, "SSNR").on_hover_text("Sky signal to noise ratio. 23 is excellent.").changed();
+                                changed |= ui.checkbox(&mut options.show_gtemp, "GTemp").on_hover_text("Ground temperature. 75 is hot.").changed();
+                                changed |= ui.checkbox(&mut options.show_stemp, "STemp").on_hover_text("Sky temperature. 75 is hot.").changed();
+                                ui.end_row();
+
+                                changed |= ui.checkbox(&mut options.show_fps, "FPS").on_hover_text("Frames received per second").changed();
+                                changed |= ui.checkbox(&mut options.show_err, "Errors").on_hover_text("Error count").changed();
+                                ui.end_row();
+                                changed |= ui.checkbox(&mut options.show_settings_cam, "Camera Set").on_hover_text("Camera ISO/exposure parameters").changed();
+                                changed |= ui.checkbox(&mut options.show_actual_cam, "Camera Act").on_hover_text("Actual camera parameters").changed();
+                                ui.end_row();
+                                changed |= ui.checkbox(&mut options.show_cct, "CCT").on_hover_text("Correlated Color Temperature").changed();
+                                changed |= ui.checkbox(&mut options.show_rb, "Red Balance").on_hover_text("Red Balance values").changed();
+                                ui.end_row();
+                                
+                                
+                            }
                         });
                         ui.end_row();
                     });
@@ -271,7 +320,7 @@ impl WalksnailOsdTool {
                     let aspect_ratio = video_info.width as f32 / video_info.height as f32;
                     let preview_height = preview_width / aspect_ratio;
                     let image = Image::new(handle, vec2(preview_width, preview_height));
-                    let rect = ui.add(image.bg_fill(Color32::LIGHT_GRAY)).rect;
+                    let rect = ui.add(image.bg_fill(Color32::DARK_GRAY)).rect;
 
                     if self.osd_preview.mask_edit_mode_enabled {
                         self.draw_grid(ui, ctx, rect);

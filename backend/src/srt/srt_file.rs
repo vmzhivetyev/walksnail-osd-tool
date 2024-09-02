@@ -27,21 +27,25 @@ impl SrtFile {
         let srt_frames = srtparse::from_file(&path)?
             .iter()
             .map(|i| -> Result<SrtFrame, SrtFileError> {
-                let debug_data = i.text.parse::<SrtDebugFrameData>().ok();
+                let debug_data_result = i.text.parse::<SrtDebugFrameData>();
                 let data = i.text.parse::<SrtFrameData>().ok();
 
-                if debug_data.is_some() {
+                if debug_data_result.is_ok() {
                     has_debug = true;
+                } else {
+                    dbg!(&debug_data_result);
                 }
                 if let Some(data) = &data {
                     has_distance |= data.distance > 0;
                 }
 
+                let debug_data = debug_data_result.ok();
+
                 Ok(SrtFrame {
                     start_time_secs: i.start_time.into_duration().as_secs_f32(),
                     end_time_secs: i.end_time.into_duration().as_secs_f32(),
                     data,
-                    debug_data,
+                    debug_data: debug_data,
                 })
             })
             .collect::<Result<Vec<_>, _>>()?;

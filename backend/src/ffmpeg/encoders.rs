@@ -92,8 +92,10 @@ impl Encoder {
                 &["-tag:v", "hvc1"] // Apple QuickTime player on Mac supports hvc1. It doesn't support hev1 which is the default.
             ),
 
+            #[cfg(target_os = "macos")]
             Encoder::new("libvpx-vp9", Codec::VP9, false),
 
+            #[cfg(target_os = "macos")]
             Encoder::new_with_extra_args("prores_ks", Codec::ProRes, false,
                 &["-profile:v", "4", "-pix_fmt", "yuva422p10le", "-alpha_bits", "8", "-vendor", "apl0"]
             ),
