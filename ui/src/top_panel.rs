@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use egui::{vec2, Align2, Button, Frame, Label, RichText, Sense, Ui, Visuals, Window};
+use egui::{vec2, Align2, Button, FontId, Frame, Label, RichText, Sense, TextFormat, TextStyle, Ui, Visuals, Window};
 
 use super::WalksnailOsdTool;
 
@@ -108,8 +108,19 @@ impl WalksnailOsdTool {
                 .show(ctx, |ui| {
                     ui.add_space(10.0);
 
+                    ui.horizontal(|ui| {
+                        ui.style_mut().override_text_style = Some(TextStyle::Button);
+                        ui.style_mut().text_styles.get_mut(&TextStyle::Button).unwrap().size = 20.0;
+
+                        ui.hyperlink_to("This project is a fork", "https://github.com/vmzhivetyev/walksnail-osd-tool");
+                        ui.label("of");
+                        ui.hyperlink_to("walksnail-osd-tool", "https://github.com/avsaase/walksnail-osd-tool");
+                    });
+
+                    ui.add_space(16.0);
+
                     egui::Grid::new("about").spacing(vec2(10.0, 5.0)).show(ui, |ui| {
-                        ui.label("Author:");
+                        ui.label("Original Author:");
                         ui.label("Alexander van Saase");
                         ui.end_row();
 
@@ -131,14 +142,14 @@ impl WalksnailOsdTool {
                         ui.label("License:");
                         ui.hyperlink_to(
                             "General Public License v3.0",
-                            "https://github.com/avsaase/walksnail-osd-tool/blob/master/LICENSE.md",
+                            "https://github.com/vmzhivetyev/walksnail-osd-tool/blob/master/LICENSE.md",
                         );
                         ui.end_row();
                     });
 
                     ui.add_space(10.0);
 
-                    ui.hyperlink_to("Buy me a coffee", "https://www.buymeacoffee.com/avsaase");
+                    ui.hyperlink_to("Original Author’s Support Link", "https://www.buymeacoffee.com/avsaase");
                 });
         }
     }
