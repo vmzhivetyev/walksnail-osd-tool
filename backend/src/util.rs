@@ -52,9 +52,5 @@ pub fn command_to_cli(cmd: &std::process::Command) -> String {
             }
         })
         .collect();
-    format!(
-        "{} {}",
-        cmd.get_program().to_string_lossy(),
-        cli_args.join(" ")
-    )
+    format!("{} {}", cmd.get_program().to_string_lossy(), cli_args.join(" "))
 }

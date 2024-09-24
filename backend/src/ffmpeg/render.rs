@@ -1,5 +1,7 @@
 use std::{
-    io::{self, Write}, path::PathBuf, thread
+    io::{self, Write},
+    path::PathBuf,
+    thread,
 };
 
 use crossbeam_channel::{Receiver, Sender};
@@ -49,7 +51,7 @@ pub fn start_video_render(
         } else {
             None
         },
-        input_video
+        input_video,
     )?;
 
     // Channels to communicate with ffmpeg handler thread
@@ -144,7 +146,8 @@ pub fn spawn_encoder(
 
     encoder_command
         .input(original_file.to_str().unwrap())
-        .map("0").map("1:a?")
+        .map("0")
+        .map("1:a?")
         .codec_audio("copy");
 
     if upscale {
@@ -162,7 +165,7 @@ pub fn spawn_encoder(
         .codec_video(&video_encoder.name)
         .args(["-b:v", &format!("{}M", bitrate_mbps)])
         .args(&video_encoder.extra_args)
-		.args(["-video_track_timescale", time_base.to_string().as_str()]);
+        .args(["-video_track_timescale", time_base.to_string().as_str()]);
 
     // if let Some(chroma_color) = chroma_key {
     //     if chroma_color[3] > 0.99 {
@@ -175,7 +178,7 @@ pub fn spawn_encoder(
 
     //         output_video.set_extension("webm");
     //     }
-    // } else { 
+    // } else {
     //     encoder_command
     //         .pix_fmt("yuv420p");
     // }
@@ -184,12 +187,13 @@ pub fn spawn_encoder(
         output_video.set_extension("mov");
     }
 
-    encoder_command
-        .overwrite()
-        .output(output_video.to_str().unwrap());
+    encoder_command.overwrite().output(output_video.to_str().unwrap());
 
-    tracing::info!("✅✅✅✅✅✅✅ {}", crate::util::command_to_cli(encoder_command.as_inner()));
- 
+    tracing::info!(
+        "✅✅✅✅✅✅✅ {}",
+        crate::util::command_to_cli(encoder_command.as_inner())
+    );
+
     let encoder = encoder_command.spawn()?;
     Ok(encoder)
 }

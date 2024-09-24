@@ -13,7 +13,7 @@ pub struct SrtOptions {
     pub show_latency: bool,
     pub show_bitrate: bool,
     pub show_distance: bool,
-    
+
     // debug srt data
     pub show_channel: bool,
     pub show_gsnr: bool,

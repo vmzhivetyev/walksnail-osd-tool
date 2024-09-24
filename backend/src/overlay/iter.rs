@@ -55,8 +55,14 @@ impl<'a> FrameOverlayIter<'a> {
             osd_frames_iter.next().unwrap()
         };
         let first_srt_frame = srt_frames_iter.next().unwrap();
-        let chroma_key =
-            chroma_key.map(|c| Rgba([(c[0] * 255.0) as u8, (c[1] * 255.0) as u8, (c[2] * 255.0) as u8, (c[3] * 255.0) as u8]));
+        let chroma_key = chroma_key.map(|c| {
+            Rgba([
+                (c[0] * 255.0) as u8,
+                (c[1] * 255.0) as u8,
+                (c[2] * 255.0) as u8,
+                (c[3] * 255.0) as u8,
+            ])
+        });
         Self {
             decoder_iter,
             decoder_process,

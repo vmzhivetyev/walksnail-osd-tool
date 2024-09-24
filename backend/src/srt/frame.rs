@@ -1,5 +1,6 @@
-use parse_display::FromStr;
 use std::str::FromStr;
+
+use parse_display::FromStr;
 use regex::Regex;
 
 #[derive(Debug, Clone)]
@@ -81,11 +82,15 @@ impl FromStr for SrtDebugFrameData {
             static ref RE_CCT_RB: Regex = Regex::new(r"\[cct:(\d+),\s*rb:([\d.]+)\s*([\d.]+)\]").unwrap();
         }
 
-        let channel_signal = RE_CHANNEL_SIGNAL.captures(s).ok_or("Failed to match channel and signal")?;
+        let channel_signal = RE_CHANNEL_SIGNAL
+            .captures(s)
+            .ok_or("Failed to match channel and signal")?;
         let sp = RE_SP.captures(s).ok_or("Failed to match SP values")?;
         let gp = RE_GP.captures(s).ok_or("Failed to match GP values")?;
         let gtp_stp = RE_GTP_STP.captures(s).ok_or("Failed to match GTP and STP values")?;
-        let snr_temp = RE_SNR_TEMP.captures(s).ok_or("Failed to match SNR and temperature values")?;
+        let snr_temp = RE_SNR_TEMP
+            .captures(s)
+            .ok_or("Failed to match SNR and temperature values")?;
         let misc = RE_MISC.captures(s).ok_or("Failed to match miscellaneous values")?;
         let iso = RE_ISO.captures(s).ok_or("Failed to match ISO values")?;
         let gain = RE_GAIN.captures(s).ok_or("Failed to match gain values")?;
@@ -176,7 +181,40 @@ mod tests {
         let parsed = line.parse::<SrtDebugFrameData>();
         assert_eq!(
             parsed.expect("Failed to parse SRT frame data"),
-            SrtDebugFrameData { signal: 4, channel: 4, latency: 35, sp1: 74, sp2: 152, sp3: 152, sp4: 152, gp1: 59, gp2: 65, gp3: 53, gp4: 60, gtp: 10, gtp0: 0, stp: 9, stp0: -1, gsnr: 21.4, ssnr: 21.6, gtemp: 35.0, stemp: 56.0, fps: 60, gerr: 0, serr: 0, serr_ext: 24, iso: 0, iso_mode: "max".to_string(), iso_exp: 0, gain: 0.0, gain_exp: 0.0, gain_lx: 0, cct: 0, rb: 0.0, rb_ext: 0.0 }
+            SrtDebugFrameData {
+                signal: 4,
+                channel: 4,
+                latency: 35,
+                sp1: 74,
+                sp2: 152,
+                sp3: 152,
+                sp4: 152,
+                gp1: 59,
+                gp2: 65,
+                gp3: 53,
+                gp4: 60,
+                gtp: 10,
+                gtp0: 0,
+                stp: 9,
+                stp0: -1,
+                gsnr: 21.4,
+                ssnr: 21.6,
+                gtemp: 35.0,
+                stemp: 56.0,
+                fps: 60,
+                gerr: 0,
+                serr: 0,
+                serr_ext: 24,
+                iso: 0,
+                iso_mode: "max".to_string(),
+                iso_exp: 0,
+                gain: 0.0,
+                gain_exp: 0.0,
+                gain_lx: 0,
+                cct: 0,
+                rb: 0.0,
+                rb_ext: 0.0
+            }
         )
     }
 }

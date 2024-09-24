@@ -42,18 +42,13 @@ pub fn overlay_osd(image: &mut RgbaImage, osd_frame: &osd::Frame, font: &font::F
             let single_glyph_y_offset = image.height() / ROW_COUNT;
             let remainder_x_offset = image.width() % COL_COUNT / 2;
             let remainder_y_offset = image.height() % ROW_COUNT / 2;
-            
+
             let x_raw = remainder_x_offset + grid_position.x * single_glyph_x_offset;
             let y_raw = remainder_y_offset + grid_position.y * single_glyph_y_offset;
             let x = (x_raw as i32 + osd_options.position.x) as i64;
             let y = (y_raw as i32 + osd_options.position.y) as i64;
 
-            overlay(
-                image,
-                &character_image,
-                x,
-                y,
-            )
+            overlay(image, &character_image, x, y)
         }
     }
 }

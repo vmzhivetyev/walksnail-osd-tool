@@ -1,8 +1,8 @@
 use image::{Rgba, RgbaImage};
-use imageproc::{drawing::draw_text_mut};
-use rusttype::{Font, Scale, point};
+use imageproc::drawing::draw_text_mut;
+use rusttype::{point, Font, Scale};
 
-use crate::srt::{SrtFrameData, SrtDebugFrameData, SrtOptions};
+use crate::srt::{SrtDebugFrameData, SrtFrameData, SrtOptions};
 
 #[inline]
 pub fn overlay_srt_data(
@@ -67,7 +67,8 @@ pub fn overlay_srt_data(
         "".into()
     };
 
-    let srt_string = format!("{signal_str}{channel_str}{time_str}{gbat_str}{sbat_str}{latency_str}{bitrate_str}{distance_str}");
+    let srt_string =
+        format!("{signal_str}{channel_str}{time_str}{gbat_str}{sbat_str}{latency_str}{bitrate_str}{distance_str}");
 
     let image_dimensions = image.dimensions();
 
@@ -102,10 +103,16 @@ pub fn overlay_srt_debug_data(
         srt_string.push_str(&format!("MCS:{} ", srt_debug_data.signal));
     }
     if srt_options.show_gp {
-        srt_string.push_str(&format!("GP[{:>3} {:>3} {:>3} {:>3}] ", srt_debug_data.gp1, srt_debug_data.gp2, srt_debug_data.gp3, srt_debug_data.gp4))
+        srt_string.push_str(&format!(
+            "GP[{:>3} {:>3} {:>3} {:>3}] ",
+            srt_debug_data.gp1, srt_debug_data.gp2, srt_debug_data.gp3, srt_debug_data.gp4
+        ))
     }
     if srt_options.show_sp {
-        srt_string.push_str(&format!("SP[{:>3} {:>3} {:>3} {:>3}] ", srt_debug_data.sp1, srt_debug_data.sp2, srt_debug_data.sp3, srt_debug_data.sp4))
+        srt_string.push_str(&format!(
+            "SP[{:>3} {:>3} {:>3} {:>3}] ",
+            srt_debug_data.sp1, srt_debug_data.sp2, srt_debug_data.sp3, srt_debug_data.sp4
+        ))
     }
     if srt_options.show_gtp {
         srt_string.push_str(&format!("GTP:{:>2} ", srt_debug_data.gtp))
@@ -132,13 +139,22 @@ pub fn overlay_srt_debug_data(
         srt_string.push_str(&format!("FPS:{:>2} ", srt_debug_data.fps));
     }
     if srt_options.show_err {
-        srt_string.push_str(&format!("GErr:{:>2} SErr:{:>2} {:>2} ", srt_debug_data.gerr, srt_debug_data.serr, srt_debug_data.serr_ext));
+        srt_string.push_str(&format!(
+            "GErr:{:>2} SErr:{:>2} {:>2} ",
+            srt_debug_data.gerr, srt_debug_data.serr, srt_debug_data.serr_ext
+        ));
     }
     if srt_options.show_settings_cam {
-        srt_string.push_str(&format!("[ISO:{} Mode:{} Exp:{}] ", srt_debug_data.iso, srt_debug_data.iso_mode, srt_debug_data.iso_exp));
+        srt_string.push_str(&format!(
+            "[ISO:{} Mode:{} Exp:{}] ",
+            srt_debug_data.iso, srt_debug_data.iso_mode, srt_debug_data.iso_exp
+        ));
     }
     if srt_options.show_actual_cam {
-        srt_string.push_str(&format!("[ISO_Gain:{:.2} Exp:{:.3}ms Lx:{}] ", srt_debug_data.gain, srt_debug_data.gain_exp, srt_debug_data.gain_lx));
+        srt_string.push_str(&format!(
+            "[ISO_Gain:{:.2} Exp:{:.3}ms Lx:{}] ",
+            srt_debug_data.gain, srt_debug_data.gain_exp, srt_debug_data.gain_lx
+        ));
     }
     if srt_options.show_cct {
         srt_string.push_str(&format!("[CCT:{}] ", srt_debug_data.cct));
@@ -150,12 +166,7 @@ pub fn overlay_srt_debug_data(
     overlay_string(image, &srt_string, font, srt_options)
 }
 
-fn overlay_string(
-    image: &mut RgbaImage,
-    srt_string: &String,
-    font: &rusttype::Font,
-    srt_options: &SrtOptions,
-) {
+fn overlay_string(image: &mut RgbaImage, srt_string: &String, font: &rusttype::Font, srt_options: &SrtOptions) {
     let image_dimensions = image.dimensions();
     let scale = Scale::uniform(srt_options.scale / 1080.0 * image_dimensions.1 as f32);
 
@@ -174,9 +185,17 @@ fn overlay_string(
 
     for word in words {
         let potential_line = if on_first_line {
-            if line1.is_empty() { word.to_string() } else { format!("{} {}", line1, word) }
+            if line1.is_empty() {
+                word.to_string()
+            } else {
+                format!("{} {}", line1, word)
+            }
         } else {
-            if line2.is_empty() { word.to_string() } else { format!("{} {}", line2, word) }
+            if line2.is_empty() {
+                word.to_string()
+            } else {
+                format!("{} {}", line2, word)
+            }
         };
 
         if text_width(font, scale, &potential_line) <= max_width {

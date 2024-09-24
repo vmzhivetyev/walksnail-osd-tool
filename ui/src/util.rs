@@ -236,8 +236,13 @@ pub mod build_info {
 
     pub enum Build {
         #[allow(dead_code)]
-        Release { version: Version, commit: String },
-        Dev { commit: String },
+        Release {
+            version: Version,
+            commit: String,
+        },
+        Dev {
+            commit: String,
+        },
         Unknown,
     }
 

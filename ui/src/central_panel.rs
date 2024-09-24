@@ -1,8 +1,13 @@
 use std::time::Instant;
 
-use backend::{ffmpeg::{Codec, Encoder}, font::CharacterSize, util::Coordinates};
+use backend::{
+    ffmpeg::{Codec, Encoder},
+    font::CharacterSize,
+    util::Coordinates,
+};
 use egui::{
-    vec2, Button, CentralPanel, Checkbox, CollapsingHeader, Color32, CursorIcon, Grid, Image, Rect, RichText, ScrollArea, Sense, Slider, Stroke, TextStyle, Ui
+    vec2, Button, CentralPanel, Checkbox, CollapsingHeader, Color32, CursorIcon, Grid, Image, Rect, RichText,
+    ScrollArea, Sense, Slider, Stroke, TextStyle, Ui,
 };
 
 use crate::{
@@ -273,32 +278,71 @@ impl WalksnailOsdTool {
 
                             // debug srt data
                             if has_debug {
-                                
-                                ui.end_row();
-                                
-                                changed |= ui.checkbox(&mut options.show_gp, "GP").on_hover_text("Ground RSSI -dBm. 40-60 is good, 130 is low").changed();
-                                changed |= ui.checkbox(&mut options.show_sp, "SP").on_hover_text("Sky RSSI -dBm. 40-60 is good, 130 is low").changed();
-                                changed |= ui.checkbox(&mut options.show_gtp, "GTP").on_hover_text("Ground transmit dBm").changed();
-                                changed |= ui.checkbox(&mut options.show_stp, "STP").on_hover_text("Sky transmit dBm").changed();
                                 ui.end_row();
 
-                                changed |= ui.checkbox(&mut options.show_gsnr, "GSNR").on_hover_text("Ground signal to noise ratio. 23 is excellent.").changed();
-                                changed |= ui.checkbox(&mut options.show_ssnr, "SSNR").on_hover_text("Sky signal to noise ratio. 23 is excellent.").changed();
-                                changed |= ui.checkbox(&mut options.show_gtemp, "GTemp").on_hover_text("Ground temperature. 75 is hot.").changed();
-                                changed |= ui.checkbox(&mut options.show_stemp, "STemp").on_hover_text("Sky temperature. 75 is hot.").changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_gp, "GP")
+                                    .on_hover_text("Ground RSSI -dBm. 40-60 is good, 130 is low")
+                                    .changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_sp, "SP")
+                                    .on_hover_text("Sky RSSI -dBm. 40-60 is good, 130 is low")
+                                    .changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_gtp, "GTP")
+                                    .on_hover_text("Ground transmit dBm")
+                                    .changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_stp, "STP")
+                                    .on_hover_text("Sky transmit dBm")
+                                    .changed();
                                 ui.end_row();
 
-                                changed |= ui.checkbox(&mut options.show_fps, "FPS").on_hover_text("Frames received per second").changed();
-                                changed |= ui.checkbox(&mut options.show_err, "Errors").on_hover_text("Error count").changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_gsnr, "GSNR")
+                                    .on_hover_text("Ground signal to noise ratio. 23 is excellent.")
+                                    .changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_ssnr, "SSNR")
+                                    .on_hover_text("Sky signal to noise ratio. 23 is excellent.")
+                                    .changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_gtemp, "GTemp")
+                                    .on_hover_text("Ground temperature. 75 is hot.")
+                                    .changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_stemp, "STemp")
+                                    .on_hover_text("Sky temperature. 75 is hot.")
+                                    .changed();
                                 ui.end_row();
-                                changed |= ui.checkbox(&mut options.show_settings_cam, "Camera Set").on_hover_text("Camera ISO/exposure parameters").changed();
-                                changed |= ui.checkbox(&mut options.show_actual_cam, "Camera Act").on_hover_text("Actual camera parameters").changed();
+
+                                changed |= ui
+                                    .checkbox(&mut options.show_fps, "FPS")
+                                    .on_hover_text("Frames received per second")
+                                    .changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_err, "Errors")
+                                    .on_hover_text("Error count")
+                                    .changed();
                                 ui.end_row();
-                                changed |= ui.checkbox(&mut options.show_cct, "CCT").on_hover_text("Correlated Color Temperature").changed();
-                                changed |= ui.checkbox(&mut options.show_rb, "Red Balance").on_hover_text("Red Balance values").changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_settings_cam, "Camera Set")
+                                    .on_hover_text("Camera ISO/exposure parameters")
+                                    .changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_actual_cam, "Camera Act")
+                                    .on_hover_text("Actual camera parameters")
+                                    .changed();
                                 ui.end_row();
-                                
-                                
+                                changed |= ui
+                                    .checkbox(&mut options.show_cct, "CCT")
+                                    .on_hover_text("Correlated Color Temperature")
+                                    .changed();
+                                changed |= ui
+                                    .checkbox(&mut options.show_rb, "Red Balance")
+                                    .on_hover_text("Red Balance values")
+                                    .changed();
+                                ui.end_row();
                             }
                         });
                         ui.end_row();
@@ -492,19 +536,25 @@ impl WalksnailOsdTool {
             .iter()
             .filter(|e| e.detected || show_undetected_encoders)
             .collect();
-    
+
         filtered_encoders.sort_by(|a, b| {
             const CODEC_PRIORITY: [Codec; 4] = [Codec::H265, Codec::H264, Codec::VP9, Codec::ProRes];
-    
-            let a_priority = CODEC_PRIORITY.iter().position(|c| *c == a.codec).unwrap_or(CODEC_PRIORITY.len());
-            let b_priority = CODEC_PRIORITY.iter().position(|c| *c == b.codec).unwrap_or(CODEC_PRIORITY.len());
+
+            let a_priority = CODEC_PRIORITY
+                .iter()
+                .position(|c| *c == a.codec)
+                .unwrap_or(CODEC_PRIORITY.len());
+            let b_priority = CODEC_PRIORITY
+                .iter()
+                .position(|c| *c == b.codec)
+                .unwrap_or(CODEC_PRIORITY.len());
             let type_cmp = a_priority.cmp(&b_priority);
 
             let hardware_cmp = b.hardware.cmp(&a.hardware);
 
             let name_cmp = a.name.cmp(&b.name);
 
-            hardware_cmp.then_with(||type_cmp).then_with(||name_cmp)
+            hardware_cmp.then_with(|| type_cmp).then_with(|| name_cmp)
         });
 
         filtered_encoders

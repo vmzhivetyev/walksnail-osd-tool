@@ -32,7 +32,7 @@ impl TryFrom<FfProbe> for VideoInfo {
         let width = stream.width.ok_or(VideoInfoError::NoFrameWidth)? as u32;
         let height = stream.height.ok_or(VideoInfoError::NoFrameHeight)? as u32;
         let frame_rate = {
-            // Using r_frame_rate because 'avg_frame_rate' rate will always 
+            // Using r_frame_rate because 'avg_frame_rate' rate will always
             // be something like 58.123 as a result of missing frame.
             // 'r_frame_rate' is the actual intended frame rate.
             // 'r_frame_rate' or 'avg_frame_rate' example value: "60/1".

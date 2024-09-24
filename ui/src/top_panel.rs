@@ -110,7 +110,10 @@ impl WalksnailOsdTool {
                         ui.style_mut().override_text_style = Some(TextStyle::Button);
                         ui.style_mut().text_styles.get_mut(&TextStyle::Button).unwrap().size = 20.0;
 
-                        ui.hyperlink_to("This project is a fork", "https://github.com/vmzhivetyev/walksnail-osd-tool");
+                        ui.hyperlink_to(
+                            "This project is a fork",
+                            "https://github.com/vmzhivetyev/walksnail-osd-tool",
+                        );
                         ui.label("of");
                         ui.hyperlink_to("walksnail-osd-tool", "https://github.com/avsaase/walksnail-osd-tool");
                     });
