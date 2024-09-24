@@ -4,6 +4,33 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.0] - 2024-09-24
+
+### Added
+* Aspect Ratio Correction: Added option to rescale input video to 4:3 aspect, addressing distortion issues for videos recorded with "4:3 FULL" setting in VRX.
+* Added checkboxes for Debug SRT components, only enable the things you want.
+* Implemented automatic text wrapping for Debug SRT content.
+* Added checkbox to fully disable OSD rendering in the final video.
+* Added Apple ProRes Encoder, it supports true transparent background.
+
+### Fixed
+* macOS Compatibility: Videos encoded with `hevc_videotoolbox` on macos are now playable in QuickTime and in Finder's Quick Look.
+* FPS and Timing Fixes: Fully fixed issues with final video's fps and OSD-to-video timing desyncs.
+* Last used render settings (Encoder, Bitrate, etc.) are now preserved across app relaunches.
+* Fixed positioning of OSD glyphs, no more gaps and overlaps.
+* Fixed parsing of [Debug SRT files](https://walksnail.wiki/en/Debug).
+* Light/Dark Mode preference is now saved between sessions.
+* Original audio stream from input video is now maintained in the output video.
+* Other PRs:
+  * [Fixed final video to have the same time scale as original](https://github.com/avsaase/walksnail-osd-tool/pull/47)
+  * [Added additional OSD rendering settings](https://github.com/avsaase/walksnail-osd-tool/pull/46)
+* For Developers:
+  * Fixed Debugging: Fixed build profiles settings, disabled optimizations for Debug profile.
+  * Simpler Build: Added shell scripts for macOS and Linux to streamline building from source.
+
+### Changed
+* Dark Mode set as default.
+
 ## [0.3.0] - 2024-03-23
 
 ### Added
