@@ -284,7 +284,7 @@ pub fn check_updates() -> Result<Option<GitHubReleaseItem>, LookupError> {
     } = build_info::get_version()
     {
         let github = github_release_check::GitHub::new().unwrap();
-        let releases = github.query("avsaase/walksnail-osd-tool")?;
+        let releases = github.query("vmzhivetyev/walksnail-osd-tool")?;
         let update_target = releases
             .iter()
             .find(|release| {
