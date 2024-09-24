@@ -44,14 +44,11 @@ jobs:
     runs-on: ${{ matrix.targets.runner }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
       - name: Install toolchain
-        uses: actions-rs/toolchain@v1
+        uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: nightly
-          profile: minimal
-          override: true
           target: ${{ matrix.targets.target }}
 
       - name: Cache dependencies
@@ -106,7 +103,6 @@ jobs:
       - name: Create Mac App bundle
         if: ${{ matrix.targets.name == 'macos-intel' || matrix.targets.name == 'macos-arm'}}
         run: |
-          cd ./ui
           cargo bundle --release --target ${{ matrix.targets.target }} --features macos-app-bundle
           cp ${{ github.workspace }}/ext/ffmpeg/${{ matrix.targets.name }}/ffmpeg ${{ github.workspace }}/target/${{ matrix.targets.target }}/release/bundle/osx/Walksnail\ OSD\ Tool.app/Contents/MacOS/ffmpeg
           cp ${{ github.workspace }}/ext/ffmpeg/${{ matrix.targets.name }}/ffprobe ${{ github.workspace }}/target/${{ matrix.targets.target }}/release/bundle/osx/Walksnail\ OSD\ Tool.app/Contents/MacOS/ffprobe
