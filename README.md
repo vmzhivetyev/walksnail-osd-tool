@@ -1,3 +1,41 @@
+# Fork Enhancements
+
+## Key Improvements
+
+* macOS Compatibility: Videos encoded with `hevc_videotoolbox` on macos are now playable in QuickTime and in Finder's Quick Look.
+* Aspect Ratio Correction: Added option to rescale input video to 4:3 aspect, addressing distortion issues for videos recorded with "4:3 FULL" setting in VRX.
+* FPS and Timing Fixes: Fully fixed issues with final video's fps and OSD-to-video timing desyncs.
+* Last used render settings (Encoder, Bitrate, etc.) are now preserved across app relaunches.
+
+* OSD Rendering Enhancements:
+    * Fixed positioning of OSD glyphs, no more gaps and overlaps.
+    * Fixed parsing of [Debug SRT files](https://walksnail.wiki/en/Debug).
+    * Added checkboxes for Debug SRT components, only enable the things you want.
+    * Implemented automatic text wrapping for Debug SRT content.
+    * Added checkbox to fully disable OSD rendering in the final video.
+
+* UI Improvements:
+    * Dark Mode set as default.
+    * Light/Dark Mode preference is now saved between sessions.
+
+* Audio:
+    * Original audio stream from input video is now maintained in the output video.
+
+* Encoders:
+    * Added Apple ProRes Encoder, it supports true transparent background.
+
+* Other PRs:
+    * [Fixed final video to have the same time scale as original](https://github.com/avsaase/walksnail-osd-tool/pull/47)
+    * [Added additional OSD rendering settings](https://github.com/avsaase/walksnail-osd-tool/pull/46)
+
+* For Developers:
+    * Fixed Debugging: Fixed build profiles settings, disabled optimizations for Debug profile.
+    * Simpler Build: Added shell scripts for macOS and Linux to streamline building from source.
+
+___
+
+# Original README
+
 <p align="center">
 <img width="256" height="176" src="https://user-images.githubusercontent.com/880421/224411816-c0cf1331-c856-42e9-a3d6-1c23b7da7886.png">
 </p>
