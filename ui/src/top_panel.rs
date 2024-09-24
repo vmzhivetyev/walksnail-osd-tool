@@ -1,6 +1,6 @@
 use std::time::Instant;
 
-use egui::{vec2, Align2, Button, FontId, Frame, Label, RichText, Sense, TextFormat, TextStyle, Ui, Visuals, Window};
+use egui::{vec2, Align2, Button, Frame, Label, RichText, Sense, TextStyle, Ui, Visuals, Window};
 
 use super::WalksnailOsdTool;
 
