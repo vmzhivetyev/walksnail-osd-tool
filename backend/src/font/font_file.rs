@@ -1,7 +1,41 @@
-use std::path::PathBuf;
+use std::{cell::RefCell, hash::{DefaultHasher, Hash, Hasher}, path::PathBuf};
 
 use derivative::Derivative;
 use image::{imageops::FilterType, io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
+
+use std::collections::HashMap;
+
+
+// Cache structure
+#[derive(Derivative, Clone, Debug)]
+pub struct ImageCache {
+    cache: RefCell<HashMap<u64, ImageBuffer<Rgba<u8>, Vec<u8>>>>,
+}
+
+impl ImageCache {
+    pub fn new() -> Self {
+        ImageCache {
+            cache: RefCell::new(HashMap::new()),
+        }
+    }
+
+    fn generate_key(index: usize, size: &CharacterSize) -> u64 {
+        let mut hasher = DefaultHasher::new();
+        index.hash(&mut hasher);
+        size.hash(&mut hasher);
+        hasher.finish()
+    }
+
+    pub fn get(&self, index: usize, size: &CharacterSize) -> Option<ImageBuffer<Rgba<u8>, Vec<u8>>> {
+        let key = Self::generate_key(index, size);
+        self.cache.borrow().get(&key).cloned() // Cloning the image to return a copy
+    }
+
+    pub fn insert(&self, index: usize, size: &CharacterSize, image: ImageBuffer<Rgba<u8>, Vec<u8>>) {
+        let key = Self::generate_key(index, size);
+        self.cache.borrow_mut().insert(key, image);
+    }
+}
 
 use super::{
     dimensions::{detect_dimensions, CharacterSize, FontType},
@@ -17,6 +51,7 @@ pub struct FontFile {
     pub font_type: FontType,
     #[derivative(Debug = "ignore")]
     characters: Vec<RgbaImage>,
+    cache: ImageCache,
 }
 
 impl FontFile {
@@ -34,16 +69,26 @@ impl FontFile {
             character_size,
             font_type,
             characters,
+            cache: ImageCache::new(),
         })
     }
 
     pub fn get_character(&self, index: usize, size: &CharacterSize) -> Option<ImageBuffer<Rgba<u8>, Vec<u8>>> {
+        if let Some(cached_image) = self.cache.get(index, size) {
+            return Some(cached_image.clone());
+        }
+
         self.characters.get(index).map(|original_image| {
-            if size.width() != self.character_size.width() || size.height() != self.character_size.height() {
+            let resized_image = if size.width() != self.character_size.width() || size.height() != self.character_size.height() {
                 image::imageops::resize(original_image, size.width(), size.height(), FilterType::Lanczos3)
             } else {
                 original_image.clone()
-            }
+            };
+
+            // Cache the resized image
+            self.cache.insert(index, size, resized_image.clone());
+            println!("Cache char {}", index);
+            resized_image
         })
     }
 }

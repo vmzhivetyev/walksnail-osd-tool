@@ -27,6 +27,18 @@
             },
             "args": [],
             "sourceLanguages": ["rust"]
+        },
+        {
+            "name": "Run Release",
+            "type": "lldb",
+            "request": "launch",
+            "cargo": {
+                "args": [
+                    "build", "--release"
+                ]
+            },
+            "args": [],
+            "sourceLanguages": ["rust"]
         }
     ]
 }

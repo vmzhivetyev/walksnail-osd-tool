@@ -13,7 +13,7 @@ pub(crate) const CHARACTER_HEIGHT_SMALL: u32 = 36;
 pub(crate) const CHARACTER_WIDTH_RACE: u32 = 18;
 pub(crate) const CHARACTER_HEIGHT_RACE: u32 = 27;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Hash)]
 pub enum CharacterSize {
     Large,
     Small,
