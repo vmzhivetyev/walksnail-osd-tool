@@ -86,7 +86,12 @@ pub fn start_video_render(
         .spawn(move || {
             tracing::info_span!("Decoder handler thread").in_scope(|| {
                 frame_overlay_iter.for_each(|f| {
+                    let start = std::time::Instant::now();
                     encoder_stdin.write_all(&f.data).ok();
+                    tracing::info!(
+                        "encoder_stdin.write_all done in {:?}.",
+                        start.elapsed()
+                    );
                 });
             });
         })
