@@ -227,16 +227,25 @@ impl WalksnailOsdTool {
         if let (Some(video_info), Some(osd_file), Some(font_file), Some(srt_file)) =
             (&self.video_info, &self.osd_file, &self.font_file, &self.srt_file)
         {
+            let osd_frame_index = self.osd_preview.preview_frame as usize - 1;
+            let osd_frame = osd_file
+                .frames
+                .get(osd_frame_index)
+                .unwrap();
+
+            let osd_frame_time = osd_frame.time_millis as f32 / 1000.0;
+
+            let srt_frame = srt_file.frames.iter()
+                .find(|frame| frame.start_time_secs >= osd_frame_time)
+                .unwrap();
+
             let image = egui::ColorImage::from_rgba_unmultiplied(
                 [video_info.width as usize, video_info.height as usize],
                 &create_osd_preview(
                     video_info.width,
                     video_info.height,
-                    osd_file
-                        .frames
-                        .get(self.osd_preview.preview_frame as usize - 1)
-                        .unwrap(),
-                    srt_file.frames.last().unwrap(),
+                    osd_frame,
+                    srt_frame,
                     font_file,
                     self.srt_font.as_ref().unwrap(),
                     &self.osd_options,
