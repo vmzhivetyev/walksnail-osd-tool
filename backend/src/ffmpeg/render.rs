@@ -1,7 +1,5 @@
 use std::{
-    io::{self, Write},
-    path::PathBuf,
-    thread,
+    io::{self, Write}, path::PathBuf, thread
 };
 
 use crossbeam_channel::{Receiver, Sender};
@@ -18,6 +16,34 @@ use crate::{
     overlay::FrameOverlayIter,
     srt::{self, SrtOptions},
 };
+
+fn run_ready_frames_to_queue(frame_iter: impl Iterator<Item = ffmpeg_sidecar::event::OutputVideoFrame>, tx: Sender<ffmpeg_sidecar::event::OutputVideoFrame>) {
+    for frame in frame_iter {
+        // If send fails (receiver dropped), we exit the thread
+        if tx.send(frame).is_err() {
+            break;
+        }
+        tracing::info!("Frame queued for processing");
+    }
+}
+
+fn run_ready_frames_from_queue_to_encoder(rx: Receiver<ffmpeg_sidecar::event::OutputVideoFrame>, mut encoder_stdin: impl Write) {
+    while let Ok(frame) = rx.recv() {
+        let start = std::time::Instant::now();
+
+        // write_all can take a lot of time if the encoder process is not ready to read it's stdin, it means encoder is the bottleneck.
+        // If write fails, we just log it and continue
+        if let Err(e) = encoder_stdin.write_all(&frame.data) {
+            tracing::error!("Failed to write frame: {}", e);
+            continue;
+        }
+        
+        tracing::info!(
+            "encoder_stdin.write_all done in {:?}.",
+            start.elapsed()
+        );
+    }
+}
 
 #[tracing::instrument(skip(osd_frames, srt_frames, font_file), err)]
 pub fn start_video_render(
@@ -80,22 +106,27 @@ pub fn start_video_render(
     );
 
     // On another thread run the decoder iterator to completion and feed the output to the encoder's stdin
-    let mut encoder_stdin = encoder_process.take_stdin().expect("Failed to get `stdin` for encoder");
+    let encoder_stdin = encoder_process.take_stdin().expect("Failed to get `stdin` for encoder");
+
+    let (ready_frames_queue_in, ready_frames_queue_out) = crossbeam_channel::bounded:: <ffmpeg_sidecar::event::OutputVideoFrame>(1);
+
     thread::Builder::new()
-        .name("Decoder handler".into())
+        .name("Push ready frames to queue".into())
         .spawn(move || {
-            tracing::info_span!("Decoder handler thread").in_scope(|| {
-                frame_overlay_iter.for_each(|f| {
-                    let start = std::time::Instant::now();
-                    encoder_stdin.write_all(&f.data).ok();
-                    tracing::info!(
-                        "encoder_stdin.write_all done in {:?}.",
-                        start.elapsed()
-                    );
-                });
+            tracing::info_span!("ready frames iter -> queue").in_scope(|| {
+                run_ready_frames_to_queue(frame_overlay_iter, ready_frames_queue_in);
             });
         })
-        .expect("Failed to spawn decoder handler thread");
+        .expect("Failed to spawn producer thread");
+
+    thread::Builder::new()
+        .name("Pop ready frames from queue to encoder".into())
+        .spawn(move || {
+            tracing::info_span!("ready frames queue -> encoder").in_scope(|| {
+                run_ready_frames_from_queue_to_encoder(ready_frames_queue_out, encoder_stdin);
+            });
+        })
+        .expect("Failed to spawn consumer thread");
 
     // On yet another thread run the encoder to completion
     thread::Builder::new()
