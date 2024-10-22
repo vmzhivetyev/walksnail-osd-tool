@@ -153,10 +153,10 @@ impl Iterator for FrameOverlayIter<'_> {
                 // dbg!("🌤️🌤️🌤️", &other_event);
                 handle_decoder_events(other_event, &self.ffmpeg_sender);
 
-                tracing::info!(
-                    "handle_decoder_events done in {:?}.",
-                    start.elapsed()
-                );
+                // tracing::info!(
+                //     "handle_decoder_events done in {:?}.",
+                //     start.elapsed()
+                // );
 
                 None
             }

@@ -59,9 +59,9 @@ pub fn overlay_osd(image: &mut RgbaImage, osd_frame: &osd::Frame, font: &font::F
         }
     }
 
-    tracing::info!(
-        "overlay_osd done in {:?} for {} chars.",
-        start.elapsed(),
-        rendered_chars
-    );
+    // tracing::info!(
+    //     "overlay_osd done in {:?} for {} chars.",
+    //     start.elapsed(),
+    //     rendered_chars
+    // );
 }

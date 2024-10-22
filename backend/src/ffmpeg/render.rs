@@ -38,10 +38,10 @@ fn run_ready_frames_from_queue_to_encoder(rx: Receiver<ffmpeg_sidecar::event::Ou
             continue;
         }
         
-        tracing::info!(
-            "encoder_stdin.write_all done in {:?}.",
-            start.elapsed()
-        );
+        // tracing::info!(
+        //     "encoder_stdin.write_all done in {:?}.",
+        //     start.elapsed()
+        // );
     }
 }
 

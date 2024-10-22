@@ -167,11 +167,11 @@ pub fn overlay_srt_debug_data(
 
     let result = overlay_string(image, &srt_string, font, srt_options);
 
-    tracing::info!(
-        "overlay_srt_debug_data done in {:?} for {} chars.",
-        start.elapsed(),
-        srt_string.chars().count()
-    );
+    // tracing::info!(
+    //     "overlay_srt_debug_data done in {:?} for {} chars.",
+    //     start.elapsed(),
+    //     srt_string.chars().count()
+    // );
 
     result
 }
