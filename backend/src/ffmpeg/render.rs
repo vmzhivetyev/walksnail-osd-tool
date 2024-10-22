@@ -151,7 +151,11 @@ pub fn spawn_encoder(
         .codec_audio("copy");
 
     if upscale {
-        encoder_command.args(["-vf", "scale=2560x1440:flags=bicubic"]);
+        if video_encoder.name.contains("nvenc") {
+            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-1:1440:4"]);
+        } else {
+            encoder_command.args(["-vf", "scale=-1:1440:flags=lanczos"]);
+        }
     }
 
     if rescale_to_4x3_aspect {

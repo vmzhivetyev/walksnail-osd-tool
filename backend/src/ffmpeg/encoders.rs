@@ -48,10 +48,17 @@ impl Encoder {
 
     #[tracing::instrument(ret)]
     pub fn get_available_encoders(ffmpeg_path: &PathBuf) -> Vec<Self> {
+         // Apple QuickTime player on Mac supports hvc1. It doesn't support hev1 which is the default.
+         // Make hevc videos be compatible with MacOS QuickTime.
+        let hvc1tag = ["-tag:v", "hvc1"]; 
+
         #[rustfmt::skip]
         let mut all_encoders = [
             Encoder::new("libx264", Codec::H264, false),
-            Encoder::new("libx265", Codec::H265, false),
+            
+            Encoder::new_with_extra_args(
+                "libx265", Codec::H265, false, &hvc1tag
+            ),
 
             #[cfg(target_os = "windows")]
             Encoder::new("h264_amf", Codec::H264, true),
@@ -75,7 +82,9 @@ impl Encoder {
             Encoder::new("hevc_amf", Codec::H265, true),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
-            Encoder::new("hevc_nvenc", Codec::H265, true),
+            Encoder::new_with_extra_args(
+                "hevc_nvenc", Codec::H265, true, &hvc1tag
+            ),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
             Encoder::new("hevc_qsv", Codec::H265, true),
@@ -88,8 +97,7 @@ impl Encoder {
 
             #[cfg(target_os = "macos")]
             Encoder::new_with_extra_args(
-                "hevc_videotoolbox", Codec::H265, true, 
-                &["-tag:v", "hvc1"] // Apple QuickTime player on Mac supports hvc1. It doesn't support hev1 which is the default.
+                "hevc_videotoolbox", Codec::H265, true, &hvc1tag
             ),
 
             #[cfg(target_os = "macos")]
