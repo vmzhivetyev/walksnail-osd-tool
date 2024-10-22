@@ -140,7 +140,7 @@ impl Iterator for FrameOverlayIter<'_> {
                 video_frame.data = frame_image.as_raw().to_vec();
                 
                 tracing::info!(
-                    "iter next frame done in {:?}.",
+                    "next frame prepared in {:?}.",
                     start.elapsed()
                 );
 

@@ -23,7 +23,7 @@ fn run_ready_frames_to_queue(frame_iter: impl Iterator<Item = ffmpeg_sidecar::ev
         if tx.send(frame).is_err() {
             break;
         }
-        tracing::info!("Frame queued for processing");
+        tracing::info!("Frame queued for processing. Queued: {}", tx.len());
     }
 }
 
@@ -108,7 +108,7 @@ pub fn start_video_render(
     // On another thread run the decoder iterator to completion and feed the output to the encoder's stdin
     let encoder_stdin = encoder_process.take_stdin().expect("Failed to get `stdin` for encoder");
 
-    let (ready_frames_queue_in, ready_frames_queue_out) = crossbeam_channel::bounded:: <ffmpeg_sidecar::event::OutputVideoFrame>(1);
+    let (ready_frames_queue_in, ready_frames_queue_out) = crossbeam_channel::bounded:: <ffmpeg_sidecar::event::OutputVideoFrame>(100);
 
     thread::Builder::new()
         .name("Push ready frames to queue".into())
@@ -252,7 +252,7 @@ fn handle_encoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromF
         }
         FfmpegEvent::LogEOF => {
             tracing::info!("ffmpeg encoder EOF reached");
-            ffmpeg_sender.send(FromFfmpegMessage::EncoderFinished).unwrap();
+            ffmpeg_sender.send(FromFfmpegMessage::EncoderFinished).ok();
         }
         _ => {}
     }
