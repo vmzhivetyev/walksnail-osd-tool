@@ -152,9 +152,9 @@ pub fn spawn_encoder(
 
     if upscale {
         if video_encoder.name.contains("nvenc") {
-            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-1:1440:4"]);
+            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:4"]);
         } else {
-            encoder_command.args(["-vf", "scale=-1:1440:flags=lanczos"]);
+            encoder_command.args(["-vf", "scale=-2:1440:flags=lanczos"]);
         }
     }
 
