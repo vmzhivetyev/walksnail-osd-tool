@@ -188,9 +188,9 @@ pub fn spawn_encoder(
 
     if upscale {
         if video_encoder.name.contains("nvenc") {
-            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:4"]);
+            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:3"]);
         } else {
-            encoder_command.args(["-vf", "scale=-2:1440:flags=lanczos"]);
+            encoder_command.args(["-vf", "scale=-2:1440:flags=bicubic"]);
         }
     } else {
         if video_encoder.name.contains("nvenc") {
@@ -204,12 +204,23 @@ pub fn spawn_encoder(
         // Such video will be played back the same way as if it really was 4:3.
         encoder_command.args(["-aspect", "4:3"]);
     }
+    
+    if video_encoder.name.contains("hevc_nvenc_optimized") {
+        encoder_command
+            .codec_video("hevc_nvenc")
+            .args(["-b:v", "0k"])
+            .args(["-rc", "constqp"])
+            .args(["-qp", "27"]);
+    }
+    else {
+        encoder_command
+            .codec_video(&video_encoder.name)
+            .args(["-b:v", &format!("{}M", bitrate_mbps)]);
+    }
 
     encoder_command
-        .codec_video(&video_encoder.name)
-        .args(["-b:v", &format!("{}M", bitrate_mbps)])
         .args(&video_encoder.extra_args)
-        .args(["-video_track_timescale", time_base.to_string().as_str()]);
+        .args(["-video_track_timescale", time_base.to_string().as_str()]);        
 
     // if let Some(chroma_color) = chroma_key {
     //     if chroma_color[3] > 0.99 {
