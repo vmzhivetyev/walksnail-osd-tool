@@ -68,6 +68,7 @@ pub fn start_video_render(
         video_info.frame_rate,
         video_info.time_base,
         render_settings.bitrate_mbps,
+        render_settings.keep_quality,
         &render_settings.encoder,
         output_video,
         render_settings.upscale,
@@ -162,6 +163,7 @@ pub fn spawn_encoder(
     frame_rate: f32,
     time_base: u32,
     bitrate_mbps: u32,
+    keep_quality: bool,
     video_encoder: &Encoder,
     output_video: &PathBuf,
     upscale: bool,
@@ -205,23 +207,32 @@ pub fn spawn_encoder(
         encoder_command.args(["-aspect", "4:3"]);
     }
     
-    if video_encoder.name.contains("hevc_nvenc_optimized") {
-        encoder_command
-            .codec_video("hevc_nvenc")
-            .args(["-b:v", "0k"])
-            .args(["-rc", "constqp"])
-            .args(["-qp", "27"]);
+    encoder_command
+        .codec_video(&video_encoder.name);
+
+    if keep_quality {
+        if video_encoder.name.contains("hevc_nvenc") {
+            encoder_command
+                .args(["-rc", "constqp"])
+                .args(["-qp", "27"])
+                .args(["-b:v", "0k"]);
+        }
+        else if video_encoder.name.contains("h264_nvenc") {
+            encoder_command
+                .args(["-rc", "constqp"])
+                .args(["-qp", "22"])
+                .args(["-b:v", "0k"]);
+        }
     }
     else {
         encoder_command
-            .codec_video(&video_encoder.name)
             .args(["-b:v", &format!("{}M", bitrate_mbps)]);
     }
 
     encoder_command
         .args(&video_encoder.extra_args)
-        .args(["-video_track_timescale", time_base.to_string().as_str()]);        
-
+        .args(["-video_track_timescale", time_base.to_string().as_str()]);      
+        
     // if let Some(chroma_color) = chroma_key {
     //     if chroma_color[3] > 0.99 {
     //         encoder_command

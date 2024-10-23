@@ -85,9 +85,6 @@ impl Encoder {
             Encoder::new_with_extra_args("hevc_nvenc", Codec::H265, true, &hvc1tag),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
-            Encoder::new_with_extra_args("hevc_nvenc_optimized", Codec::H265, true, &hvc1tag),
-
-            #[cfg(any(target_os = "windows", target_os = "linux"))]
             Encoder::new("hevc_qsv", Codec::H265, true),
 
             #[cfg(target_os = "linux")]
@@ -119,7 +116,6 @@ impl Encoder {
             .par_iter_mut()
             .map(|encoder| {
                 encoder.detected = Self::ffmpeg_encoder_available(encoder, ffmpeg_path);
-                if encoder.name.contains("hevc_nvenc_opti") {encoder.detected = true;}
                 encoder.clone()
             })
             .collect()
