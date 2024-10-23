@@ -87,7 +87,7 @@ impl FontFile {
 
             // Cache the resized image
             self.cache.insert(index, size, resized_image.clone());
-            println!("Cache char {}", index);
+            println!("Cache glyph image {}", index);
             resized_image
         })
     }

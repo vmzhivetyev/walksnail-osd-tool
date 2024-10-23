@@ -1,4 +1,5 @@
 use image::{imageops::overlay, RgbaImage};
+use std::time::Instant;
 
 use crate::{
     font::{self, CharacterSize},
@@ -23,6 +24,10 @@ pub fn overlay_osd(image: &mut RgbaImage, osd_frame: &osd::Frame, font: &font::F
         .character_size
         .clone()
         .unwrap_or(get_character_size(image.height()));
+
+    let _start = Instant::now();
+    let mut _rendered_chars = 0;
+
     for character in &osd_frame.glyphs {
         if character.index == 0 || osd_options.get_mask(&character.grid_position) {
             continue;
@@ -48,7 +53,15 @@ pub fn overlay_osd(image: &mut RgbaImage, osd_frame: &osd::Frame, font: &font::F
             let x = (x_raw as i32 + osd_options.position.x) as i64;
             let y = (y_raw as i32 + osd_options.position.y) as i64;
 
+            _rendered_chars += 1;
+
             overlay(image, &character_image, x, y)
         }
     }
+
+    // tracing::info!(
+    //     "overlay_osd done in {:?} for {} chars.",
+    //     _start.elapsed(),
+    //     _rendered_chars
+    // );
 }
