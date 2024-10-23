@@ -192,6 +192,10 @@ pub fn spawn_encoder(
         } else {
             encoder_command.args(["-vf", "scale=-2:1440:flags=lanczos"]);
         }
+    } else {
+        if video_encoder.name.contains("nvenc") {
+            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda"]);
+        }
     }
 
     if rescale_to_4x3_aspect {
