@@ -223,6 +223,10 @@ pub fn spawn_encoder(
                 .args(["-qp", "22"])
                 .args(["-b:v", "0k"]);
         }
+        else {
+            encoder_command
+                .args(["-b:v", &format!("{}M", bitrate_mbps)]);
+        }
     }
     else {
         encoder_command
