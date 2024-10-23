@@ -94,7 +94,7 @@ pub fn overlay_srt_debug_data(
     font: &rusttype::Font,
     srt_options: &SrtOptions,
 ) {
-    let start = std::time::Instant::now();
+    let _start = std::time::Instant::now();
 
     let mut srt_string = String::new();
 
@@ -169,7 +169,7 @@ pub fn overlay_srt_debug_data(
 
     // tracing::info!(
     //     "overlay_srt_debug_data done in {:?} for {} chars.",
-    //     start.elapsed(),
+    //     _start.elapsed(),
     //     srt_string.chars().count()
     // );
 

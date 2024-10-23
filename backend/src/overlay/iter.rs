@@ -93,7 +93,7 @@ impl Iterator for FrameOverlayIter<'_> {
         self.decoder_iter.find_map(|e| match e {
             FfmpegEvent::OutputFrame(mut video_frame) => {
                 
-                let start = std::time::Instant::now();
+                let _start = std::time::Instant::now();
 
                 // For every video frame check if frame time is later than the next OSD frame time.
                 // If so advance the iterator over the OSD frames so we use the correct OSD frame
@@ -139,15 +139,15 @@ impl Iterator for FrameOverlayIter<'_> {
 
                 video_frame.data = frame_image.as_raw().to_vec();
                 
-                tracing::info!(
-                    "next frame prepared in {:?}.",
-                    start.elapsed()
-                );
+                // tracing::info!(
+                //     "next frame prepared in {:?}.",
+                //     _start.elapsed()
+                // );
 
                 Some(video_frame)
             }
             other_event => {
-                let start = std::time::Instant::now();
+                let _start = std::time::Instant::now();
 
                 tracing::trace!("{:?}", &other_event);
                 // dbg!("🌤️🌤️🌤️", &other_event);
@@ -155,7 +155,7 @@ impl Iterator for FrameOverlayIter<'_> {
 
                 // tracing::info!(
                 //     "handle_decoder_events done in {:?}.",
-                //     start.elapsed()
+                //     _start.elapsed()
                 // );
 
                 None

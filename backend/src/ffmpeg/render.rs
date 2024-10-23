@@ -23,13 +23,13 @@ fn run_ready_frames_to_queue(frame_iter: impl Iterator<Item = ffmpeg_sidecar::ev
         if tx.send(frame).is_err() {
             break;
         }
-        tracing::info!("Frame queued for processing. Queued: {}", tx.len());
+        // tracing::debug!("Frame queued for processing. Queued: {}", tx.len());
     }
 }
 
 fn run_ready_frames_from_queue_to_encoder(rx: Receiver<ffmpeg_sidecar::event::OutputVideoFrame>, mut encoder_stdin: impl Write) {
     while let Ok(frame) = rx.recv() {
-        let start = std::time::Instant::now();
+        let _start = std::time::Instant::now();
 
         // write_all can take a lot of time if the encoder process is not ready to read it's stdin, it means encoder is the bottleneck.
         // If write fails, we just log it and continue
@@ -40,7 +40,7 @@ fn run_ready_frames_from_queue_to_encoder(rx: Receiver<ffmpeg_sidecar::event::Ou
         
         // tracing::info!(
         //     "encoder_stdin.write_all done in {:?}.",
-        //     start.elapsed()
+        //     _start.elapsed()
         // );
     }
 }
@@ -255,7 +255,7 @@ fn handle_encoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromF
             }
         }
         FfmpegEvent::LogEOF => {
-            tracing::info!("ffmpeg encoder EOF reached");
+            tracing::warn!("ffmpeg encoder EOF reached");
             ffmpeg_sender.send(FromFfmpegMessage::EncoderFinished).ok();
         }
         _ => {}
