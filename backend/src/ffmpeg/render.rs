@@ -211,13 +211,13 @@ pub fn spawn_encoder(
         .codec_video(&video_encoder.name);
 
     if keep_quality {
-        if video_encoder.name.contains("hevc_nvenc") {
+        if video_encoder.name.contains("hevc_nvenc")||video_encoder.name.contains("libx265") {
             encoder_command
                 .args(["-rc", "constqp"])
                 .args(["-qp", "27"])
                 .args(["-b:v", "0k"]);
         }
-        else if video_encoder.name.contains("h264_nvenc") {
+        else if video_encoder.name.contains("h264_nvenc")||video_encoder.name.contains("libx264") {
             encoder_command
                 .args(["-rc", "constqp"])
                 .args(["-qp", "22"])
