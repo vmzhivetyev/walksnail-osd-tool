@@ -503,8 +503,10 @@ impl WalksnailOsdTool {
                         });
                         ui.end_row();
 
+                        let bitrate_enabled = !self.render_settings.keep_quality;
+
                         ui.label("Encoding bitrate").on_hover_text(tooltip_text("Target bitrate of the rendered video."));
-                        changed |= ui.add(Slider::new(&mut self.render_settings.bitrate_mbps, 0..=160).text("Mbps")).changed();                                
+                        changed = ui.add_enabled(bitrate_enabled, Slider::new(&mut self.render_settings.bitrate_mbps, 0..=160).text("Mbps")).changed();                                
                         ui.end_row();
 
                         ui.label("Constant quality mode").on_hover_text(tooltip_text("Automatically adjust bitrate to keep source video quality(constqp). Uses less disk space."));
@@ -531,7 +533,7 @@ impl WalksnailOsdTool {
             });
 
         if changed {
-            self.config_changed = Some(Instant::now());
+            self.config_changed = Some(Instant::now());            
         }
     }
 
