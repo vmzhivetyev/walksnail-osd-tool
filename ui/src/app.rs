@@ -285,7 +285,11 @@ impl WalksnailOsdTool {
             }
         }
 
+        // we have to temporarily copy image into local variable because we capture mutable self to do frames_for_ui_rx.recv()
         let mut img: Option<RgbaImage> = Option::None;
+
+        let _start = std::time::Instant::now();
+
         if let Some(frames_for_ui_rx) = &self.frames_for_ui_rx {
             if let Ok(rgba_image) = frames_for_ui_rx.recv() {
                 img = Some(rgba_image);
@@ -293,6 +297,11 @@ impl WalksnailOsdTool {
         }
         if let Some(img) = &img {
             self.set_osd_preview(ctx, &img);
+
+            tracing::info!(
+                "converting rgba image into egui image done in {:?}.",
+                _start.elapsed()
+            );
         }
     }
 

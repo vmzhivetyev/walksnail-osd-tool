@@ -44,8 +44,15 @@ fn run_ready_frames_from_queue_to_encoder(
         }
 
         if frame_to_ui_tx.is_empty() {
+            let _start = std::time::Instant::now();
+
             let rgba_image = RgbaImage::from_raw(frame.width, frame.height, frame.data).unwrap();
             let _ = frame_to_ui_tx.send(rgba_image);
+
+            tracing::info!(
+                "sending ffmpeg frame into ui pipe done in {:?}.",
+                _start.elapsed()
+            );
         }
 
         // tracing::info!(
