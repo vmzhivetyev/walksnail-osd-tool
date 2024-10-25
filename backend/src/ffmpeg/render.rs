@@ -257,7 +257,7 @@ pub fn spawn_encoder(
 
     encoder_command
         .args(&video_encoder.extra_args)
-        .args(["-video_track_timescale", time_base.to_string().as_str()]);      
+        .args(["-video_track_timescale", time_base.to_string().as_str()]);
 
     if &video_encoder.name == "prores_ks" {
         output_video.set_extension("mov");
@@ -267,7 +267,9 @@ pub fn spawn_encoder(
         }
     }
 
-    encoder_command.overwrite().output(output_video.to_str().unwrap());
+    encoder_command
+        .overwrite()
+        .output(output_video.to_str().unwrap());
 
     tracing::info!(
         "✅✅✅✅✅✅✅ {}",
