@@ -56,9 +56,10 @@ impl WalksnailOsdTool {
                         video_info,
                         &self.render_settings,
                     ) {
-                        Ok((to_ffmpeg_sender, from_ffmpeg_receiver)) => {
+                        Ok((to_ffmpeg_sender, from_ffmpeg_receiver, frames_for_ui_rx)) => {
                             self.to_ffmpeg_sender = Some(to_ffmpeg_sender);
                             self.from_ffmpeg_receiver = Some(from_ffmpeg_receiver);
+                            self.frames_for_ui_rx = Some(frames_for_ui_rx);
                         }
                         Err(_) => {
                             self.render_status.status = Status::Error {

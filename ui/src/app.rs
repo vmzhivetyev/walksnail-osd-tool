@@ -1,6 +1,5 @@
 use std::{
-    path::PathBuf,
-    time::{Duration, Instant},
+    path::PathBuf, ptr::null, time::{Duration, Instant}
 };
 
 use backend::{
@@ -16,6 +15,7 @@ use egui::{
     pos2, text::LayoutJob, vec2, Align2, Color32, Frame, Grid, TextFormat, TextStyle, TextureHandle, Visuals, Window,
 };
 use github_release_check::{GitHubReleaseItem, LookupError};
+use image::RgbaImage;
 use poll_promise::Promise;
 
 use crate::{
@@ -35,6 +35,7 @@ pub struct WalksnailOsdTool {
     pub ui_dimensions: UiDimensions,
     pub to_ffmpeg_sender: Option<Sender<ToFfmpegMessage>>,
     pub from_ffmpeg_receiver: Option<Receiver<FromFfmpegMessage>>,
+    pub frames_for_ui_rx: Option<Receiver<RgbaImage>>,
     pub render_status: RenderStatus,
     pub encoders: Vec<Encoder>,
     pub dependencies: Dependencies,
@@ -180,7 +181,7 @@ impl eframe::App for WalksnailOsdTool {
             ctx.request_repaint();
         }
 
-        self.receive_ffmpeg_message();
+        self.receive_ffmpeg_message(ctx);
         self.poll_update_check();
 
         self.render_top_panel(ctx);
@@ -223,6 +224,20 @@ impl WalksnailOsdTool {
         }
     }
 
+    pub fn set_osd_preview(&mut self, ctx: &egui::Context, rgba_image: &RgbaImage) {
+        if let (Some(video_info), Some(osd_file), Some(font_file), Some(srt_file)) =
+            (&self.video_info, &self.osd_file, &self.font_file, &self.srt_file)
+        {
+            let image = egui::ColorImage::from_rgba_unmultiplied(
+                [video_info.width as usize, video_info.height as usize],
+                &rgba_image,
+            );
+
+            let handle = ctx.load_texture("OSD preview", image, egui::TextureOptions::default());
+            self.osd_preview.texture_handle = Some(handle);
+        }
+    }
+
     pub fn update_osd_preview(&mut self, ctx: &egui::Context) {
         if let (Some(video_info), Some(osd_file), Some(font_file), Some(srt_file)) =
             (&self.video_info, &self.osd_file, &self.font_file, &self.srt_file)
@@ -239,27 +254,24 @@ impl WalksnailOsdTool {
                 .find(|frame| frame.start_time_secs >= osd_frame_time)
                 .unwrap();
 
-            let image = egui::ColorImage::from_rgba_unmultiplied(
-                [video_info.width as usize, video_info.height as usize],
-                &create_osd_preview(
-                    video_info.width,
-                    video_info.height,
-                    osd_frame,
-                    srt_frame,
-                    font_file,
-                    self.srt_font.as_ref().unwrap(),
-                    &self.osd_options,
-                    &self.srt_options,
-                ),
+            let rgba_image = create_osd_preview(
+                video_info.width,
+                video_info.height,
+                osd_frame,
+                srt_frame,
+                font_file,
+                self.srt_font.as_ref().unwrap(),
+                &self.osd_options,
+                &self.srt_options,
             );
-            let handle = ctx.load_texture("OSD preview", image, egui::TextureOptions::default());
-            self.osd_preview.texture_handle = Some(handle);
+
+            self.set_osd_preview(ctx, &rgba_image);
         } else {
             self.osd_preview.texture_handle = None;
         }
     }
 
-    pub fn receive_ffmpeg_message(&mut self) {
+    pub fn receive_ffmpeg_message(&mut self, ctx: &egui::Context) {
         if let (Some(tx), Some(rx), Some(video_info)) =
             (&self.to_ffmpeg_sender, &self.from_ffmpeg_receiver, &self.video_info)
         {
@@ -271,6 +283,16 @@ impl WalksnailOsdTool {
                 }
                 self.render_status.update_from_ffmpeg_message(message, video_info)
             }
+        }
+
+        let mut img: Option<RgbaImage> = Option::None;
+        if let Some(frames_for_ui_rx) = &self.frames_for_ui_rx {
+            if let Ok(rgba_image) = frames_for_ui_rx.recv() {
+                img = Some(rgba_image);
+            }
+        }
+        if let Some(img) = &img {
+            self.set_osd_preview(ctx, &img);
         }
     }
 
