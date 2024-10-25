@@ -220,7 +220,7 @@ pub fn spawn_encoder(
         }
         else if video_encoder.name.contains("hevc_videotoolbox") {
             encoder_command
-                .args(["-qp", "27"])
+                .args(["-q:v", "75"])
                 .args(["-b:v", "0k"]);
         }
         else if video_encoder.name.contains("libx265") {
@@ -237,7 +237,7 @@ pub fn spawn_encoder(
         }
         else if video_encoder.name.contains("h264_videotoolbox") {
             encoder_command
-                .args(["-qp", "22"])
+                .args(["-q:v", "75"])
                 .args(["-b:v", "0k"]);
         }
         else if video_encoder.name.contains("libx264") {
