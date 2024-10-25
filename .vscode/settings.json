@@ -1,3 +1,7 @@
 {
-    "lldb.cargo": "cargo"
+    "lldb.cargo": "cargo",
+    "workbench.colorCustomizations": {
+        "editorInlayHint.foreground":"#464",
+        "editorInlayHint.background":"#0000"
+    }
 }
