@@ -225,7 +225,7 @@ pub fn spawn_encoder(
         }
         else if video_encoder.name.contains("libx265") {
             encoder_command
-                .args(["-crf", "29"])
+                .args(["-qp", "27"])
                 .args(["-b:v", "0k"]);
         }
         // h264
@@ -242,7 +242,7 @@ pub fn spawn_encoder(
         }
         else if video_encoder.name.contains("libx264") {
             encoder_command
-                .args(["-crf", "23"])
+                .args(["-qp", "22"])
                 .args(["-b:v", "0k"]);
         }
         else {
