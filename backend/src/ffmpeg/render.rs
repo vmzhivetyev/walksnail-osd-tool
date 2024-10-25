@@ -211,16 +211,26 @@ pub fn spawn_encoder(
         .codec_video(&video_encoder.name);
 
     if keep_quality {
-        if video_encoder.name.contains("hevc_nvenc")||video_encoder.name.contains("libx265") {
+        if video_encoder.name.contains("hevc_nvenc") {
             encoder_command
                 .args(["-rc", "constqp"])
                 .args(["-qp", "27"])
                 .args(["-b:v", "0k"]);
         }
-        else if video_encoder.name.contains("h264_nvenc")||video_encoder.name.contains("libx264") {
+        else if video_encoder.name.contains("h264_nvenc") {
             encoder_command
                 .args(["-rc", "constqp"])
                 .args(["-qp", "22"])
+                .args(["-b:v", "0k"]);
+        }
+        else if video_encoder.name.contains("libx265") {
+            encoder_command
+                .args(["-crf", "29"])
+                .args(["-b:v", "0k"]);
+        }
+        else if video_encoder.name.contains("libx264") {
+            encoder_command
+                .args(["-crf", "23"])
                 .args(["-b:v", "0k"]);
         }
         else {
