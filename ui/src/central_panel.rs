@@ -509,7 +509,7 @@ impl WalksnailOsdTool {
                         changed = ui.add_enabled(bitrate_enabled, Slider::new(&mut self.render_settings.bitrate_mbps, 0..=160).text("Mbps")).changed();                                
                         ui.end_row();
 
-                        ui.label("Constant quality mode").on_hover_text(tooltip_text("Automatically adjust bitrate to keep source video quality(constqp). Uses less disk space."));
+                        ui.label("Constant quality mode").on_hover_text(tooltip_text("Automatically adjust bitrate to keep source video quality(constqp/crf). Uses less disk space."));
                         changed |= ui.add(Checkbox::without_text(&mut self.render_settings.keep_quality)).changed();
                         ui.end_row();
 
