@@ -258,25 +258,13 @@ pub fn spawn_encoder(
     encoder_command
         .args(&video_encoder.extra_args)
         .args(["-video_track_timescale", time_base.to_string().as_str()]);      
-        
-    // if let Some(chroma_color) = chroma_key {
-    //     if chroma_color[3] > 0.99 {
-    //         encoder_command
-    //             .pix_fmt("yuv420p");
-    //     } else {
-    //         encoder_command
-    //             .pix_fmt("yuva420p")
-    //             .args(["-alpha_quality", "1", "-f", "webm"]);
-
-    //         output_video.set_extension("webm");
-    //     }
-    // } else {
-    //     encoder_command
-    //         .pix_fmt("yuv420p");
-    // }
 
     if &video_encoder.name == "prores_ks" {
         output_video.set_extension("mov");
+    } else {
+        if chroma_key == None {
+            encoder_command.pix_fmt("yuv420p");
+        }
     }
 
     encoder_command.overwrite().output(output_video.to_str().unwrap());
