@@ -85,6 +85,7 @@ pub fn start_video_render(
         video_info.frame_rate,
         video_info.time_base,
         render_settings.bitrate_mbps,
+        render_settings.keep_quality,
         &render_settings.encoder,
         output_video,
         render_settings.upscale,
@@ -180,6 +181,7 @@ pub fn spawn_encoder(
     frame_rate: f32,
     time_base: u32,
     bitrate_mbps: u32,
+    keep_quality: bool,
     video_encoder: &Encoder,
     output_video: &PathBuf,
     upscale: bool,
@@ -206,9 +208,9 @@ pub fn spawn_encoder(
 
     if upscale {
         if video_encoder.name.contains("nvenc") {
-            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:4"]);
+            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:3"]);
         } else {
-            encoder_command.args(["-vf", "scale=-2:1440:flags=lanczos"]);
+            encoder_command.args(["-vf", "scale=-2:1440:flags=bicubic"]);
         }
     } else {
         if video_encoder.name.contains("nvenc") {
@@ -222,34 +224,70 @@ pub fn spawn_encoder(
         // Such video will be played back the same way as if it really was 4:3.
         encoder_command.args(["-aspect", "4:3"]);
     }
+    
+    encoder_command
+        .codec_video(&video_encoder.name);
+
+    if keep_quality {
+        // h265
+        if video_encoder.name.contains("hevc_nvenc") {
+            encoder_command
+                .args(["-rc", "constqp"])
+                .args(["-qp", "27"])
+                .args(["-b:v", "0k"]);
+        }
+        else if video_encoder.name.contains("hevc_videotoolbox") {
+            encoder_command
+                .args(["-q:v", "75"])
+                .args(["-b:v", "0k"]);
+        }
+        else if video_encoder.name.contains("libx265") {
+            encoder_command
+                .args(["-qp", "27"])
+                .args(["-b:v", "0k"]);
+        }
+        // h264
+        else if video_encoder.name.contains("h264_nvenc") {
+            encoder_command
+                .args(["-rc", "constqp"])
+                .args(["-qp", "22"])
+                .args(["-b:v", "0k"]);
+        }
+        else if video_encoder.name.contains("h264_videotoolbox") {
+            encoder_command
+                .args(["-q:v", "75"])
+                .args(["-b:v", "0k"]);
+        }
+        else if video_encoder.name.contains("libx264") {
+            encoder_command
+                .args(["-qp", "22"])
+                .args(["-b:v", "0k"]);
+        }
+        else {
+            encoder_command
+                .args(["-b:v", &format!("{}M", bitrate_mbps)]);
+        }
+    }
+    else {
+        encoder_command
+            .args(["-b:v", &format!("{}M", bitrate_mbps)]);
+    }
 
     encoder_command
-        .codec_video(&video_encoder.name)
-        .args(["-b:v", &format!("{}M", bitrate_mbps)])
         .args(&video_encoder.extra_args)
         .args(["-video_track_timescale", time_base.to_string().as_str()]);
 
-    // if let Some(chroma_color) = chroma_key {
-    //     if chroma_color[3] > 0.99 {
-    //         encoder_command
-    //             .pix_fmt("yuv420p");
-    //     } else {
-    //         encoder_command
-    //             .pix_fmt("yuva420p")
-    //             .args(["-alpha_quality", "1", "-f", "webm"]);
-
-    //         output_video.set_extension("webm");
-    //     }
-    // } else {
-    //     encoder_command
-    //         .pix_fmt("yuv420p");
-    // }
-
     if &video_encoder.name == "prores_ks" {
         output_video.set_extension("mov");
+    } else {
+        if chroma_key == None {
+            encoder_command.pix_fmt("yuv420p");
+        }
     }
 
-    encoder_command.overwrite().output(output_video.to_str().unwrap());
+    encoder_command
+        .overwrite()
+        .output(output_video.to_str().unwrap());
 
     tracing::info!(
         "✅✅✅✅✅✅✅ {}",

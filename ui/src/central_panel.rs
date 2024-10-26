@@ -503,11 +503,30 @@ impl WalksnailOsdTool {
                         });
                         ui.end_row();
 
+                        let selected_encoder = selectable_encoders.get(self.render_settings.selected_encoder_idx).unwrap();
+                        let bitrate_enabled = !self.render_settings.keep_quality;
+                        let mut constant_quality_available = false;
+                        
+                        if selected_encoder.codec == Codec::H264 || selected_encoder.codec == Codec::H265 {
+                            constant_quality_available = true;
+                        } else {
+                            changed |= self.render_settings.keep_quality;
+                            self.render_settings.keep_quality = false;
+                        }
+
                         ui.label("Encoding bitrate").on_hover_text(tooltip_text("Target bitrate of the rendered video."));
-                        changed |= ui.add(Slider::new(&mut self.render_settings.bitrate_mbps, 0..=160).text("Mbps")).changed();
+                        if bitrate_enabled {
+                            changed = ui.add_enabled(bitrate_enabled, Slider::new(&mut self.render_settings.bitrate_mbps, 0..=160).text("Mbps")).changed();
+                        } else {
+                            ui.label("[AUTO]");
+                        }
                         ui.end_row();
 
-                        ui.label("Upscale to 1440p").on_hover_text(tooltip_text("Upscale the output video to 1440p to get better quality after uplaoding to YouTube."));
+                        ui.label("Constant quality mode").on_hover_text(tooltip_text("Automatically adjust bitrate to preserve as much details as possible. Uses less disk space than comparable quality with constant bitrate."));
+                        changed |= ui.add_enabled(constant_quality_available, Checkbox::without_text(&mut self.render_settings.keep_quality)).changed();
+                        ui.end_row();
+
+                        ui.label("Upscale to 1440p for YT").on_hover_text(tooltip_text("Upscale the output video to 1440p to get better quality after uploading to YouTube."));
                         changed |= ui.add(Checkbox::without_text(&mut self.render_settings.upscale)).changed();
                         ui.end_row();
 
@@ -519,7 +538,7 @@ impl WalksnailOsdTool {
                         changed |= ui.add(Checkbox::without_text(&mut self.render_settings.rendering_live_view)).changed();
                         ui.end_row();
 
-                        ui.label("Chroma key").on_hover_text(tooltip_text("Render the video with a chroma key instead of the input video so the OSD can be overlay in video editing software."));
+                        ui.label("Chroma key").on_hover_text(tooltip_text("Render the video with a chroma key background instead of the input video so the OSD can be used as overlay video."));
                         ui.horizontal(|ui| {
                             changed |= ui.add(Checkbox::without_text(&mut self.render_settings.use_chroma_key)).changed();
                             changed |= ui.color_edit_button_rgba_unmultiplied(&mut self.render_settings.chroma_key).changed();

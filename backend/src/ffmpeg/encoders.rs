@@ -82,9 +82,7 @@ impl Encoder {
             Encoder::new("hevc_amf", Codec::H265, true),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
-            Encoder::new_with_extra_args(
-                "hevc_nvenc", Codec::H265, true, &hvc1tag
-            ),
+            Encoder::new_with_extra_args("hevc_nvenc", Codec::H265, true, &hvc1tag),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
             Encoder::new("hevc_qsv", Codec::H265, true),
