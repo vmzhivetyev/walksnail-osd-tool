@@ -1,5 +1,5 @@
 use std::{
-    path::PathBuf, ptr::null, time::{Duration, Instant}
+    path::PathBuf, time::{Duration, Instant}
 };
 
 use backend::{
@@ -185,7 +185,7 @@ impl eframe::App for WalksnailOsdTool {
             ctx.request_repaint();
         }
 
-        self.receive_ffmpeg_message(ctx);
+        self.receive_ffmpeg_message();
         self.show_rendered_frame_from_ffmpeg(ctx);
         self.poll_update_check();
 
@@ -230,9 +230,7 @@ impl WalksnailOsdTool {
     }
 
     pub fn set_osd_preview(&mut self, ctx: &egui::Context, rgba_image: &RgbaImage) {
-        if let (Some(video_info), Some(osd_file), Some(font_file), Some(srt_file)) =
-            (&self.video_info, &self.osd_file, &self.font_file, &self.srt_file)
-        {
+        if let Some(video_info) = &self.video_info {
             let image = egui::ColorImage::from_rgba_unmultiplied(
                 [video_info.width as usize, video_info.height as usize],
                 &rgba_image,
@@ -276,7 +274,7 @@ impl WalksnailOsdTool {
         }
     }
 
-    pub fn receive_ffmpeg_message(&mut self, ctx: &egui::Context) {
+    pub fn receive_ffmpeg_message(&mut self) {
         if let (Some(tx), Some(rx), Some(video_info)) =
             (&self.to_ffmpeg_sender, &self.from_ffmpeg_receiver, &self.video_info)
         {
