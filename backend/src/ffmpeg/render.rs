@@ -34,7 +34,7 @@ fn run_ready_frames_from_queue_to_encoder(
     frame_to_ui_tx: Sender<RgbaImage>
 ) {
     while let Ok(frame) = rx.recv() {
-        let _start = std::time::Instant::now();
+        let _start_write_all = std::time::Instant::now();
 
         // write_all can take a lot of time if the encoder process is not ready to read it's stdin, it means encoder is the bottleneck.
         // If write fails, we just log it and continue
@@ -49,15 +49,15 @@ fn run_ready_frames_from_queue_to_encoder(
             let rgba_image = RgbaImage::from_raw(frame.width, frame.height, frame.data).unwrap();
             let _ = frame_to_ui_tx.send(rgba_image);
 
-            tracing::info!(
-                "sending ffmpeg frame into ui pipe done in {:?}.",
-                _start.elapsed()
-            );
+            // tracing::info!(
+            //     "sending ffmpeg frame into ui pipe done in {:?}.",
+            //     _start.elapsed()
+            // );
         }
 
         // tracing::info!(
         //     "encoder_stdin.write_all done in {:?}.",
-        //     _start.elapsed()
+        //     _start_write_all.elapsed()
         // );
     }
 }

@@ -305,10 +305,10 @@ impl WalksnailOsdTool {
         if let Some(img) = &img {
             self.set_osd_preview(ctx, &img);
 
-            tracing::info!(
-                "converting rgba image into egui image done in {:?}.",
-                _start.elapsed()
-            );
+            // tracing::info!(
+            //     "converting rgba image into egui image done in {:?}.",
+            //     _start.elapsed()
+            // );
         }
     }
 
