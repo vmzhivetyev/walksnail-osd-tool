@@ -17,6 +17,10 @@ use crate::{
 };
 
 impl WalksnailOsdTool {
+    pub fn get_selected_encoder(&self) -> Option<backend::ffmpeg::Encoder> {
+        self.displayed_encoders().get(self.render_settings.selected_encoder_idx).cloned()
+    }
+
     pub fn render_central_panel(&mut self, ctx: &egui::Context) {
         CentralPanel::default().show(ctx, |ui| {
             ScrollArea::vertical().show(ui, |ui| {
@@ -465,29 +469,27 @@ impl WalksnailOsdTool {
         CollapsingHeader::new(RichText::new("Rendering Options").heading())
             .default_open(true)
             .show_unindented(ui, |ui| {
-                let selectable_encoders = Self::sort_and_filter_encoders(&self.encoders, self.render_settings.show_undetected_encoders);
-
                 Grid::new("render_options")
                     .min_col_width(self.ui_dimensions.options_column1_width)
                     .show(ui, |ui| {
+
+                        let displayed_encoders = self.displayed_encoders();
+
                         ui.label("Encoder")
                             .on_hover_text(tooltip_text("Encoder used for rendering. In some cases not all available encoders are detected. Check the box to also show these."));
                         ui.horizontal(|ui| {
                             let selection = egui::ComboBox::from_id_source("encoder").width(350.0).show_index(
                                 ui,
                                 &mut self.render_settings.selected_encoder_idx,
-                                selectable_encoders.len(),
+                                displayed_encoders.len(),
                                 |i| {
-                                    selectable_encoders
+                                    displayed_encoders
                                         .get(i)
                                         .map(|e| e.to_string())
                                         .unwrap_or("None".to_string())
                                 },
                             );
                             if selection.changed() {
-                                // This is a little hacky but it's nice to have a single struct that keeps track of all render settings
-                                self.render_settings.encoder =
-                                    (*selectable_encoders.get(self.render_settings.selected_encoder_idx).unwrap()).clone();
                                 changed |= true;
                             }
 
@@ -496,22 +498,22 @@ impl WalksnailOsdTool {
                                 .on_hover_text(tooltip_text("Show undetected encoders."))
                                 .changed() {
                                     self.render_settings.selected_encoder_idx = 0;
-                                    self.render_settings.encoder =
-                                        (*selectable_encoders.first().unwrap()).clone();
                                     changed |= true;
                             }
                         });
                         ui.end_row();
 
-                        let selected_encoder = selectable_encoders.get(self.render_settings.selected_encoder_idx).unwrap();
+                        let selected_encoder = self.get_selected_encoder();
                         let bitrate_enabled = !self.render_settings.keep_quality;
                         let mut constant_quality_available = false;
                         
-                        if selected_encoder.codec == Codec::H264 || selected_encoder.codec == Codec::H265 {
-                            constant_quality_available = true;
-                        } else {
-                            changed |= self.render_settings.keep_quality;
-                            self.render_settings.keep_quality = false;
+                        if let Some(selected_encoder) = selected_encoder {
+                            if selected_encoder.codec == Codec::H264 || selected_encoder.codec == Codec::H265 {
+                                constant_quality_available = true;
+                            } else {
+                                changed |= self.render_settings.keep_quality;
+                                self.render_settings.keep_quality = false;
+                            }
                         }
 
                         ui.label("Encoding bitrate").on_hover_text(tooltip_text("Target bitrate of the rendered video."));
@@ -554,10 +556,19 @@ impl WalksnailOsdTool {
         }
     }
 
-    fn sort_and_filter_encoders(encoders: &Vec<Encoder>, show_undetected_encoders: bool) -> Vec<&Encoder> {
-        let mut filtered_encoders: Vec<&Encoder> = encoders
+    pub fn displayed_encoders(&self) -> Vec<Encoder> {
+        if self.render_settings.show_undetected_encoders {
+            return self.encoders.clone()
+        } else {
+            return self.detected_encoders.clone()
+        };
+    }
+
+    pub fn sort_and_filter_encoders(encoders: &Vec<Encoder>) -> Vec<Encoder> {
+        let mut filtered_encoders: Vec<Encoder> = encoders
             .iter()
-            .filter(|e| e.detected || show_undetected_encoders)
+            .filter(|e| e.detected)
+            .map(|x| x.clone())
             .collect();
 
         filtered_encoders.sort_by(|a, b| {

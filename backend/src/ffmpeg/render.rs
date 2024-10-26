@@ -75,6 +75,7 @@ pub fn start_video_render(
     srt_options: &SrtOptions,
     video_info: &VideoInfo,
     render_settings: &RenderSettings,
+    encoder: &Encoder,
 ) -> Result<(Sender<ToFfmpegMessage>, Receiver<FromFfmpegMessage>, Receiver<RgbaImage>), io::Error> {
     let mut decoder_process = spawn_decoder(ffmpeg_path, input_video)?;
 
@@ -86,7 +87,7 @@ pub fn start_video_render(
         video_info.time_base,
         render_settings.bitrate_mbps,
         render_settings.keep_quality,
-        &render_settings.encoder,
+        encoder,
         output_video,
         render_settings.upscale,
         render_settings.rescale_to_4x3_aspect,

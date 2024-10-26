@@ -38,6 +38,7 @@ pub struct WalksnailOsdTool {
     pub frames_for_ui_rx: Option<Receiver<RgbaImage>>,
     pub render_status: RenderStatus,
     pub encoders: Vec<Encoder>,
+    pub detected_encoders: Vec<Encoder>,
     pub dependencies: Dependencies,
     pub render_settings: RenderSettings,
     pub osd_preview: OsdPreview,
@@ -90,6 +91,8 @@ impl WalksnailOsdTool {
             ..Default::default()
         };
 
+        let detected_encoders = Self::sort_and_filter_encoders(&encoders);
+
         Self {
             dependencies: Dependencies {
                 dependencies_satisfied,
@@ -97,6 +100,7 @@ impl WalksnailOsdTool {
                 ffprobe_path,
             },
             encoders,
+            detected_encoders: detected_encoders,
             srt_font: Some(srt_font),
             osd_options,
             srt_options,
