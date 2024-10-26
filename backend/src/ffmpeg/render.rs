@@ -8,6 +8,7 @@ use ffmpeg_sidecar::{
     command::FfmpegCommand,
     event::{FfmpegEvent, LogLevel},
 };
+use image::RgbaImage;
 
 use super::{render_settings::RenderSettings, Encoder, FromFfmpegMessage, ToFfmpegMessage, VideoInfo};
 use crate::{
@@ -27,9 +28,13 @@ fn run_ready_frames_to_queue(frame_iter: impl Iterator<Item = ffmpeg_sidecar::ev
     }
 }
 
-fn run_ready_frames_from_queue_to_encoder(rx: Receiver<ffmpeg_sidecar::event::OutputVideoFrame>, mut encoder_stdin: impl Write) {
+fn run_ready_frames_from_queue_to_encoder(
+    rx: Receiver<ffmpeg_sidecar::event::OutputVideoFrame>,
+    mut encoder_stdin: impl Write,
+    frame_to_ui_tx: Sender<RgbaImage>
+) {
     while let Ok(frame) = rx.recv() {
-        let _start = std::time::Instant::now();
+        let _start_write_all = std::time::Instant::now();
 
         // write_all can take a lot of time if the encoder process is not ready to read it's stdin, it means encoder is the bottleneck.
         // If write fails, we just log it and continue
@@ -37,10 +42,22 @@ fn run_ready_frames_from_queue_to_encoder(rx: Receiver<ffmpeg_sidecar::event::Ou
             tracing::error!("Failed to write frame: {}", e);
             continue;
         }
-        
+
+        if frame_to_ui_tx.is_empty() {
+            let _start = std::time::Instant::now();
+
+            let rgba_image = RgbaImage::from_raw(frame.width, frame.height, frame.data).unwrap();
+            let _ = frame_to_ui_tx.send(rgba_image);
+
+            // tracing::info!(
+            //     "sending ffmpeg frame into ui pipe done in {:?}.",
+            //     _start.elapsed()
+            // );
+        }
+
         // tracing::info!(
         //     "encoder_stdin.write_all done in {:?}.",
-        //     _start.elapsed()
+        //     _start_write_all.elapsed()
         // );
     }
 }
@@ -58,7 +75,7 @@ pub fn start_video_render(
     srt_options: &SrtOptions,
     video_info: &VideoInfo,
     render_settings: &RenderSettings,
-) -> Result<(Sender<ToFfmpegMessage>, Receiver<FromFfmpegMessage>), io::Error> {
+) -> Result<(Sender<ToFfmpegMessage>, Receiver<FromFfmpegMessage>, Receiver<RgbaImage>), io::Error> {
     let mut decoder_process = spawn_decoder(ffmpeg_path, input_video)?;
 
     let mut encoder_process = spawn_encoder(
@@ -83,6 +100,7 @@ pub fn start_video_render(
     // Channels to communicate with ffmpeg handler thread
     let (from_ffmpeg_tx, from_ffmpeg_rx) = crossbeam_channel::unbounded();
     let (to_ffmpeg_tx, to_ffmpeg_rx) = crossbeam_channel::unbounded();
+    let (frames_for_ui_tx, frames_for_ui_rx) = crossbeam_channel::bounded(1);
 
     // Iterator over decoded video and OSD frames
     let frame_overlay_iter = FrameOverlayIter::new(
@@ -123,7 +141,7 @@ pub fn start_video_render(
         .name("Pop ready frames from queue to encoder".into())
         .spawn(move || {
             tracing::info_span!("ready frames queue -> encoder").in_scope(|| {
-                run_ready_frames_from_queue_to_encoder(ready_frames_queue_out, encoder_stdin);
+                run_ready_frames_from_queue_to_encoder(ready_frames_queue_out, encoder_stdin, frames_for_ui_tx);
             });
         })
         .expect("Failed to spawn consumer thread");
@@ -141,7 +159,7 @@ pub fn start_video_render(
         })
         .expect("Failed to spawn encoder handler thread");
 
-    Ok((to_ffmpeg_tx, from_ffmpeg_rx))
+    Ok((to_ffmpeg_tx, from_ffmpeg_rx, frames_for_ui_rx))
 }
 
 #[tracing::instrument(skip(ffmpeg_path))]
