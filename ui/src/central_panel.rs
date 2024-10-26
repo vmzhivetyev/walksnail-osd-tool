@@ -515,6 +515,10 @@ impl WalksnailOsdTool {
                         changed |= ui.add(Checkbox::without_text(&mut self.render_settings.rescale_to_4x3_aspect)).changed();
                         ui.end_row();
 
+                        ui.label("Rendering live view").on_hover_text(tooltip_text("Enables live view of rendered frames once rendering is started."));
+                        changed |= ui.add(Checkbox::without_text(&mut self.render_settings.rendering_live_view)).changed();
+                        ui.end_row();
+
                         ui.label("Chroma key").on_hover_text(tooltip_text("Render the video with a chroma key instead of the input video so the OSD can be overlay in video editing software."));
                         ui.horizontal(|ui| {
                             changed |= ui.add(Checkbox::without_text(&mut self.render_settings.use_chroma_key)).changed();

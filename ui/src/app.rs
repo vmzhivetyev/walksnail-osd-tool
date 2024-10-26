@@ -182,6 +182,7 @@ impl eframe::App for WalksnailOsdTool {
         }
 
         self.receive_ffmpeg_message(ctx);
+        self.show_rendered_frame_from_ffmpeg(ctx);
         self.poll_update_check();
 
         self.render_top_panel(ctx);
@@ -283,6 +284,12 @@ impl WalksnailOsdTool {
                 }
                 self.render_status.update_from_ffmpeg_message(message, video_info)
             }
+        }
+    }
+
+    pub fn show_rendered_frame_from_ffmpeg(&mut self, ctx: &egui::Context) {
+        if !self.render_settings.rendering_live_view {
+            return;
         }
 
         // we have to temporarily copy image into local variable because we capture mutable self to do frames_for_ui_rx.recv()
