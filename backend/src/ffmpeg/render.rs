@@ -169,6 +169,7 @@ pub fn start_video_render(
 pub fn spawn_decoder(ffmpeg_path: &PathBuf, input_video: &PathBuf) -> Result<FfmpegChild, io::Error> {
     let decoder = FfmpegCommand::new_with_path(ffmpeg_path)
         .create_no_window()
+        .args(["-hwaccel", "auto"])
         .input(input_video.to_str().unwrap())
         .args(["-f", "rawvideo", "-pix_fmt", "rgba", "-"])
         .spawn()?;
@@ -210,13 +211,13 @@ pub fn spawn_encoder(
 
     if upscale {
         if video_encoder.name.contains("nvenc") {
-            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:3"]);
+            encoder_command.args(["-vf", "format=yuv420p,hwupload_cuda,scale_cuda=-2:1440:3,hwdownload,format=yuv420p"]);
         } else {
             encoder_command.args(["-vf", "scale=-2:1440:flags=bicubic"]);
         }
     } else {
         if video_encoder.name.contains("nvenc") {
-            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda"]);
+            encoder_command.args(["-vf", "format=rgb24"]);
         }
     }
 
