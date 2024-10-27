@@ -6,3 +6,4 @@
 artifacts
 ext/ffmpeg/macos-arm/ffmpeg
 ext/ffmpeg/macos-arm/ffprobe
+ext/ffmpeg/windows64/ffmpeg-6.0-essentials_build

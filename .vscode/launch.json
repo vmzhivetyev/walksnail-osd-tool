@@ -1,44 +1,41 @@
 {
-    // Use IntelliSense to learn about possible attributes.
-    // Hover to view descriptions of existing attributes.
-    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
         {
             "name": "Run Debug",
-            "type": "lldb",
+            "type": "cppvsdbg", // or "cppdbg" for gdb
             "request": "launch",
-            "cargo": {
-                "args": [
-                    "build", "--profile", "dev"
-                ]
-            },
+            "program": "${workspaceFolder}/target/debug/walksnail-osd-tool.exe",
             "args": [],
-            "sourceLanguages": ["rust"]
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "stopAtEntry": false,
+            "preLaunchTask": "cargo build",
+            "console": "integratedTerminal"
         },
         {
             "name": "Run Optimized",
-            "type": "lldb",
+            "type": "cppvsdbg", // or "cppdbg" for gdb
             "request": "launch",
-            "cargo": {
-                "args": [
-                    "build", "--profile", "devoptimized"
-                ]
-            },
+            "program": "${workspaceFolder}/target/debugoptimized/walksnail-osd-tool.exe",
             "args": [],
-            "sourceLanguages": ["rust"]
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "stopAtEntry": false,
+            "preLaunchTask": "cargo build --profile devoptimized",
+            "console": "integratedTerminal"
         },
         {
             "name": "Run Release",
-            "type": "lldb",
+            "type": "cppvsdbg", // or "cppdbg" for gdb
             "request": "launch",
-            "cargo": {
-                "args": [
-                    "build", "--release"
-                ]
-            },
+            "program": "${workspaceFolder}/target/release/walksnail-osd-tool.exe",
             "args": [],
-            "sourceLanguages": ["rust"]
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "stopAtEntry": false,
+            "preLaunchTask": "cargo build --release",
+            "console": "integratedTerminal"
         }
     ]
 }

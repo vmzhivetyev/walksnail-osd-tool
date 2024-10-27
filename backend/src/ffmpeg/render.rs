@@ -40,7 +40,7 @@ fn run_ready_frames_from_queue_to_encoder(
         // write_all can take a lot of time if the encoder process is not ready to read it's stdin, it means encoder is the bottleneck.
         // If write fails, we just log it and continue
         if let Err(e) = encoder_stdin.write_all(&frame.data) {
-            tracing::error!("Failed to write frame: {}", e);
+            //tracing::error!("Failed to write frame: {}", e);
             continue;
         }
 

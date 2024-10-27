@@ -37,8 +37,12 @@ fn main() -> Result<(), eframe::Error> {
 
     // On startup check if ffmpeg and ffprove are available on the user's system
     // Then check which encoders are available
-    let ffmpeg_path = util::get_dependency_path("ffmpeg");
-    let ffprobe_path = util::get_dependency_path("ffprobe");
+    // let ffmpeg_path = util::get_dependency_path("C:\\ProgramData\\chocolatey\\bin\\ffmpeg.exe");
+    // let ffprobe_path = util::get_dependency_path("C:\\ProgramData\\chocolatey\\bin\\ffprobe.exe");
+    
+    let ffmpeg_path = util::get_dependency_path("C:\\git\\walksnail-osd-tool\\ext\\ffmpeg\\windows64\\ffmpeg-6.0-essentials_build\\bin\\ffmpeg.exe");
+    let ffprobe_path = util::get_dependency_path("C:\\git\\walksnail-osd-tool\\ext\\ffmpeg\\windows64\\ffmpeg-6.0-essentials_build\\bin\\ffprobe.exe");
+    
     let dependencies_satisfied = ffmpeg_available(&ffmpeg_path) && ffprobe_available(&ffprobe_path);
     let encoders = if dependencies_satisfied {
         Encoder::get_available_encoders(&ffmpeg_path)
