@@ -9,6 +9,7 @@ use ffmpeg_sidecar::{
     event::{FfmpegEvent, LogLevel},
 };
 use image::RgbaImage;
+use tracing::field::debug;
 
 use super::{render_settings::RenderSettings, Encoder, FromFfmpegMessage, ToFfmpegMessage, VideoInfo};
 use crate::{
@@ -301,6 +302,30 @@ pub fn spawn_encoder(
 
 fn handle_encoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromFfmpegMessage>) {
     match ffmpeg_event {
+        FfmpegEvent::ParsedVersion(version) => {
+            println!("ffmpeg encoder >>> FFmpeg version: {:?}", version);
+        }
+        FfmpegEvent::ParsedConfiguration(config) => {
+            println!("ffmpeg encoder >>> FFmpeg configuration: {:?}", config);
+        }
+        FfmpegEvent::ParsedStreamMapping(mapping) => {
+            println!("ffmpeg encoder >>> Stream mapping: {}", mapping);
+        }
+        FfmpegEvent::ParsedInput(input) => {
+            println!("ffmpeg encoder >>> Input details: {:?}", input);
+        }
+        FfmpegEvent::ParsedOutput(output) => {
+            println!("ffmpeg encoder >>> Output details: {:?}", output);
+        }
+        FfmpegEvent::ParsedInputStream(stream) => {
+            println!("ffmpeg encoder >>> Input stream: {:?}", stream);
+        }
+        FfmpegEvent::ParsedOutputStream(stream) => {
+            println!("ffmpeg encoder >>> Output stream: {:?}", stream);
+        }
+        FfmpegEvent::ParsedDuration(duration) => {
+            println!("ffmpeg encoder >>> Duration: {:?}", duration);
+        }
         FfmpegEvent::Log(level, e) => {
             if level == LogLevel::Fatal
             // there are some fatal errors that ffmpeg considers normal errors
@@ -309,6 +334,8 @@ fn handle_encoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromF
             {
                 tracing::error!("ffmpeg fatal error: {}", &e);
                 ffmpeg_sender.send(FromFfmpegMessage::EncoderFatalError(e)).unwrap();
+            } else {
+                println!("ffmpeg encoder >>> {}", &e);
             }
         }
         FfmpegEvent::LogEOF => {
