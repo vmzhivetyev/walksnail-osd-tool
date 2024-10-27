@@ -232,46 +232,11 @@ pub fn spawn_encoder(
         .codec_video(&video_encoder.name);
 
     if keep_quality {
-        // h265
-        if video_encoder.name.contains("hevc_nvenc") {
-            encoder_command
-                .args(["-rc", "constqp"])
-                .args(["-qp", "27"])
-                .args(["-b:v", "0k"]);
-        }
-        else if video_encoder.name.contains("hevc_videotoolbox") {
-            encoder_command
-                .args(["-q:v", "75"])
-                .args(["-b:v", "0k"]);
-        }
-        else if video_encoder.name.contains("libx265") {
-            encoder_command
-                .args(["-qp", "27"])
-                .args(["-b:v", "0k"]);
-        }
-        // h264
-        else if video_encoder.name.contains("h264_nvenc") {
-            encoder_command
-                .args(["-rc", "constqp"])
-                .args(["-qp", "22"])
-                .args(["-b:v", "0k"]);
-        }
-        else if video_encoder.name.contains("h264_videotoolbox") {
-            encoder_command
-                .args(["-q:v", "75"])
-                .args(["-b:v", "0k"]);
-        }
-        else if video_encoder.name.contains("libx264") {
-            encoder_command
-                .args(["-qp", "22"])
-                .args(["-b:v", "0k"]);
-        }
-        else {
-            encoder_command
-                .args(["-b:v", &format!("{}M", bitrate_mbps)]);
-        }
-    }
-    else {
+        // this will crash when encoder is not setup to support constant quality mode.
+        let args = &video_encoder.constant_quality_args.clone().unwrap();
+        encoder_command
+            .args(args);
+    } else {
         encoder_command
             .args(["-b:v", &format!("{}M", bitrate_mbps)]);
     }
@@ -327,6 +292,9 @@ fn handle_encoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromF
         FfmpegEvent::ParsedDuration(duration) => {
             println!("ffmpeg encoder >>> Duration: {:?}", duration);
         }
+        FfmpegEvent::Progress(p) => {
+            ffmpeg_sender.send(FromFfmpegMessage::EncoderProgress(p)).unwrap();
+        }
         FfmpegEvent::Log(level, e) => {
             if level == LogLevel::Fatal
             // there are some fatal errors that ffmpeg considers normal errors
@@ -350,7 +318,7 @@ fn handle_encoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromF
 pub fn handle_decoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromFfmpegMessage>) {
     match ffmpeg_event {
         FfmpegEvent::Progress(p) => {
-            ffmpeg_sender.send(FromFfmpegMessage::Progress(p)).unwrap();
+            ffmpeg_sender.send(FromFfmpegMessage::DecoderProgress(p)).unwrap();
         }
         FfmpegEvent::Done | FfmpegEvent::LogEOF => {
             ffmpeg_sender.send(FromFfmpegMessage::DecoderFinished).unwrap();

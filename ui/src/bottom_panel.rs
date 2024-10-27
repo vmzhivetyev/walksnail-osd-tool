@@ -65,7 +65,7 @@ impl WalksnailOsdTool {
                             self.frames_for_ui_rx = Some(frames_for_ui_rx);
                         }
                         Err(_) => {
-                            self.render_status.status = Status::Error {
+                            self.render_status.decoder_status = Status::Error {
                                 progress_pct: 0.0,
                                 error: "Failed to start video render".to_string(),
                             }
@@ -88,12 +88,13 @@ impl WalksnailOsdTool {
     }
 
     fn render_progress(&mut self, ui: &mut Ui) {
-        match &self.render_status.status {
+        match &self.render_status.decoder_status {
             Status::Idle => {}
             Status::InProgress {
                 time_remaining,
                 fps,
                 speed,
+                bitrate_kbps: bitrate,
                 progress_pct,
             } => {
                 ui.vertical(|ui| {
@@ -105,9 +106,17 @@ impl WalksnailOsdTool {
                         } else {
                             "––:––".into()
                         };
-                        ui.label(format!(
-                            "Time remaining: {}, fps: {:.1}, speed: {:.3}x",
-                            time_remaining_string, fps, speed
+                        let bitrate = match &self.render_status.encoder_status {
+                            Status::InProgress { time_remaining: _, fps: _, speed: _, bitrate_kbps, progress_pct: _ } => {
+                                bitrate_kbps
+                            },
+                            _ => { 
+                                &0.0
+                            },
+                        };
+                        ui.monospace(format!(
+                            "Time remaining: {}, fps: {:.1}, speed: {:.3}x, bitrate: {:.1}Mbps",
+                            time_remaining_string, fps, speed, bitrate / 1000.0
                         ));
                     });
                 });

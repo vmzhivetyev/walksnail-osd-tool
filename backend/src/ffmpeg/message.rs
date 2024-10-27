@@ -3,7 +3,8 @@ use ffmpeg_sidecar::event::FfmpegProgress;
 pub enum FromFfmpegMessage {
     DecoderFatalError(String),
     EncoderFatalError(String),
-    Progress(FfmpegProgress),
+    EncoderProgress(FfmpegProgress),
+    DecoderProgress(FfmpegProgress),
     DecoderFinished,
     EncoderFinished,
 }
