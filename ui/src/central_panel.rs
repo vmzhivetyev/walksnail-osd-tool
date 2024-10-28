@@ -508,7 +508,7 @@ impl WalksnailOsdTool {
                         let mut constant_quality_available = false;
                         
                         if let Some(selected_encoder) = selected_encoder {
-                            if selected_encoder.codec == Codec::H264 || selected_encoder.codec == Codec::H265 {
+                            if selected_encoder.constant_quality_args != None {
                                 constant_quality_available = true;
                             } else {
                                 changed |= self.render_settings.keep_quality;

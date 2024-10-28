@@ -231,46 +231,11 @@ pub fn spawn_encoder(
         .codec_video(&video_encoder.name);
 
     if keep_quality {
-        // h265
-        if video_encoder.name.contains("hevc_nvenc") {
-            encoder_command
-                .args(["-rc", "constqp"])
-                .args(["-qp", "27"])
-                .args(["-b:v", "0k"]);
-        }
-        else if video_encoder.name.contains("hevc_videotoolbox") {
-            encoder_command
-                .args(["-q:v", "75"])
-                .args(["-b:v", "0k"]);
-        }
-        else if video_encoder.name.contains("libx265") {
-            encoder_command
-                .args(["-qp", "27"])
-                .args(["-b:v", "0k"]);
-        }
-        // h264
-        else if video_encoder.name.contains("h264_nvenc") {
-            encoder_command
-                .args(["-rc", "constqp"])
-                .args(["-qp", "22"])
-                .args(["-b:v", "0k"]);
-        }
-        else if video_encoder.name.contains("h264_videotoolbox") {
-            encoder_command
-                .args(["-q:v", "75"])
-                .args(["-b:v", "0k"]);
-        }
-        else if video_encoder.name.contains("libx264") {
-            encoder_command
-                .args(["-qp", "22"])
-                .args(["-b:v", "0k"]);
-        }
-        else {
-            encoder_command
-                .args(["-b:v", &format!("{}M", bitrate_mbps)]);
-        }
-    }
-    else {
+        // this will crash when encoder is not setup to support constant quality mode.
+        let args = &video_encoder.constant_quality_args.clone().unwrap();
+        encoder_command
+            .args(args);
+    } else {
         encoder_command
             .args(["-b:v", &format!("{}M", bitrate_mbps)]);
     }
