@@ -94,6 +94,7 @@ impl WalksnailOsdTool {
                 time_remaining,
                 fps,
                 speed,
+                bitrate,
                 progress_pct,
             } => {
                 ui.vertical(|ui| {
@@ -106,8 +107,8 @@ impl WalksnailOsdTool {
                             "––:––".into()
                         };
                         ui.label(format!(
-                            "Time remaining: {}, fps: {:.1}, speed: {:.3}x",
-                            time_remaining_string, fps, speed
+                            "Time remaining: {}, fps: {:.1}, speed: {:.3}x, bitrate: {:.1}Mbps",
+                            time_remaining_string, fps, speed, bitrate / 1000.0
                         ));
                     });
                 });

@@ -15,6 +15,7 @@ pub enum Status {
         time_remaining: Option<Duration>,
         fps: f32,
         speed: f32,
+        bitrate: f32,
         progress_pct: f32,
     },
     Completed,
@@ -33,6 +34,7 @@ impl RenderStatus {
             time_remaining: None,
             fps: 0.0,
             speed: 0.0,
+            bitrate: 0.0,
             progress_pct: 0.0,
         };
     }
@@ -86,6 +88,7 @@ impl RenderStatus {
                     },
                     fps: p.fps,
                     speed: p.speed,
+                    bitrate: p.bitrate_kbps,
                     progress_pct,
                 };
             }
