@@ -210,13 +210,13 @@ pub fn spawn_encoder(
 
     if upscale {
         if video_encoder.name.contains("nvenc") {
-            encoder_command.args(["-vf", "format=yuv420p,hwupload_cuda,scale_cuda=-2:1440:3,hwdownload,format=yuv420p"]);
+            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:3"]);
         } else {
             encoder_command.args(["-vf", "scale=-2:1440:flags=bicubic"]);
         }
     } else {
         if video_encoder.name.contains("nvenc") {
-            encoder_command.args(["-vf", "format=rgb24"]);
+            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda"]);
         }
     }
 
@@ -247,7 +247,7 @@ pub fn spawn_encoder(
     if &video_encoder.name == "prores_ks" {
         output_video.set_extension("mov");
     } else {
-        if chroma_key == None {
+        if chroma_key == None && !video_encoder.name.contains("nvenc") {
             encoder_command.pix_fmt("yuv420p");
         }
     }
