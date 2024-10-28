@@ -291,6 +291,9 @@ fn handle_encoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromF
         FfmpegEvent::ParsedDuration(duration) => {
             println!("ffmpeg encoder >>> Duration: {:?}", duration);
         }
+        FfmpegEvent::Progress(p) => {
+            ffmpeg_sender.send(FromFfmpegMessage::EncoderProgress(p)).unwrap();
+        }
         FfmpegEvent::Log(level, e) => {
             if level == LogLevel::Fatal
             // there are some fatal errors that ffmpeg considers normal errors
@@ -314,7 +317,7 @@ fn handle_encoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromF
 pub fn handle_decoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromFfmpegMessage>) {
     match ffmpeg_event {
         FfmpegEvent::Progress(p) => {
-            ffmpeg_sender.send(FromFfmpegMessage::Progress(p)).unwrap();
+            ffmpeg_sender.send(FromFfmpegMessage::DecoderProgress(p)).unwrap();
         }
         FfmpegEvent::Done | FfmpegEvent::LogEOF => {
             ffmpeg_sender.send(FromFfmpegMessage::DecoderFinished).unwrap();
