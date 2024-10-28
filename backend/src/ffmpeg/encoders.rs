@@ -79,7 +79,7 @@ impl Encoder {
             #[cfg(any(target_os = "windows", target_os = "linux"))]
             Encoder::new(
                 "h264_nvenc", Codec::H264, true,
-                Some(&["-rc", "constqp", "-qp", "22", "-b:v", "0k"])
+                Some(&["-qp", "18", "-b:v", "0k"])
             ),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
@@ -115,7 +115,7 @@ impl Encoder {
             #[cfg(any(target_os = "windows", target_os = "linux"))]
             Encoder::new_with_extra_args(
                 "hevc_nvenc", Codec::H265, true,
-                Some(&["-rc", "constqp", "-qp", "27", "-b:v", "0k"]),
+                Some(&["-qp", "19", "-b:v", "0k"]),
                 &hvc1tag
             ),
 
