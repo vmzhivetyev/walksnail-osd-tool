@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2] - 2024-10-28
+
+### Changed
+- Encoding Speed: Improved encoding performance when using `*_nvenc` encoders.
+- Encoding Quality **in Constant Quality Mode**: Changed `qp` values to improve encoded video quality for `hevc_nvenc` and `h264_nvenc`.
+
+## [1.1.1] - 2024-10-28
+
+### Added
+- Encoding bitrate: Output video bitrate is now displayed in the status bar during rendering.
+
+### Fixed
+- Constant Quality feature: Resolved an issue where some encoders used the fixed bitrate set by the slider instead of the CRF when this feature was enabled.
+- App freezes: Fixed freezing of the app when the encoder crashed.
+- Encoders crashes: Fixed invalid parameters supplied to `*_nvenc` encoders.
+
+### Changed
+- Undetected encoders are no more visible in the app. Detection is done by running an encoder and checking if it crashes, so undetected encoders do not work anyway.
+- Hardware decoder will now be automatically used if available, this decreases CPU load.
+
+## [1.1.0] - 2024-10-26
+
+### Added
+- "Constant Quality" feature: Prioritizes video quality by asking the encoder for a target quality level instead of bitrate. (1850df3)
+- Rendering process live view: Added a feature to render live preview of the output video frames while rendering. This feature doesn't harm encoding speed (yes, at all). (3cb3419)
+
+### Fixed
+- Wrong encoder was used: Fixed an issue where the `libx264` encoder was used instead of the selected encoder in the UI, occurring after app updates or on fresh installs. (e9f3a28)
+
+### Changed
+- Encoding performance (all encoders): Achieved up to 30% faster encoding by separating *frame generation* and *feeding into ffmpeg* into distinct threads, coupled with a new queue. This change affects all encoders, though performance gains may vary depending on pipeline bottlenecks or full CPU utilization. (3afb2bb)
+- Encoding performance on NVIDIA GPUs: Major speed enhancements, up to 60% faster encoding without upscaling and up to 6x speedup with upscaling, specifically for `hevc_nvenc` and `h264_nvenc` encoders. (85e7912)
+- OSD glyph caching: Resized OSD glyphs images are now cached at runtime, reducing CPU usage by osd rendering (frame generation) thread. (ebc4ff0)
+
+### Known Issues
+- `nvenc` encoder won't work.
+
 ## [1.0.0] - 2024-09-24
 
 ### Added
