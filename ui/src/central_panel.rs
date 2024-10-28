@@ -493,6 +493,7 @@ impl WalksnailOsdTool {
                                 changed |= true;
                             }
 
+                            #[cfg(debug_assertions)]
                             if ui
                                 .add(Checkbox::without_text(&mut self.render_settings.show_undetected_encoders))
                                 .on_hover_text(tooltip_text("Show undetected encoders."))
@@ -557,11 +558,11 @@ impl WalksnailOsdTool {
     }
 
     pub fn displayed_encoders(&self) -> Vec<Encoder> {
+        #[cfg(debug_assertions)]
         if self.render_settings.show_undetected_encoders {
             return self.encoders.clone()
-        } else {
-            return self.detected_encoders.clone()
-        };
+        }
+        return self.detected_encoders.clone();
     }
 
     pub fn sort_and_filter_encoders(encoders: &Vec<Encoder>) -> Vec<Encoder> {
