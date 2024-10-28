@@ -17,12 +17,12 @@
             "name": "Run Optimized",
             "type": "cppvsdbg", // or "cppdbg" for gdb
             "request": "launch",
-            "program": "${workspaceFolder}/target/debugoptimized/walksnail-osd-tool.exe",
+            "program": "${workspaceFolder}/target/devoptimized/walksnail-osd-tool.exe",
             "args": [],
             "cwd": "${workspaceFolder}",
             "environment": [],
             "stopAtEntry": false,
-            "preLaunchTask": "cargo build --profile devoptimized",
+            "preLaunchTask": "cargo build devoptimized",
             "console": "integratedTerminal"
         },
         {
