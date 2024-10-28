@@ -28,21 +28,26 @@ pub struct Encoder {
     pub codec: Codec,
     pub hardware: bool,
     pub detected: bool,
+    pub constant_quality_args: Option<Vec<String>>,
     pub extra_args: Vec<String>,
 }
 
 impl Encoder {
-    fn new(name: &str, codec: Codec, hardware: bool) -> Self {
-        Self::new_with_extra_args(name, codec, hardware, &[])
+    fn new(name: &str, codec: Codec, hardware: bool, constant_quality_args: Option<&[&str]>) -> Self {
+        Self::new_with_extra_args(name, codec, hardware, constant_quality_args, &[])
     }
 
-    fn new_with_extra_args(name: &str, codec: Codec, hardware: bool, extra_args: &[&str]) -> Self {
+    fn new_with_extra_args(name: &str, codec: Codec, hardware: bool, constant_quality_args: Option<&[&str]>, extra_args: &[&str]) -> Self {
+        let constant_quality_args_vec = constant_quality_args.map(|args| args.iter().map(|&s| s.to_string()).collect());
+        let extra_args_vec = extra_args.iter().map(|&s| s.to_string()).collect();
+
         Self {
             name: name.to_string(),
             codec,
             hardware,
             detected: false,
-            extra_args: extra_args.iter().map(|&s| s.to_string()).collect(),
+            constant_quality_args: constant_quality_args_vec,
+            extra_args: extra_args_vec,
         }
     }
 
@@ -54,60 +59,108 @@ impl Encoder {
 
         #[rustfmt::skip]
         let mut all_encoders = [
-            Encoder::new("libx264", Codec::H264, false),
+            Encoder::new(
+                "libx264", Codec::H264, false,
+                Some(&["-crf", "19", "-b:v", "0k"])
+            ),
             
             Encoder::new_with_extra_args(
-                "libx265", Codec::H265, false, &hvc1tag
+                "libx265", Codec::H265, false,
+                Some(&["-crf", "20", "-b:v", "0k"]),
+                &hvc1tag
             ),
 
             #[cfg(target_os = "windows")]
-            Encoder::new("h264_amf", Codec::H264, true),
+            Encoder::new(
+                "h264_amf", Codec::H264, true,
+                None
+            ),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
-            Encoder::new("h264_nvenc", Codec::H264, true),
+            Encoder::new(
+                "h264_nvenc", Codec::H264, true,
+                Some(&["-rc", "constqp", "-qp", "22", "-b:v", "0k"])
+            ),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
-            Encoder::new("h264_qsv", Codec::H264, true),
+            Encoder::new(
+                "h264_qsv", Codec::H264, true,
+                None
+            ),
 
             #[cfg(target_os = "linux")]
-            Encoder::new("h264_vaapi", Codec::H264, true),
+            Encoder::new(
+                "h264_vaapi", Codec::H264, true,
+                None
+            ),
 
             #[cfg(target_os = "linux")]
-            Encoder::new("h264_v4l2m2m", Codec::H264, true),
+            Encoder::new(
+                "h264_v4l2m2m", Codec::H264, true,
+                None
+            ),
 
             #[cfg(target_os = "macos")]
-            Encoder::new("h264_videotoolbox", Codec::H264, true),
+            Encoder::new(
+                "h264_videotoolbox", Codec::H264, true,
+                Some(&["-q:v", "70", "-b:v", "0k"]),
+            ),
 
             #[cfg(target_os = "windows")]
-            Encoder::new("hevc_amf", Codec::H265, true),
+            Encoder::new(
+                "hevc_amf", Codec::H265, true,
+                None
+            ),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
-            Encoder::new_with_extra_args("hevc_nvenc", Codec::H265, true, &hvc1tag),
+            Encoder::new_with_extra_args(
+                "hevc_nvenc", Codec::H265, true,
+                Some(&["-rc", "constqp", "-qp", "27", "-b:v", "0k"]),
+                &hvc1tag
+            ),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
-            Encoder::new("hevc_qsv", Codec::H265, true),
+            Encoder::new(
+                "hevc_qsv", Codec::H265, true,
+                None
+            ),
 
             #[cfg(target_os = "linux")]
-            Encoder::new("hevc_vaapi", Codec::H265, true),
+            Encoder::new(
+                "hevc_vaapi", Codec::H265, true,
+                None
+            ),
 
             #[cfg(target_os = "linux")]
-            Encoder::new("hevc_v4l2m2m", Codec::H265, true),
+            Encoder::new(
+                "hevc_v4l2m2m", Codec::H265, true,
+                None
+            ),
 
             #[cfg(target_os = "macos")]
             Encoder::new_with_extra_args(
-                "hevc_videotoolbox", Codec::H265, true, &hvc1tag
+                "hevc_videotoolbox", Codec::H265, true,
+                Some(&["-q:v", "70", "-b:v", "0k"]),
+                &hvc1tag
             ),
 
             #[cfg(target_os = "macos")]
-            Encoder::new("libvpx-vp9", Codec::VP9, false),
+            Encoder::new(
+                "libvpx-vp9", Codec::VP9, false,
+                None
+            ),
 
             #[cfg(target_os = "macos")]
-            Encoder::new_with_extra_args("prores_ks", Codec::ProRes, false,
+            Encoder::new_with_extra_args(
+                "prores_ks", Codec::ProRes, false,
+                None,
                 &["-profile:v", "4", "-pix_fmt", "yuva422p10le", "-alpha_bits", "8", "-vendor", "apl0"]
             ),
 
             #[cfg(target_os = "macos")]
-            Encoder::new_with_extra_args("prores_videotoolbox", Codec::ProRes, true,
+            Encoder::new_with_extra_args(
+                "prores_videotoolbox", Codec::ProRes, true,
+                None,
                 &["-profile:v", "4", "-pix_fmt", "yuva422p10le", "-alpha_bits", "8", "-vendor", "apl0"]
             ),            
         ];

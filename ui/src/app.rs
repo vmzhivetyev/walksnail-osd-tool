@@ -300,7 +300,7 @@ impl WalksnailOsdTool {
         let _start = std::time::Instant::now();
 
         if let Some(frames_for_ui_rx) = &self.frames_for_ui_rx {
-            if let Ok(rgba_image) = frames_for_ui_rx.recv() {
+            if let Ok(rgba_image) = frames_for_ui_rx.try_recv() {
                 img = Some(rgba_image);
             }
         }

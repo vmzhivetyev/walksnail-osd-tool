@@ -493,6 +493,7 @@ impl WalksnailOsdTool {
                                 changed |= true;
                             }
 
+                            #[cfg(debug_assertions)]
                             if ui
                                 .add(Checkbox::without_text(&mut self.render_settings.show_undetected_encoders))
                                 .on_hover_text(tooltip_text("Show undetected encoders."))
@@ -508,7 +509,7 @@ impl WalksnailOsdTool {
                         let mut constant_quality_available = false;
                         
                         if let Some(selected_encoder) = selected_encoder {
-                            if selected_encoder.codec == Codec::H264 || selected_encoder.codec == Codec::H265 {
+                            if selected_encoder.constant_quality_args != None {
                                 constant_quality_available = true;
                             } else {
                                 changed |= self.render_settings.keep_quality;
@@ -557,11 +558,11 @@ impl WalksnailOsdTool {
     }
 
     pub fn displayed_encoders(&self) -> Vec<Encoder> {
+        #[cfg(debug_assertions)]
         if self.render_settings.show_undetected_encoders {
             return self.encoders.clone()
-        } else {
-            return self.detected_encoders.clone()
-        };
+        }
+        return self.detected_encoders.clone();
     }
 
     pub fn sort_and_filter_encoders(encoders: &Vec<Encoder>) -> Vec<Encoder> {
