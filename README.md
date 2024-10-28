@@ -1,5 +1,8 @@
 # Fork Enhancements
 
+> [!TIP]
+> If you know you have some hardware encoder available (e.g. `hevc_qsv`) but you don't see it in the app, then you most probably need to install a full build and/or another version of ffmpeg ([how to](FFMPEG.md)).
+
 ## Key Improvements
 
 * macOS Compatibility: Videos encoded with `hevc_videotoolbox` on macos are now playable in QuickTime and in Finder's Quick Look.
@@ -31,7 +34,7 @@
 * For Developers:
     * Fixed Debugging: Fixed build profiles settings, disabled optimizations for Debug profile.
     * Simpler Build: Added shell scripts for macOS and Linux to streamline building from source.
-
+ 
 ___
 
 # Original README
