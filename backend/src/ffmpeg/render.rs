@@ -236,7 +236,11 @@ pub fn spawn_encoder(
         .codec_video(&video_encoder.name);
 
     use std::env;
-    let env_args: Vec<String> = env::var("ENC_ARGS").unwrap().split(' ').map(|s| s.trim().to_string()).collect();
+    let env_args: Vec<String> = env::var("ENC_ARGS")
+        .ok()
+        .filter(|val| !val.is_empty())
+        .map(|val| val.split_whitespace().map(|s| s.to_string()).collect())
+        .unwrap_or_else(Vec::new);
         
 
     if keep_quality {
