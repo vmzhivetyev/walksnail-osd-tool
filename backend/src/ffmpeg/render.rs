@@ -235,6 +235,10 @@ pub fn spawn_encoder(
     encoder_command
         .codec_video(&video_encoder.name);
 
+    use std::env;
+    let env_args: Vec<String> = env::var("ENC_ARGS").unwrap().split(' ').map(|s| s.trim().to_string()).collect();
+        
+
     if keep_quality {
         // this will crash when encoder is not setup to support constant quality mode.
         let args = &video_encoder.constant_quality_args.clone().unwrap();
@@ -242,7 +246,8 @@ pub fn spawn_encoder(
             .args(args);
     } else {
         encoder_command
-            .args(["-b:v", &format!("{}M", bitrate_mbps)]);
+            .args(["-b:v", &format!("{}M", bitrate_mbps)])
+            .args(&env_args);
     }
 
     encoder_command
