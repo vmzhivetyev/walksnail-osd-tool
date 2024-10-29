@@ -21,6 +21,19 @@ mod side_panel;
 mod top_panel;
 mod util;
 
+use clap::Parser;
+
+/// Walksnail OSD Tool
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Args {
+    /// Path to the video file
+    #[arg(short, long)]
+    video: Option<String>,
+    osd: Option<String>,
+}
+
+
 fn main() -> Result<(), eframe::Error> {
     let _guard = util::init_tracing();
 
@@ -58,6 +71,22 @@ fn main() -> Result<(), eframe::Error> {
         width: 256,
         height: 256,
     };
+
+    let cmdline_args = Args::parse();
+
+    if let Some(video_path) = cmdline_args.video {
+        println!("Video path provided: {}", video_path);
+        // Add your video processing code here
+    } else {
+        println!("No video path provided");
+    }
+
+    if let Some(osd_path) = cmdline_args.osd {
+        println!("OSD path provided: {}", osd_path);
+        // Add your osd processing code here
+    } else {
+        println!("No OSD path provided");
+    }
 
     let options = eframe::NativeOptions {
         viewport: ViewportBuilder::default()

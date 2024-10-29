@@ -31,6 +31,7 @@ tracing-appender = { version = "0.2.2", default-features = false }
 tracing-subscriber = "0.3.16"
 directories = "5.0.0"
 semver = "1.0.17"
+clap = { version = "4.1", features = ["derive"] }
 
 [build-dependencies]
 image = "0.24.5"
