@@ -79,6 +79,7 @@ pub fn start_video_render(
 ) -> Result<(Sender<ToFfmpegMessage>, Receiver<FromFfmpegMessage>, Receiver<RgbaImage>), io::Error> {
     let mut decoder_process = spawn_decoder(ffmpeg_path, input_video)?;
 
+    let mut encoder_cmd: String = "".to_string();
     let mut encoder_process = spawn_encoder(
         ffmpeg_path,
         video_info.width,
@@ -97,12 +98,15 @@ pub fn start_video_render(
             None
         },
         input_video,
+        &mut encoder_cmd,
     )?;
 
     // Channels to communicate with ffmpeg handler thread
     let (from_ffmpeg_tx, from_ffmpeg_rx) = crossbeam_channel::unbounded();
     let (to_ffmpeg_tx, to_ffmpeg_rx) = crossbeam_channel::unbounded();
     let (frames_for_ui_tx, frames_for_ui_rx) = crossbeam_channel::bounded(1);
+
+    from_ffmpeg_tx.send(FromFfmpegMessage::EncoderStartedWithCommand(encoder_cmd)).unwrap();
 
     // Iterator over decoded video and OSD frames
     let frame_overlay_iter = FrameOverlayIter::new(
@@ -190,6 +194,7 @@ pub fn spawn_encoder(
     rescale_to_4x3_aspect: bool,
     chroma_key: Option<[f32; 4]>,
     original_file: &PathBuf,
+    command: &mut String,
 ) -> Result<FfmpegChild, io::Error> {
     let mut encoder_command = FfmpegCommand::new_with_path(ffmpeg_path);
     let mut output_video = output_video.clone();
@@ -255,6 +260,8 @@ pub fn spawn_encoder(
     encoder_command
         .overwrite()
         .output(output_video.to_str().unwrap());
+
+    *command = crate::util::command_to_cli(encoder_command.as_inner());
 
     tracing::info!(
         "✅✅✅✅✅✅✅ {}",

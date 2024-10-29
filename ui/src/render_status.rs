@@ -6,6 +6,7 @@ use backend::ffmpeg::{FromFfmpegMessage, VideoInfo};
 pub struct RenderStatus {
     pub decoder_status: Status,
     pub encoder_status: Status,
+    pub encoder_cmd: String,
 }
 
 #[derive(PartialEq, Default)]
@@ -62,6 +63,13 @@ impl RenderStatus {
     }
 
     pub fn update_from_ffmpeg_message(&mut self, message: FromFfmpegMessage, video_info: &VideoInfo) {
+        match &message {
+            FromFfmpegMessage::EncoderStartedWithCommand(cmd) => {
+                self.encoder_cmd = cmd.to_string();
+            }
+            _ => {}
+        }
+
         match (&self.decoder_status, &message) {
             (
                 Status::InProgress { progress_pct, .. },

@@ -123,7 +123,7 @@ impl WalksnailOsdTool {
                         ui.monospace(format!(
                             "Time remaining: {}, fps: {:.1}, speed: {:.3}x, bitrate: {:.1}Mbps",
                             time_remaining_string, fps, speed, encoder_bitrate / 1000.0
-                        ));
+                        )).on_hover_text_at_pointer(&self.render_status.encoder_cmd);
                     });
                 });
             }
