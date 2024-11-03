@@ -233,7 +233,7 @@ pub fn spawn_encoder(
         }
     } else {
         if video_encoder.name.contains("nvenc") {
-            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda"]);
+            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda", "-preset", "p7", "-tune", "hq"]);
         }
     }
 
