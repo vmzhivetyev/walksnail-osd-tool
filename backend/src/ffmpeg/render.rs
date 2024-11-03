@@ -215,7 +215,7 @@ pub fn spawn_encoder(
 
     if upscale {
         if video_encoder.name.contains("nvenc") {
-            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:3"]);
+            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:3", "-preset", "p7", "-tune", "hq"]);
         } else {
             encoder_command.args(["-vf", "scale=-2:1440:flags=bicubic"]);
         }
