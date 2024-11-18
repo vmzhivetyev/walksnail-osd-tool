@@ -9,10 +9,12 @@
 * Aspect Ratio Correction: Added option to rescale input video to 4:3 aspect, addressing distortion issues for videos recorded with "4:3 FULL" setting in VRX.
 * FPS and Timing Fixes: Fully fixed issues with final video's fps and OSD-to-video timing desyncs.
 * Last used render settings (Encoder, Bitrate, etc.) are now preserved across app relaunches.
+* Linux builds in releases! ffmpeg not included.
 
 * OSD Rendering Enhancements:
     * Fixed positioning of OSD glyphs, no more gaps and overlaps.
     * Fixed parsing of [Debug SRT files](https://walksnail.wiki/en/Debug).
+    * Loading an SRT file is now optional. You can also toggle SRT rendering with a checkbox.
     * Added checkboxes for Debug SRT components, only enable the things you want.
     * Implemented automatic text wrapping for Debug SRT content.
     * Added checkbox to fully disable OSD rendering in the final video.
@@ -26,6 +28,8 @@
 
 * Encoders:
     * Added Apple ProRes Encoder, it supports true transparent background.
+    * Much faster encoding speeds thanks to optimized encoder parameters and CPU bottlenecks optimizations.
+    * Support for automatic bitrate selection.
 
 * Other PRs:
     * [Fixed final video to have the same time scale as original](https://github.com/avsaase/walksnail-osd-tool/pull/47)
