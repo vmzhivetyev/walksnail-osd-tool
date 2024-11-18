@@ -30,12 +30,11 @@ impl WalksnailOsdTool {
             {
                 tracing::info!("Start render button clicked");
                 self.render_status.start_render();
-                if let (Some(video_path), Some(osd_file), Some(font_file), Some(video_info), Some(srt_file), Some(encoder)) = (
+                if let (Some(video_path), Some(osd_file), Some(font_file), Some(video_info), Some(encoder)) = (
                     &self.video_file,
                     &self.osd_file,
                     &self.font_file,
                     &self.video_info,
-                    &self.srt_file,
                     self.get_selected_encoder(),
                 ) {
                     self.osd_options.osd_playback_speed_factor = if self.osd_options.adjust_playback_speed {
@@ -50,7 +49,7 @@ impl WalksnailOsdTool {
                         video_path,
                         &get_output_video_path(video_path),
                         osd_file.frames.clone(),
-                        srt_file.frames.clone(),
+                        self.srt_file.as_ref().map(|file| file.frames.clone()),
                         font_file.clone(),
                         self.srt_font.as_ref().unwrap().clone(),
                         &self.osd_options,
@@ -71,6 +70,11 @@ impl WalksnailOsdTool {
                             }
                         }
                     };
+                } else {
+                    self.render_status.decoder_status = Status::Error {
+                        progress_pct: 0.0,
+                        error: "Failed to start video render. Unexpected state detected.".to_string(),
+                    }
                 }
             }
         } else {

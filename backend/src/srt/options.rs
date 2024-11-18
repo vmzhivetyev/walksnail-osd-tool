@@ -6,6 +6,8 @@ use crate::util::Coordinates;
 pub struct SrtOptions {
     pub position: Coordinates<f32>,
     pub scale: f32,
+    pub no_srt: bool,
+
     pub show_time: bool,
     pub show_sbat: bool,
     pub show_gbat: bool,
@@ -37,6 +39,8 @@ impl Default for SrtOptions {
         Self {
             position: Coordinates::new(1.5, 95.0),
             scale: 35.0,
+            no_srt: false,
+
             show_time: false,
             show_sbat: false,
             show_gbat: false,

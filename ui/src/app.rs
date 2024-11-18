@@ -242,8 +242,8 @@ impl WalksnailOsdTool {
     }
 
     pub fn update_osd_preview(&mut self, ctx: &egui::Context) {
-        if let (Some(video_info), Some(osd_file), Some(font_file), Some(srt_file)) =
-            (&self.video_info, &self.osd_file, &self.font_file, &self.srt_file)
+        if let (Some(video_info), Some(osd_file), Some(font_file)) =
+            (&self.video_info, &self.osd_file, &self.font_file)
         {
             let osd_frame_index = self.osd_preview.preview_frame as usize - 1;
             let osd_frame = osd_file
@@ -252,10 +252,13 @@ impl WalksnailOsdTool {
                 .unwrap();
 
             let osd_frame_time = osd_frame.time_millis as f32 / 1000.0;
-
-            let srt_frame = srt_file.frames.iter()
-                .find(|frame| frame.start_time_secs >= osd_frame_time)
-                .unwrap();
+            
+            let srt_frame = if let Some(srt_file) = &self.srt_file {
+                srt_file.frames.iter()
+                    .find(|frame| frame.start_time_secs >= osd_frame_time)
+            } else {
+                None
+            };
 
             let rgba_image = create_osd_preview(
                 video_info.width,

@@ -68,7 +68,7 @@ pub fn start_video_render(
     input_video: &PathBuf,
     output_video: &PathBuf,
     osd_frames: Vec<osd::Frame>,
-    srt_frames: Vec<srt::SrtFrame>,
+    srt_frames: Option<Vec<srt::SrtFrame>>,
     font_file: font::FontFile,
     srt_font: rusttype::Font<'static>,
     osd_options: &OsdOptions,

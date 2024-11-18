@@ -202,6 +202,7 @@ impl WalksnailOsdTool {
         let mut changed = false;
 
         CollapsingHeader::new(RichText::new("SRT Options").heading())
+            .enabled(self.srt_loaded())
             .default_open(true)
             .show_unindented(ui, |ui| {
                 Grid::new("srt_options")
@@ -348,6 +349,15 @@ impl WalksnailOsdTool {
                                     .changed();
                                 ui.end_row();
                             }
+                        });
+                        ui.end_row();
+
+                        ui.label("Disable SRT rendering")
+                            .on_hover_text(tooltip_text("Do not render SRT."));
+                        ui.horizontal(|ui| {
+                            changed |= ui
+                                .add(Checkbox::without_text(&mut self.srt_options.no_srt))
+                                .changed()
                         });
                         ui.end_row();
                     });
