@@ -1,7 +1,7 @@
 use std::{
     env::current_exe,
     path::{Path, PathBuf},
-    time::{Duration, Instant},
+    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
 use backend::{config::AppConfig, ffmpeg::VideoInfo, font::FontFile, osd::OsdFile, srt::SrtFile};
@@ -105,7 +105,9 @@ pub fn format_minutes_seconds(duration: &Duration) -> String {
 
 pub fn get_output_video_path(input_video_path: &Path) -> PathBuf {
     let input_video_file_name = input_video_path.file_stem().unwrap().to_string_lossy();
-    let output_video_file_name = format!("{}_with_osd.mp4", input_video_file_name);
+    
+    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_secs();
+    let output_video_file_name = format!("{}_with_osd_{}.mp4", input_video_file_name, timestamp);
     let mut output_video_path = input_video_path.parent().unwrap().to_path_buf();
     output_video_path.push(output_video_file_name);
     output_video_path
