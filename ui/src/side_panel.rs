@@ -48,7 +48,7 @@ impl WalksnailOsdTool {
                                     ui.label("File name:");
                                 });
                                 row.col(|ui| {
-                                    if let Some(video_file) = &self.video_file {
+                                    if let Some(video_file) = &self.input_video_file {
                                         ui.label(video_file.file_name().unwrap().to_string_lossy());
                                     } else {
                                         ui.label("-");
