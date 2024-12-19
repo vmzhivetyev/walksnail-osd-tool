@@ -29,6 +29,7 @@ use crate::{
 pub struct WalksnailOsdTool {
     pub config_changed: Option<Instant>,
     pub video_file: Option<PathBuf>,
+    pub output_video_file: Option<PathBuf>,
     pub video_info: Option<VideoInfo>,
     pub osd_file: Option<OsdFile>,
     pub font_file: Option<FontFile>,
@@ -47,6 +48,7 @@ pub struct WalksnailOsdTool {
     pub srt_options: SrtOptions,
     pub srt_font: Option<rusttype::Font<'static>>,
     pub about_window_open: bool,
+    pub filename_set: bool,
     pub dark_mode: bool,
     pub app_update: AppUpdate,
     pub app_version: String,
