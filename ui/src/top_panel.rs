@@ -67,7 +67,7 @@ impl WalksnailOsdTool {
             .add_enabled(self.render_status.is_not_in_progress(), Button::new("Reset files"))
             .clicked()
         {
-            self.video_file = None;
+            self.input_video_file = None;
             self.video_info = None;
             self.osd_file = None;
             self.font_file = None;

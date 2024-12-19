@@ -488,7 +488,7 @@ impl WalksnailOsdTool {
                             ui.horizontal(|ui| {
                                 handle_file_path_update(
                                     ui,
-                                    &self.video_file,
+                                    &self.input_video_file,
                                     &mut self.output_video_file,
                                     &mut self.filename_set,
                                     &self.render_status,

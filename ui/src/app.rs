@@ -28,7 +28,7 @@ use crate::{
 #[derive(Default)]
 pub struct WalksnailOsdTool {
     pub config_changed: Option<Instant>,
-    pub video_file: Option<PathBuf>,
+    pub input_video_file: Option<PathBuf>,
     pub output_video_file: Option<PathBuf>,
     pub video_info: Option<VideoInfo>,
     pub osd_file: Option<OsdFile>,
