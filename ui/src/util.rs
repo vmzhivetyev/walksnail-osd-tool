@@ -20,7 +20,7 @@ impl WalksnailOsdTool {
     }
 
     pub fn video_loaded(&self) -> bool {
-        self.video_file.is_some() && self.video_info.is_some()
+        self.input_video_file.is_some() && self.video_info.is_some()
     }
 
     pub fn osd_loaded(&self) -> bool {
@@ -37,7 +37,7 @@ impl WalksnailOsdTool {
 
     pub fn import_video_file(&mut self, file_handles: &[PathBuf]) {
         if let Some(video_file) = filter_file_with_extention(file_handles, "mp4") {
-            self.video_file = Some(video_file.clone());
+            self.input_video_file = Some(video_file.clone());
             self.video_info = VideoInfo::get(video_file, &self.dependencies.ffprobe_path).ok();
 
             // Try to load the matching OSD and SRT files
