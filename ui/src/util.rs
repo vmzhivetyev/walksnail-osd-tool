@@ -1,18 +1,18 @@
 use std::{
     env::current_exe,
     path::{Path, PathBuf},
-    time::{Duration, Instant, SystemTime, UNIX_EPOCH},
+    time::{Duration, Instant},
 };
 
 use backend::{config::AppConfig, ffmpeg::VideoInfo, font::FontFile, osd::OsdFile, srt::SrtFile};
-use egui::{FontFamily, FontId, Margin, RichText, Separator, TextStyle, Ui};
+use egui::{Color32, FontFamily, FontId, Margin, RichText, Separator, TextStyle, Ui};
 use github_release_check::{GitHubReleaseItem, LookupError};
 use semver::Version;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::{filter, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, Layer};
 
 use super::WalksnailOsdTool;
-use crate::util::build_info::Build;
+use crate::{render_status::RenderStatus, util::build_info::Build};
 
 impl WalksnailOsdTool {
     pub fn all_files_loaded(&self) -> bool {
@@ -103,13 +103,60 @@ pub fn format_minutes_seconds(duration: &Duration) -> String {
     format!("{}:{:0>2}", minutes, seconds)
 }
 
-pub fn get_output_video_path(input_video_path: &Path) -> PathBuf {
-    let input_video_file_name = input_video_path.file_stem().unwrap().to_string_lossy();
-    
-    let timestamp = SystemTime::now().duration_since(UNIX_EPOCH).expect("Time went backwards").as_secs();
-    let output_video_file_name = format!("{}_with_osd_{}.mp4", input_video_file_name, timestamp);
+pub fn handle_file_path_update(
+    ui: &mut egui::Ui,
+    video_file: &Option<PathBuf>,
+    output_video_file: &mut Option<PathBuf>,
+    filename_set: &mut bool,
+    render_status: &RenderStatus,
+) {
+    if let Some(input_video_file) = video_file {
+        if output_video_file.is_none() {
+            *output_video_file = video_file.clone();
+        }
+
+        let mut file_name_changed = false;
+        let mut new_file_path: Option<PathBuf> = None;
+
+        if let Some(output_video_file) = output_video_file {
+            let mut output_video_name: String = String::new();
+            if let Some(_extension) = output_video_file.extension() {
+                output_video_name = output_video_file.file_stem().unwrap().to_string_lossy().to_string();
+            }
+
+            if !*filename_set {
+                output_video_name = generate_file_name(output_video_name);
+                file_name_changed = true;
+            }
+
+            ui.text_edit_singleline(&mut output_video_name);
+            new_file_path = Some(generate_file_path(input_video_file, &output_video_name));
+
+            if output_video_file.exists() && !render_status.is_in_progress() {
+                let text = RichText::new("File already exists! It will be overwritten if not renamed");
+                ui.label(text.color(Color32::RED));
+            }
+        }
+
+        if let Some(new_path) = new_file_path {
+            *output_video_file = Some(new_path);
+        }
+
+        if file_name_changed {
+            *filename_set = true;
+        }
+    }
+}
+
+fn generate_file_name(input_file_name: String) -> String {
+    format!("{}_with_osd", input_file_name)
+}
+
+fn generate_file_path(input_video_path: &Path, filename: &String) -> PathBuf {
+    let output_video_file_name: String;
+    output_video_file_name = format!("{}.mp4", filename);
     let mut output_video_path = input_video_path.parent().unwrap().to_path_buf();
-    output_video_path.push(output_video_file_name);
+    output_video_path.push(&output_video_file_name);
     output_video_path
 }
 

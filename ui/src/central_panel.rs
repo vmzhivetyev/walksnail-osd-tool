@@ -12,7 +12,7 @@ use egui::{
 
 use crate::{
     osd_preview::{calculate_horizontal_offset, calculate_vertical_offset},
-    util::{separator_with_space, tooltip_text},
+    util::{separator_with_space, tooltip_text, handle_file_path_update},
     WalksnailOsdTool,
 };
 
@@ -475,6 +475,7 @@ impl WalksnailOsdTool {
     }
 
     fn rendering_options(&mut self, ui: &mut Ui) {
+        
         let mut changed = false;
         CollapsingHeader::new(RichText::new("Rendering Options").heading())
             .default_open(true)
@@ -482,11 +483,23 @@ impl WalksnailOsdTool {
                 Grid::new("render_options")
                     .min_col_width(self.ui_dimensions.options_column1_width)
                     .show(ui, |ui| {
-
-                        let displayed_encoders = self.displayed_encoders();
+                        ui.label("Filename").on_hover_text(tooltip_text("Filename after rendering"));
+                        ui.horizontal(|ui| {
+                            ui.horizontal(|ui| {
+                                handle_file_path_update(
+                                    ui,
+                                    &self.video_file,
+                                    &mut self.output_video_file,
+                                    &mut self.filename_set,
+                                    &self.render_status,
+                                );
+                            });
+                        });
+                        ui.end_row();
 
                         ui.label("Encoder")
                             .on_hover_text(tooltip_text("Encoder used for rendering. In some cases not all available encoders are detected. Check the box to also show these."));
+                        let displayed_encoders = self.displayed_encoders();
                         ui.horizontal(|ui| {
                             let selection = egui::ComboBox::from_id_source("encoder").width(350.0).show_index(
                                 ui,
