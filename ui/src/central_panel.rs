@@ -12,7 +12,7 @@ use egui::{
 
 use crate::{
     osd_preview::{calculate_horizontal_offset, calculate_vertical_offset},
-    util::{separator_with_space, tooltip_text, handle_file_path_update},
+    util::{handle_file_path_update, separator_with_space, tooltip_text},
     WalksnailOsdTool,
 };
 
@@ -475,7 +475,6 @@ impl WalksnailOsdTool {
     }
 
     fn rendering_options(&mut self, ui: &mut Ui) {
-        
         let mut changed = false;
         CollapsingHeader::new(RichText::new("Rendering Options").heading())
             .default_open(true)
@@ -530,7 +529,6 @@ impl WalksnailOsdTool {
                         let selected_encoder = self.get_selected_encoder();
                         let bitrate_enabled = !self.render_settings.keep_quality;
                         let mut constant_quality_available = false;
-                        
                         if let Some(selected_encoder) = selected_encoder {
                             if selected_encoder.constant_quality_args != None {
                                 constant_quality_available = true;

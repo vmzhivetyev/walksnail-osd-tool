@@ -30,7 +30,14 @@ impl WalksnailOsdTool {
             {
                 tracing::info!("Start render button clicked");
                 self.render_status.start_render();
-                if let (Some(input_video_path), Some(output_video_path), Some(osd_file), Some(font_file), Some(video_info), Some(encoder)) = (
+                if let (
+                    Some(input_video_path),
+                    Some(output_video_path),
+                    Some(osd_file),
+                    Some(font_file),
+                    Some(video_info),
+                    Some(encoder),
+                ) = (
                     &self.input_video_file,
                     &self.output_video_file,
                     &self.osd_file,
