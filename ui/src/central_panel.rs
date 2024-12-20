@@ -12,13 +12,15 @@ use egui::{
 
 use crate::{
     osd_preview::{calculate_horizontal_offset, calculate_vertical_offset},
-    util::{separator_with_space, tooltip_text, handle_file_path_update},
+    util::{handle_file_path_update, separator_with_space, tooltip_text},
     WalksnailOsdTool,
 };
 
 impl WalksnailOsdTool {
     pub fn get_selected_encoder(&self) -> Option<backend::ffmpeg::Encoder> {
-        self.displayed_encoders().get(self.render_settings.selected_encoder_idx).cloned()
+        self.displayed_encoders()
+            .get(self.render_settings.selected_encoder_idx)
+            .cloned()
     }
 
     pub fn render_central_panel(&mut self, ctx: &egui::Context) {
@@ -355,9 +357,7 @@ impl WalksnailOsdTool {
                         ui.label("Disable SRT rendering")
                             .on_hover_text(tooltip_text("Do not render SRT."));
                         ui.horizontal(|ui| {
-                            changed |= ui
-                                .add(Checkbox::without_text(&mut self.srt_options.no_srt))
-                                .changed()
+                            changed |= ui.add(Checkbox::without_text(&mut self.srt_options.no_srt)).changed()
                         });
                         ui.end_row();
                     });
@@ -475,7 +475,6 @@ impl WalksnailOsdTool {
     }
 
     fn rendering_options(&mut self, ui: &mut Ui) {
-        
         let mut changed = false;
         CollapsingHeader::new(RichText::new("Rendering Options").heading())
             .default_open(true)
@@ -530,7 +529,6 @@ impl WalksnailOsdTool {
                         let selected_encoder = self.get_selected_encoder();
                         let bitrate_enabled = !self.render_settings.keep_quality;
                         let mut constant_quality_available = false;
-                        
                         if let Some(selected_encoder) = selected_encoder {
                             if selected_encoder.constant_quality_args != None {
                                 constant_quality_available = true;
@@ -583,17 +581,13 @@ impl WalksnailOsdTool {
     pub fn displayed_encoders(&self) -> Vec<Encoder> {
         #[cfg(debug_assertions)]
         if self.render_settings.show_undetected_encoders {
-            return self.encoders.clone()
+            return self.encoders.clone();
         }
         return self.detected_encoders.clone();
     }
 
     pub fn sort_and_filter_encoders(encoders: &Vec<Encoder>) -> Vec<Encoder> {
-        let mut filtered_encoders: Vec<Encoder> = encoders
-            .iter()
-            .filter(|e| e.detected)
-            .map(|x| x.clone())
-            .collect();
+        let mut filtered_encoders: Vec<Encoder> = encoders.iter().filter(|e| e.detected).map(|x| x.clone()).collect();
 
         filtered_encoders.sort_by(|a, b| {
             const CODEC_PRIORITY: [Codec; 4] = [Codec::H265, Codec::H264, Codec::VP9, Codec::ProRes];

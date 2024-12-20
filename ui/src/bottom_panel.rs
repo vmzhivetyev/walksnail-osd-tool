@@ -30,7 +30,14 @@ impl WalksnailOsdTool {
             {
                 tracing::info!("Start render button clicked");
                 self.render_status.start_render();
-                if let (Some(input_video_path), Some(output_video_path), Some(osd_file), Some(font_file), Some(video_info), Some(encoder)) = (
+                if let (
+                    Some(input_video_path),
+                    Some(output_video_path),
+                    Some(osd_file),
+                    Some(font_file),
+                    Some(video_info),
+                    Some(encoder),
+                ) = (
                     &self.input_video_file,
                     &self.output_video_file,
                     &self.osd_file,
@@ -112,22 +119,21 @@ impl WalksnailOsdTool {
                             "––:––".into()
                         };
                         let encoder_bitrate = match &self.render_status.encoder_status {
-                            Status::InProgress { 
-                                time_remaining: _, 
-                                fps: _, 
-                                speed: _, 
-                                bitrate_kbps: encoder_bitrate, 
-                                progress_pct: _ 
-                            } => {
-                                encoder_bitrate
-                            },
-                            _ => { 
-                                &0.0
-                            },
+                            Status::InProgress {
+                                time_remaining: _,
+                                fps: _,
+                                speed: _,
+                                bitrate_kbps: encoder_bitrate,
+                                progress_pct: _,
+                            } => encoder_bitrate,
+                            _ => &0.0,
                         };
                         ui.monospace(format!(
                             "Time remaining: {}, fps: {:.1}, speed: {:.3}x, bitrate: {:.1}Mbps",
-                            time_remaining_string, fps, speed, encoder_bitrate / 1000.0
+                            time_remaining_string,
+                            fps,
+                            speed,
+                            encoder_bitrate / 1000.0
                         ));
                     });
                 });
