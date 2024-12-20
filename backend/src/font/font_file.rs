@@ -1,10 +1,13 @@
-use std::{cell::RefCell, hash::{DefaultHasher, Hash, Hasher}, path::PathBuf};
+use std::{
+    cell::RefCell,
+    hash::{DefaultHasher, Hash, Hasher},
+    path::PathBuf,
+};
 
 use derivative::Derivative;
 use image::{imageops::FilterType, io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 
 use std::collections::HashMap;
-
 
 // Cache structure
 #[derive(Derivative, Clone, Debug)]
@@ -79,11 +82,12 @@ impl FontFile {
         }
 
         self.characters.get(index).map(|original_image| {
-            let resized_image = if size.width() != self.character_size.width() || size.height() != self.character_size.height() {
-                image::imageops::resize(original_image, size.width(), size.height(), FilterType::Lanczos3)
-            } else {
-                original_image.clone()
-            };
+            let resized_image =
+                if size.width() != self.character_size.width() || size.height() != self.character_size.height() {
+                    image::imageops::resize(original_image, size.width(), size.height(), FilterType::Lanczos3)
+                } else {
+                    original_image.clone()
+                };
 
             // Cache the resized image
             self.cache.insert(index, size, resized_image.clone());

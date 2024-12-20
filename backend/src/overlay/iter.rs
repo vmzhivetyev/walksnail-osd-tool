@@ -7,7 +7,6 @@ use ffmpeg_sidecar::{
     iter::FfmpegIterator,
 };
 use image::{Rgba, RgbaImage};
-use rayon::iter::Empty;
 
 use super::{overlay_osd, overlay_srt_data, overlay_srt_debug_data};
 use crate::{
@@ -49,7 +48,7 @@ impl<'a> FrameOverlayIter<'a> {
         chroma_key: Option<[f32; 4]>,
     ) -> Self {
         let mut osd_frames_iter = osd_frames.into_iter();
-        
+
         let mut srt_frames_iter = srt_frames
             .map(|frames| frames.into_iter().peekable())
             .unwrap_or_else(|| Vec::<SrtFrame>::new().into_iter().peekable());
@@ -99,7 +98,6 @@ impl Iterator for FrameOverlayIter<'_> {
 
         self.decoder_iter.find_map(|e| match e {
             FfmpegEvent::OutputFrame(mut video_frame) => {
-                
                 let _start = std::time::Instant::now();
 
                 // For every video frame check if frame time is later than the next OSD frame time.
@@ -149,7 +147,7 @@ impl Iterator for FrameOverlayIter<'_> {
                 }
 
                 video_frame.data = frame_image.as_raw().to_vec();
-                
+
                 // tracing::info!(
                 //     "next frame prepared in {:?}.",
                 //     _start.elapsed()

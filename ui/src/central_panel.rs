@@ -12,13 +12,15 @@ use egui::{
 
 use crate::{
     osd_preview::{calculate_horizontal_offset, calculate_vertical_offset},
-    util::{separator_with_space, tooltip_text},
+    util::{handle_file_path_update, separator_with_space, tooltip_text},
     WalksnailOsdTool,
 };
 
 impl WalksnailOsdTool {
     pub fn get_selected_encoder(&self) -> Option<backend::ffmpeg::Encoder> {
-        self.displayed_encoders().get(self.render_settings.selected_encoder_idx).cloned()
+        self.displayed_encoders()
+            .get(self.render_settings.selected_encoder_idx)
+            .cloned()
     }
 
     pub fn render_central_panel(&mut self, ctx: &egui::Context) {
@@ -355,9 +357,7 @@ impl WalksnailOsdTool {
                         ui.label("Disable SRT rendering")
                             .on_hover_text(tooltip_text("Do not render SRT."));
                         ui.horizontal(|ui| {
-                            changed |= ui
-                                .add(Checkbox::without_text(&mut self.srt_options.no_srt))
-                                .changed()
+                            changed |= ui.add(Checkbox::without_text(&mut self.srt_options.no_srt)).changed()
                         });
                         ui.end_row();
                     });
@@ -482,11 +482,23 @@ impl WalksnailOsdTool {
                 Grid::new("render_options")
                     .min_col_width(self.ui_dimensions.options_column1_width)
                     .show(ui, |ui| {
-
-                        let displayed_encoders = self.displayed_encoders();
+                        ui.label("Filename").on_hover_text(tooltip_text("Filename after rendering"));
+                        ui.horizontal(|ui| {
+                            ui.horizontal(|ui| {
+                                handle_file_path_update(
+                                    ui,
+                                    &self.input_video_file,
+                                    &mut self.output_video_file,
+                                    &mut self.filename_set,
+                                    &self.render_status,
+                                );
+                            });
+                        });
+                        ui.end_row();
 
                         ui.label("Encoder")
                             .on_hover_text(tooltip_text("Encoder used for rendering. In some cases not all available encoders are detected. Check the box to also show these."));
+                        let displayed_encoders = self.displayed_encoders();
                         ui.horizontal(|ui| {
                             let selection = egui::ComboBox::from_id_source("encoder").width(350.0).show_index(
                                 ui,
@@ -517,7 +529,6 @@ impl WalksnailOsdTool {
                         let selected_encoder = self.get_selected_encoder();
                         let bitrate_enabled = !self.render_settings.keep_quality;
                         let mut constant_quality_available = false;
-                        
                         if let Some(selected_encoder) = selected_encoder {
                             if selected_encoder.constant_quality_args != None {
                                 constant_quality_available = true;
@@ -570,17 +581,13 @@ impl WalksnailOsdTool {
     pub fn displayed_encoders(&self) -> Vec<Encoder> {
         #[cfg(debug_assertions)]
         if self.render_settings.show_undetected_encoders {
-            return self.encoders.clone()
+            return self.encoders.clone();
         }
         return self.detected_encoders.clone();
     }
 
     pub fn sort_and_filter_encoders(encoders: &Vec<Encoder>) -> Vec<Encoder> {
-        let mut filtered_encoders: Vec<Encoder> = encoders
-            .iter()
-            .filter(|e| e.detected)
-            .map(|x| x.clone())
-            .collect();
+        let mut filtered_encoders: Vec<Encoder> = encoders.iter().filter(|e| e.detected).map(|x| x.clone()).collect();
 
         filtered_encoders.sort_by(|a, b| {
             const CODEC_PRIORITY: [Codec; 4] = [Codec::H265, Codec::H264, Codec::VP9, Codec::ProRes];

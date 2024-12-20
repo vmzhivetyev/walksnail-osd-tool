@@ -1,5 +1,6 @@
 use std::{
-    path::PathBuf, time::{Duration, Instant}
+    path::PathBuf,
+    time::{Duration, Instant},
 };
 
 use backend::{
@@ -27,7 +28,8 @@ use crate::{
 #[derive(Default)]
 pub struct WalksnailOsdTool {
     pub config_changed: Option<Instant>,
-    pub video_file: Option<PathBuf>,
+    pub input_video_file: Option<PathBuf>,
+    pub output_video_file: Option<PathBuf>,
     pub video_info: Option<VideoInfo>,
     pub osd_file: Option<OsdFile>,
     pub font_file: Option<FontFile>,
@@ -46,6 +48,7 @@ pub struct WalksnailOsdTool {
     pub srt_options: SrtOptions,
     pub srt_font: Option<rusttype::Font<'static>>,
     pub about_window_open: bool,
+    pub filename_set: bool,
     pub dark_mode: bool,
     pub app_update: AppUpdate,
     pub app_version: String,
@@ -242,19 +245,17 @@ impl WalksnailOsdTool {
     }
 
     pub fn update_osd_preview(&mut self, ctx: &egui::Context) {
-        if let (Some(video_info), Some(osd_file), Some(font_file)) =
-            (&self.video_info, &self.osd_file, &self.font_file)
+        if let (Some(video_info), Some(osd_file), Some(font_file)) = (&self.video_info, &self.osd_file, &self.font_file)
         {
             let osd_frame_index = self.osd_preview.preview_frame as usize - 1;
-            let osd_frame = osd_file
-                .frames
-                .get(osd_frame_index)
-                .unwrap();
+            let osd_frame = osd_file.frames.get(osd_frame_index).unwrap();
 
             let osd_frame_time = osd_frame.time_millis as f32 / 1000.0;
-            
+
             let srt_frame = if let Some(srt_file) = &self.srt_file {
-                srt_file.frames.iter()
+                srt_file
+                    .frames
+                    .iter()
                     .find(|frame| frame.start_time_secs >= osd_frame_time)
             } else {
                 None

@@ -36,6 +36,8 @@ impl WalksnailOsdTool {
 
                 self.update_osd_preview(ctx);
                 self.render_status.reset();
+                self.output_video_file = None;
+                self.filename_set = false;
             }
         }
 
@@ -55,6 +57,8 @@ impl WalksnailOsdTool {
             self.import_srt_file(&file_handles);
             self.update_osd_preview(ctx);
             self.render_status.reset();
+            self.output_video_file = None;
+            self.filename_set = false;
         }
     }
 
@@ -63,7 +67,7 @@ impl WalksnailOsdTool {
             .add_enabled(self.render_status.is_not_in_progress(), Button::new("Reset files"))
             .clicked()
         {
-            self.video_file = None;
+            self.input_video_file = None;
             self.video_info = None;
             self.osd_file = None;
             self.font_file = None;
@@ -71,6 +75,8 @@ impl WalksnailOsdTool {
             self.osd_preview.texture_handle = None;
             self.osd_preview.preview_frame = 1;
             self.render_status.reset();
+            self.output_video_file = None;
+            self.filename_set = false;
             tracing::info!("Reset files");
         }
     }

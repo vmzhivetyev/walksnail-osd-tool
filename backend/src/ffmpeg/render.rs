@@ -1,5 +1,7 @@
 use std::{
-    io::{self, Write}, path::PathBuf, thread
+    io::{self, Write},
+    path::PathBuf,
+    thread,
 };
 
 use crossbeam_channel::{Receiver, Sender};
@@ -18,7 +20,10 @@ use crate::{
     srt::{self, SrtOptions},
 };
 
-fn run_ready_frames_to_queue(frame_iter: impl Iterator<Item = ffmpeg_sidecar::event::OutputVideoFrame>, tx: Sender<ffmpeg_sidecar::event::OutputVideoFrame>) {
+fn run_ready_frames_to_queue(
+    frame_iter: impl Iterator<Item = ffmpeg_sidecar::event::OutputVideoFrame>,
+    tx: Sender<ffmpeg_sidecar::event::OutputVideoFrame>,
+) {
     for frame in frame_iter {
         // If send fails (receiver dropped), we exit the thread
         if tx.send(frame).is_err() {
@@ -31,7 +36,7 @@ fn run_ready_frames_to_queue(frame_iter: impl Iterator<Item = ffmpeg_sidecar::ev
 fn run_ready_frames_from_queue_to_encoder(
     rx: Receiver<ffmpeg_sidecar::event::OutputVideoFrame>,
     mut encoder_stdin: impl Write,
-    frame_to_ui_tx: Sender<RgbaImage>
+    frame_to_ui_tx: Sender<RgbaImage>,
 ) {
     while let Ok(frame) = rx.recv() {
         let _start_write_all = std::time::Instant::now();
@@ -76,7 +81,14 @@ pub fn start_video_render(
     video_info: &VideoInfo,
     render_settings: &RenderSettings,
     encoder: &Encoder,
-) -> Result<(Sender<ToFfmpegMessage>, Receiver<FromFfmpegMessage>, Receiver<RgbaImage>), io::Error> {
+) -> Result<
+    (
+        Sender<ToFfmpegMessage>,
+        Receiver<FromFfmpegMessage>,
+        Receiver<RgbaImage>,
+    ),
+    io::Error,
+> {
     let mut decoder_process = spawn_decoder(ffmpeg_path, input_video)?;
 
     let mut encoder_process = spawn_encoder(
@@ -128,7 +140,8 @@ pub fn start_video_render(
     // On another thread run the decoder iterator to completion and feed the output to the encoder's stdin
     let encoder_stdin = encoder_process.take_stdin().expect("Failed to get `stdin` for encoder");
 
-    let (ready_frames_queue_in, ready_frames_queue_out) = crossbeam_channel::bounded:: <ffmpeg_sidecar::event::OutputVideoFrame>(100);
+    let (ready_frames_queue_in, ready_frames_queue_out) =
+        crossbeam_channel::bounded::<ffmpeg_sidecar::event::OutputVideoFrame>(100);
 
     thread::Builder::new()
         .name("Push ready frames to queue".into())
@@ -226,18 +239,15 @@ pub fn spawn_encoder(
         // Such video will be played back the same way as if it really was 4:3.
         encoder_command.args(["-aspect", "4:3"]);
     }
-    
-    encoder_command
-        .codec_video(&video_encoder.name);
+
+    encoder_command.codec_video(&video_encoder.name);
 
     if keep_quality {
         // this will crash when encoder is not setup to support constant quality mode.
         let args = &video_encoder.constant_quality_args.clone().unwrap();
-        encoder_command
-            .args(args);
+        encoder_command.args(args);
     } else {
-        encoder_command
-            .args(["-b:v", &format!("{}M", bitrate_mbps)]);
+        encoder_command.args(["-b:v", &format!("{}M", bitrate_mbps)]);
     }
 
     encoder_command
@@ -252,9 +262,7 @@ pub fn spawn_encoder(
         }
     }
 
-    encoder_command
-        .overwrite()
-        .output(output_video.to_str().unwrap());
+    encoder_command.overwrite().output(output_video.to_str().unwrap());
 
     tracing::info!(
         "✅✅✅✅✅✅✅ {}",
