@@ -65,8 +65,7 @@ impl FontFile {
         let (font_character_size, font_type) = detect_font_character_size(font_file_dimensions)?;
 
         let characters = split_characters(&font_image, &font_character_size, &font_type);
-
-        let character_count = 256;
+        let character_count = characters.len() as u32;
 
         Ok(Self {file_path:path,font_type,font_character_size,characters,cache:ImageCache::new(), character_count })
     }
