@@ -4,7 +4,7 @@ mod error;
 mod message;
 mod render;
 mod render_settings;
-mod video_info;
+pub(crate) mod video_info;
 
 pub use dependencies::{ffmpeg_available, ffprobe_available};
 pub use encoders::{Codec, Encoder};

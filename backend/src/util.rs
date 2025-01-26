@@ -18,10 +18,22 @@ impl<T> Coordinates<T> {
     }
 }
 
-#[derive(Debug)]
-pub struct Dimension<T> {
+#[derive(Debug, Clone, Serialize, Deserialize, Derivative, Default)]
+pub struct Dimension<T: PartialEq> {
     pub width: T,
     pub height: T,
+}
+
+impl<T: PartialEq> PartialEq for Dimension<T> {
+    fn eq(&self, other: &Self) -> bool {
+        self.width == other.width && self.height == other.height
+    }
+}
+
+impl<T: PartialEq> Dimension<T> {
+    pub fn new(width: T, height: T) -> Self {
+        Self { width, height }
+    }
 }
 
 impl Display for Dimension<u32> {

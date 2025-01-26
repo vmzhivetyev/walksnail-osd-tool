@@ -51,7 +51,7 @@ impl WalksnailOsdTool {
             self.osd_file = OsdFile::open(osd_file_path.clone()).ok();
             self.osd_preview.preview_frame = 1;
             self.osd_options.osd_playback_offset = 0.0;
-            self.osd_options.character_size = None;
+            self.osd_options.character_size_class = None;
         }
     }
 

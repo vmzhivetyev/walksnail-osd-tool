@@ -2,7 +2,7 @@ use std::time::Instant;
 
 use backend::{
     ffmpeg::{Codec, Encoder},
-    font::CharacterSize,
+    font::CharacterSizeClass,
     util::Coordinates,
 };
 use egui::{
@@ -59,21 +59,21 @@ impl WalksnailOsdTool {
                                 .add(Slider::new(&mut self.osd_options.position.x, -200..=700).text("Pixels"))
                                 .changed();
 
-                            if ui.button("Center").clicked() {
-                                if let (Some(video_info), Some(osd_file), Some(font_file)) =
-                                    (&self.video_info, &self.osd_file, &self.font_file)
-                                {
-                                    self.osd_options.position.x = calculate_horizontal_offset(
-                                        video_info.width,
-                                        osd_file
-                                            .frames
-                                            .get(self.osd_preview.preview_frame as usize - 1)
-                                            .unwrap(),
-                                        &font_file.character_size,
-                                    );
-                                    changed |= true;
-                                }
-                            }
+                            // if ui.button("Center").clicked() {
+                            //     if let (Some(video_info), Some(osd_file), Some(font_file)) =
+                            //         (&self.video_info, &self.osd_file, &self.font_file)
+                            //     {
+                            //         self.osd_options.position.x = calculate_horizontal_offset(
+                            //             video_info.width,
+                            //             osd_file
+                            //                 .frames
+                            //                 .get(self.osd_preview.preview_frame as usize - 1)
+                            //                 .unwrap(),
+                            //             &font_file.character_size_class,
+                            //         );
+                            //         changed |= true;
+                            //     }
+                            // }
 
                             if ui.button("Reset").clicked() {
                                 self.osd_options.position.x = 0;
@@ -91,21 +91,21 @@ impl WalksnailOsdTool {
                                 .add(Slider::new(&mut self.osd_options.position.y, -200..=700).text("Pixels"))
                                 .changed();
 
-                            if ui.button("Center").clicked() {
-                                if let (Some(video_info), Some(osd_file), Some(font_file)) =
-                                    (&self.video_info, &self.osd_file, &self.font_file)
-                                {
-                                    self.osd_options.position.y = calculate_vertical_offset(
-                                        video_info.height,
-                                        osd_file
-                                            .frames
-                                            .get(self.osd_preview.preview_frame as usize - 1)
-                                            .unwrap(),
-                                        &font_file.character_size,
-                                    );
-                                    changed |= true
-                                }
-                            }
+                            // if ui.button("Center").clicked() {
+                            //     if let (Some(video_info), Some(osd_file), Some(font_file)) =
+                            //         (&self.video_info, &self.osd_file, &self.font_file)
+                            //     {
+                            //         self.osd_options.position.y = calculate_vertical_offset(
+                            //             video_info.height,
+                            //             osd_file
+                            //                 .frames
+                            //                 .get(self.osd_preview.preview_frame as usize - 1)
+                            //                 .unwrap(),
+                            //             &font_file.character_size_class,
+                            //         );
+                            //         changed |= true
+                            //     }
+                            // }
 
                             if ui.button("Reset").clicked() {
                                 self.osd_options.position.y = 0;
@@ -171,20 +171,20 @@ impl WalksnailOsdTool {
                         }
 
                         if self.video_info.is_some() {
-                            if self.osd_options.character_size.is_none() {
-                                self.osd_options.character_size = Some(backend::overlay::get_character_size(self.video_info.as_ref().unwrap().height));
+                            if self.osd_options.character_size_class.is_none() {
+                                self.osd_options.character_size_class = Some(CharacterSizeClass::Normal);
                             }
 
                             egui::ComboBox::from_label("Character size")
-                                .selected_text(self.osd_options.character_size.clone().map_or(String::from("No video"), |s| format!("{:?}", s)))
+                                .selected_text(self.osd_options.character_size_class.clone().map_or(String::from("No video"), |s| format!("{:?}", s)))
                                 .width(100.0)
                                 .show_ui(ui, |ui| {
-                                    if self.osd_options.character_size.is_some() {
-                                        changed |= ui.selectable_value(self.osd_options.character_size.as_mut().unwrap(), CharacterSize::Race, "Race").changed();
-                                        changed |= ui.selectable_value(self.osd_options.character_size.as_mut().unwrap(), CharacterSize::Small, "Small").changed();
-                                        changed |= ui.selectable_value(self.osd_options.character_size.as_mut().unwrap(), CharacterSize::Large, "Large").changed();
-                                        changed |= ui.selectable_value(self.osd_options.character_size.as_mut().unwrap(), CharacterSize::XLarge, "Extra Large (2k)").changed();
-                                        changed |= ui.selectable_value(self.osd_options.character_size.as_mut().unwrap(), CharacterSize::Ultra, "Ultra Large (4k)").changed();
+                                    if self.osd_options.character_size_class.is_some() {
+                                        changed |= ui.selectable_value(self.osd_options.character_size_class.as_mut().unwrap(), CharacterSizeClass::XSmall, "XS").changed();
+                                        changed |= ui.selectable_value(self.osd_options.character_size_class.as_mut().unwrap(), CharacterSizeClass::Small, "S").changed();
+                                        changed |= ui.selectable_value(self.osd_options.character_size_class.as_mut().unwrap(), CharacterSizeClass::Normal, "Normal").changed();
+                                        changed |= ui.selectable_value(self.osd_options.character_size_class.as_mut().unwrap(), CharacterSizeClass::Large, "L").changed();
+                                        changed |= ui.selectable_value(self.osd_options.character_size_class.as_mut().unwrap(), CharacterSizeClass::XLarge, "XL").changed();
                                     }
                                 });
                             ui.end_row();

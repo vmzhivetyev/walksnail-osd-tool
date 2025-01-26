@@ -314,7 +314,7 @@ impl WalksnailOsdTool {
                                 });
                                 row.col(|ui| {
                                     if let Some(font_file) = font_file {
-                                        ui.label(font_file.character_size.to_string());
+                                        ui.label(font_file.font_character_size.to_string());
                                     } else {
                                         ui.label("-");
                                     }
