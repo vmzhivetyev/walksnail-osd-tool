@@ -41,7 +41,6 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            ${{ steps.download.outputs.download-path }}/*
+          files: ${{ github.workspace }}/_deploy/consolidated/*
           draft: true
           body_path: ${{ github.workspace }}-release_notes.md
