@@ -73,7 +73,9 @@ pub fn detect_font_character_size(font_file_size: Dimension<u32>) -> Result<(Dim
     let vertical_characters_count = 256;
 
     if font_file_size.height % vertical_characters_count != 0 {
-        return Err(FontFileError::InvalidFontFileHeight { height: font_file_size.height });
+        return Err(FontFileError::InvalidFontFileHeight {
+            height: font_file_size.height,
+        });
     }
 
     let single_char_height = font_file_size.height / vertical_characters_count;
@@ -85,14 +87,19 @@ pub fn detect_font_character_size(font_file_size: Dimension<u32>) -> Result<(Dim
     let single_char_width = single_char_height * 2 / 3;
 
     if font_file_size.width % single_char_width != 0 {
-        return Err(FontFileError::InvalidFontFileWidth { width: font_file_size.width });
+        return Err(FontFileError::InvalidFontFileWidth {
+            width: font_file_size.width,
+        });
     }
-    
+
     // aka columns in the font file
     let number_of_colors = font_file_size.width / single_char_width;
 
     Ok((
-        Dimension { width: single_char_width, height: single_char_height }, 
-        FontType::from_raw_value(number_of_colors).unwrap_or(FontType::Standard)
+        Dimension {
+            width: single_char_width,
+            height: single_char_height,
+        },
+        FontType::from_raw_value(number_of_colors).unwrap_or(FontType::Standard),
     ))
 }

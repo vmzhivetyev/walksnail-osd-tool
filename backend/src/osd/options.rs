@@ -3,7 +3,10 @@ use std::collections::HashSet;
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 
-use crate::{font::CharacterSizeClass, util::{Coordinates, Dimension}};
+use crate::{
+    font::CharacterSizeClass,
+    util::{Coordinates, Dimension},
+};
 
 #[derive(Clone, Serialize, Deserialize, Derivative)]
 #[derivative(Default, Debug)]

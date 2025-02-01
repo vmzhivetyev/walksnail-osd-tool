@@ -2,7 +2,8 @@ use backend::{
     font,
     osd::{self, OsdOptions},
     overlay::{overlay_osd, overlay_srt_data, overlay_srt_debug_data},
-    srt::{self, SrtOptions}, util::Dimension,
+    srt::{self, SrtOptions},
+    util::Dimension,
 };
 use image::RgbaImage;
 

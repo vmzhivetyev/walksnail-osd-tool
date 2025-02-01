@@ -111,22 +111,21 @@ impl WalksnailOsdTool {
                             "––:––".into()
                         };
                         let encoder_bitrate = match &self.render_status.encoder_status {
-                            Status::InProgress { 
-                                time_remaining: _, 
-                                fps: _, 
-                                speed: _, 
-                                bitrate_kbps: encoder_bitrate, 
-                                progress_pct: _ 
-                            } => {
-                                encoder_bitrate
-                            },
-                            _ => { 
-                                &0.0
-                            },
+                            Status::InProgress {
+                                time_remaining: _,
+                                fps: _,
+                                speed: _,
+                                bitrate_kbps: encoder_bitrate,
+                                progress_pct: _,
+                            } => encoder_bitrate,
+                            _ => &0.0,
                         };
                         ui.monospace(format!(
                             "Time remaining: {}, fps: {:.1}, speed: {:.3}x, bitrate: {:.1}Mbps",
-                            time_remaining_string, fps, speed, encoder_bitrate / 1000.0
+                            time_remaining_string,
+                            fps,
+                            speed,
+                            encoder_bitrate / 1000.0
                         ));
                     });
                 });

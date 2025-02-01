@@ -1,10 +1,13 @@
-use std::{cell::RefCell, hash::{DefaultHasher, Hash, Hasher}, path::PathBuf};
+use std::{
+    cell::RefCell,
+    hash::{DefaultHasher, Hash, Hasher},
+    path::PathBuf,
+};
 
 use derivative::Derivative;
 use image::{imageops::FilterType, io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 
 use std::collections::HashMap;
-
 
 // Cache structure
 #[derive(Derivative, Clone, Debug)]
@@ -67,17 +70,29 @@ impl FontFile {
         let characters = split_characters(&font_image, &font_character_size, &font_type);
         let character_count = characters.len() as u32;
 
-        Ok(Self {file_path:path,font_type,font_character_size,characters,cache:ImageCache::new(), character_count })
+        Ok(Self {
+            file_path: path,
+            font_type,
+            font_character_size,
+            characters,
+            cache: ImageCache::new(),
+            character_count,
+        })
     }
 
-    pub fn get_character(&self, index: usize, size_class: &CharacterSizeClass, desired_size: Dimension<u32>) -> Option<ImageBuffer<Rgba<u8>, Vec<u8>>> {
+    pub fn get_character(
+        &self,
+        index: usize,
+        size_class: &CharacterSizeClass,
+        desired_size: Dimension<u32>,
+    ) -> Option<ImageBuffer<Rgba<u8>, Vec<u8>>> {
         if let Some(cached_image) = self.cache.get(index, size_class) {
             return Some(cached_image.clone());
         }
 
-        let final_size = Dimension { 
-            width: ((desired_size.width as f32) * size_class.multiplier()).round() as u32, 
-            height: ((desired_size.height as f32) * size_class.multiplier()).round() as u32
+        let final_size = Dimension {
+            width: ((desired_size.width as f32) * size_class.multiplier()).round() as u32,
+            height: ((desired_size.height as f32) * size_class.multiplier()).round() as u32,
         };
 
         // this allows us to use single color fonts for multicolor osd files.
@@ -85,7 +100,12 @@ impl FontFile {
 
         self.characters.get(wrapped_char_index).map(|original_image| {
             let resized_image = if final_size != self.font_character_size {
-                image::imageops::resize(original_image, final_size.width, final_size.height, FilterType::Lanczos3)
+                image::imageops::resize(
+                    original_image,
+                    final_size.width,
+                    final_size.height,
+                    FilterType::Lanczos3,
+                )
             } else {
                 original_image.clone()
             };
@@ -101,7 +121,7 @@ impl FontFile {
 fn split_characters(
     font_image: &DynamicImage,
     character_size: &Dimension<u32>,
-    font_type: &FontType
+    font_type: &FontType,
 ) -> Vec<ImageBuffer<Rgba<u8>, Vec<u8>>> {
     let columns: u32 = font_type.raw_value();
     let (width, height) = font_image.dimensions();
@@ -115,7 +135,9 @@ fn split_characters(
         let x = page_idx * character_size.width;
         for char_idx in 0..vertical_char_count {
             let y = char_idx * character_size.height;
-            let char = font_image.view(x, y, character_size.width, character_size.height).to_image();
+            let char = font_image
+                .view(x, y, character_size.width, character_size.height)
+                .to_image();
             char_vec.push(char);
         }
     }

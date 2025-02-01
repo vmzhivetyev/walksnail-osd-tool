@@ -2,7 +2,8 @@ use std::fmt::Debug;
 
 use super::{
     error::OsdFileError,
-    glyph::{Glyph, GridPosition}, OSD_GRID_WIDTH,
+    glyph::{Glyph, GridPosition},
+    OSD_GRID_WIDTH,
 };
 
 const TIMESTAMP_BYTES: usize = 4;

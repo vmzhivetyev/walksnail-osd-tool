@@ -2,20 +2,27 @@ use image::{imageops::overlay, RgbaImage};
 use std::time::Instant;
 
 use crate::{
-    ffmpeg, font::{self}, osd::{self, OsdOptions}, util::Dimension
+    ffmpeg,
+    font::{self},
+    osd::{self, OsdOptions},
+    util::Dimension,
 };
 
 pub fn get_ideal_character_size(frame_width: u32, frame_height: u32) -> Dimension<u32> {
     let char_height = frame_height / osd::OSD_GRID_HEIGHT;
     let char_width = frame_width / osd::OSD_GRID_WIDTH;
-    Dimension { width: char_width, height: char_height }
+    Dimension {
+        width: char_width,
+        height: char_height,
+    }
 }
 
 #[inline]
 pub fn overlay_osd(image: &mut RgbaImage, osd_frame: &osd::Frame, font: &font::FontFile, osd_options: &OsdOptions) {
     // TODO: check if this can be run in parallel
     let character_size_class = osd_options
-        .character_size_class.clone()
+        .character_size_class
+        .clone()
         .unwrap_or(font::CharacterSizeClass::Normal);
 
     let char_desired_size = get_ideal_character_size(image.width(), image.height());
@@ -27,7 +34,11 @@ pub fn overlay_osd(image: &mut RgbaImage, osd_frame: &osd::Frame, font: &font::F
         if character.index == 0 || osd_options.get_mask(&character.grid_position) {
             continue;
         }
-        if let Some(character_image) = font.get_character(character.index as usize, &character_size_class, char_desired_size.to_owned()) {
+        if let Some(character_image) = font.get_character(
+            character.index as usize,
+            &character_size_class,
+            char_desired_size.to_owned(),
+        ) {
             let grid_position = &character.grid_position;
 
             // According to https://betaflight.com/docs/wiki/configurator/osd-tab

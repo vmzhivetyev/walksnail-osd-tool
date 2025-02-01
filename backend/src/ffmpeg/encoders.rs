@@ -37,7 +37,13 @@ impl Encoder {
         Self::new_with_extra_args(name, codec, hardware, constant_quality_args, &[])
     }
 
-    fn new_with_extra_args(name: &str, codec: Codec, hardware: bool, constant_quality_args: Option<&[&str]>, extra_args: &[&str]) -> Self {
+    fn new_with_extra_args(
+        name: &str,
+        codec: Codec,
+        hardware: bool,
+        constant_quality_args: Option<&[&str]>,
+        extra_args: &[&str],
+    ) -> Self {
         let constant_quality_args_vec = constant_quality_args.map(|args| args.iter().map(|&s| s.to_string()).collect());
         let extra_args_vec = extra_args.iter().map(|&s| s.to_string()).collect();
 
@@ -53,9 +59,9 @@ impl Encoder {
 
     #[tracing::instrument(ret)]
     pub fn get_available_encoders(ffmpeg_path: &PathBuf) -> Vec<Self> {
-         // Apple QuickTime player on Mac supports hvc1. It doesn't support hev1 which is the default.
-         // Make hevc videos be compatible with MacOS QuickTime.
-        let hvc1tag = ["-tag:v", "hvc1"]; 
+        // Apple QuickTime player on Mac supports hvc1. It doesn't support hev1 which is the default.
+        // Make hevc videos be compatible with MacOS QuickTime.
+        let hvc1tag = ["-tag:v", "hvc1"];
 
         #[rustfmt::skip]
         let mut all_encoders = [
