@@ -143,7 +143,7 @@ jobs:
           mv walksnail-osd-tool.tar.gz ${{ github.workspace }}/_deploy/walksnail-osd-tool-${{ matrix.targets.fancy_name }}.tar.gz
 
       - name: Save binaries
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: walksnail-osd-tool-all-platforms
           path: ${{ github.workspace }}/_deploy/*.*
