@@ -145,5 +145,5 @@ jobs:
       - name: Save binaries
         uses: actions/upload-artifact@v4
         with:
-          name: walksnail-osd-tool-all-platforms
+          name: walksnail-osd-tool-${{ matrix.targets.fancy_name }}
           path: ${{ github.workspace }}/_deploy/*.*
