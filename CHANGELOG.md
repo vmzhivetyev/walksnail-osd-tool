@@ -4,6 +4,12 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4] - 2025-02-01
+
+### Fixed
+- OSD rendering for 4:3 input videos: Implemented OSD scaling to fit the entire 16x9 OSD grid into videos of any dimension, ensuring correct rendering for input files from 4:3 cameras.
+- Single/multi-color font+osd file mismatch: fixed issue where using a single-color font caused missing characters when rendering OSD recorded with multicolor data. Single color characters will now be used instead.
+
 ## [1.1.3] - 2024-11-17
 
 ### Changed
