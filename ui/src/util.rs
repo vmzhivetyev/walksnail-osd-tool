@@ -119,9 +119,10 @@ pub fn format_minutes_seconds(duration: &Duration) -> String {
 }
 
 pub fn generate_default_output_file_name(input_file_path: &PathBuf) -> String {
-    let input_file_name_no_ext = input_file_path.file_stem()
+    let input_file_name_no_ext = input_file_path
+        .file_stem()
         .map_or("file".to_string(), |p| p.to_string_lossy().to_string());
-    
+
     format!("{}_with_osd", input_file_name_no_ext)
 }
 

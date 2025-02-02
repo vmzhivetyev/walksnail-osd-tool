@@ -392,9 +392,14 @@ impl WalksnailOsdTool {
                         ui.add_space(6.0);
 
                         if file_path == self.input_video_file {
-                            ui.label(RichText::new("Output file path matches input file path.").color(accent_color.unwrap()));
+                            ui.label(
+                                RichText::new("Output file path matches input file path.").color(accent_color.unwrap()),
+                            );
                         } else if file_already_exists {
-                            ui.label(RichText::new("File already exists! It will be overwritten.").color(accent_color.unwrap()));
+                            ui.label(
+                                RichText::new("File already exists! It will be overwritten.")
+                                    .color(accent_color.unwrap()),
+                            );
                         }
                     });
                 });

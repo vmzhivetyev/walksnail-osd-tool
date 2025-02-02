@@ -12,7 +12,9 @@ use ffmpeg_sidecar::{
 };
 use image::RgbaImage;
 
-use super::{error::FfmpegError, render_settings::RenderSettings, Encoder, FromFfmpegMessage, ToFfmpegMessage, VideoInfo};
+use super::{
+    error::FfmpegError, render_settings::RenderSettings, Encoder, FromFfmpegMessage, ToFfmpegMessage, VideoInfo,
+};
 use crate::{
     font,
     osd::{self, OsdOptions},

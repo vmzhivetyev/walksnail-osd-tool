@@ -216,8 +216,11 @@ impl WalksnailOsdTool {
             if self.output_video_file.is_none() || self.ui_state.output_file_name.is_empty() {
                 self.ui_state.output_file_name = generate_default_output_file_name(input_video_file);
             }
-            
-            self.output_video_file = Some(generate_output_file_path(&input_video_file, &self.ui_state.output_file_name));
+
+            self.output_video_file = Some(generate_output_file_path(
+                &input_video_file,
+                &self.ui_state.output_file_name,
+            ));
 
             tracing::info!(
                 "changed output_video_file to: {}",
