@@ -69,7 +69,7 @@ impl Encoder {
                 "libx264", Codec::H264, false,
                 Some(&["-crf", "19", "-b:v", "0k"])
             ),
-            
+
             Encoder::new_with_extra_args(
                 "libx265", Codec::H265, false,
                 Some(&["-crf", "20", "-b:v", "0k"]),
@@ -167,8 +167,7 @@ impl Encoder {
             Encoder::new_with_extra_args(
                 "prores_videotoolbox", Codec::ProRes, true,
                 None,
-                &["-profile:v", "4", "-pix_fmt", "yuva422p10le", "-alpha_bits", "8", "-vendor", "apl0"]
-            ),            
+                &["-profile:v", "4", "-pix_fmt", "yuva422p10le", "-alpha_bits", "8", "-vendor", "apl0"]),            
         ];
 
         all_encoders
