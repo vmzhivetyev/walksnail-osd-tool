@@ -279,7 +279,7 @@ impl WalksnailOsdTool {
 
         let mut heading = RichText::new("Font file").heading();
         if !file_loaded {
-            heading = heading.color(Color32::RED);
+            heading = heading.color(Color32::LIGHT_RED);
         }
 
         CollapsingHeader::new(heading)
