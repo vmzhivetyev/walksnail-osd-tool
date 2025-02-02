@@ -3,7 +3,6 @@ use std::time::Instant;
 use image::{imageops::overlay, RgbaImage};
 
 use crate::{
-    ffmpeg,
     font::{self},
     osd::{self, OsdOptions},
     util::Dimension,

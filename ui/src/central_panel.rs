@@ -11,8 +11,7 @@ use egui::{
 };
 
 use crate::{
-    osd_preview::{calculate_horizontal_offset, calculate_vertical_offset},
-    util::{generate_default_output_file_name, generate_output_file_path, separator_with_space, tooltip_text},
+    util::{separator_with_space, tooltip_text},
     WalksnailOsdTool,
 };
 

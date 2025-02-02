@@ -5,14 +5,14 @@ use std::{
 };
 
 use backend::{config::AppConfig, ffmpeg::VideoInfo, font::FontFile, osd::OsdFile, srt::SrtFile};
-use egui::{Color32, FontFamily, FontId, Margin, RichText, Separator, TextStyle, Ui};
+use egui::{FontFamily, FontId, Margin, RichText, Separator, TextStyle, Ui};
 use github_release_check::{GitHubReleaseItem, LookupError};
 use semver::Version;
 use tracing_appender::non_blocking::WorkerGuard;
 use tracing_subscriber::{filter, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, Layer};
 
 use super::WalksnailOsdTool;
-use crate::{render_status::RenderStatus, util::build_info::Build};
+use crate::util::build_info::Build;
 
 impl WalksnailOsdTool {
     pub fn all_files_loaded(&self) -> bool {
