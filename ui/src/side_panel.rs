@@ -20,6 +20,8 @@ impl WalksnailOsdTool {
                     self.srt_info(ui);
                     separator_with_space(ui, 15.0);
                     self.font_info(ui);
+                    separator_with_space(ui, 15.0);
+                    self.output_info(ui);
                 });
             });
     }
@@ -48,7 +50,7 @@ impl WalksnailOsdTool {
                                     ui.label("File name:");
                                 });
                                 row.col(|ui| {
-                                    if let Some(video_file) = &self.video_file {
+                                    if let Some(video_file) = &self.input_video_file {
                                         ui.label(video_file.file_name().unwrap().to_string_lossy());
                                     } else {
                                         ui.label("-");
@@ -275,7 +277,12 @@ impl WalksnailOsdTool {
         let font_file = self.font_file.as_ref();
         let file_loaded = font_file.is_some();
 
-        CollapsingHeader::new(RichText::new("Font file").heading())
+        let mut heading = RichText::new("Font file").heading();
+        if !file_loaded {
+            heading = heading.color(Color32::LIGHT_RED);
+        }
+
+        CollapsingHeader::new(heading)
             .icon(move |ui, opennes, response| circle_icon(ui, opennes, response, file_loaded))
             .default_open(true)
             .show(ui, |ui| {
@@ -342,6 +349,59 @@ impl WalksnailOsdTool {
                                 });
                             });
                         });
+                });
+            });
+    }
+
+    fn output_info(&mut self, ui: &mut Ui) {
+        let file_path: Option<std::path::PathBuf> = self.output_video_file.clone(); // Clone to avoid borrow issues
+        let file_already_exists: bool = file_path.as_ref().is_some_and(|x| x.exists());
+
+        if file_path.is_none() {
+            return;
+        }
+
+        let accent_color: Option<Color32> = if file_path == self.input_video_file {
+            Some(Color32::LIGHT_RED)
+        } else if file_already_exists {
+            Some(Color32::YELLOW)
+        } else {
+            None
+        };
+
+        let mut heading: RichText = RichText::new("Output file").heading();
+
+        if let Some(color) = accent_color {
+            heading = heading.color(color);
+        }
+
+        CollapsingHeader::new(heading)
+            .icon(|ui, openness, response| circle_icon(ui, openness, response, true))
+            .default_open(true)
+            .show(ui, |ui| {
+                ui.push_id("output_info", |ui| {
+                    ui.vertical(|ui| {
+                        ui.label("File name:");
+
+                        ui.add_space(6.0);
+
+                        if ui.text_edit_singleline(&mut self.ui_state.output_file_name).changed() {
+                            self.update_output_video_path(); // Now `self` can be mutated safely
+                        }
+
+                        ui.add_space(6.0);
+
+                        if file_path == self.input_video_file {
+                            ui.label(
+                                RichText::new("Output file path matches input file path.").color(accent_color.unwrap()),
+                            );
+                        } else if file_already_exists {
+                            ui.label(
+                                RichText::new("File already exists! It will be overwritten.")
+                                    .color(accent_color.unwrap()),
+                            );
+                        }
+                    });
                 });
             });
     }

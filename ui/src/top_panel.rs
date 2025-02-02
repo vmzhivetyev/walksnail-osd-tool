@@ -63,14 +63,15 @@ impl WalksnailOsdTool {
             .add_enabled(self.render_status.is_not_in_progress(), Button::new("Reset files"))
             .clicked()
         {
-            self.video_file = None;
+            // Note: don't do `self.font_file = None` here, that just makes UX bad.
+            self.input_video_file = None;
             self.video_info = None;
             self.osd_file = None;
-            self.font_file = None;
             self.srt_file = None;
             self.osd_preview.texture_handle = None;
             self.osd_preview.preview_frame = 1;
             self.render_status.reset();
+            self.update_output_video_path(); // this will reset it to empty since input_video_file is none.
             tracing::info!("Reset files");
         }
     }

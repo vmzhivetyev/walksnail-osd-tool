@@ -1,13 +1,12 @@
 use std::{
     cell::RefCell,
+    collections::HashMap,
     hash::{DefaultHasher, Hash, Hasher},
     path::PathBuf,
 };
 
 use derivative::Derivative;
 use image::{imageops::FilterType, io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
-
-use std::collections::HashMap;
 
 // Cache structure
 #[derive(Derivative, Clone, Debug)]
@@ -40,12 +39,11 @@ impl ImageCache {
     }
 }
 
-use crate::util::Dimension;
-
 use super::{
     dimensions::{detect_font_character_size, CharacterSizeClass, FontType},
     error::FontFileError,
 };
+use crate::util::Dimension;
 
 #[derive(Derivative, Clone)]
 #[derivative(Debug)]

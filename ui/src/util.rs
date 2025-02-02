@@ -19,8 +19,16 @@ impl WalksnailOsdTool {
         self.video_loaded() && self.osd_loaded() && self.font_loaded()
     }
 
+    pub fn is_start_render_allowed(&self) -> bool {
+        self.all_files_loaded() && self.is_encoder_selected() && self.is_output_file_path_allowed()
+    }
+
+    pub fn is_output_file_path_allowed(&self) -> bool {
+        self.output_video_file != self.input_video_file
+    }
+
     pub fn video_loaded(&self) -> bool {
-        self.video_file.is_some() && self.video_info.is_some()
+        self.input_video_file.is_some() && self.video_info.is_some()
     }
 
     pub fn osd_loaded(&self) -> bool {
@@ -35,10 +43,17 @@ impl WalksnailOsdTool {
         self.font_file.is_some()
     }
 
+    pub fn is_encoder_selected(&self) -> bool {
+        self.get_selected_encoder().is_some()
+    }
+
     pub fn import_video_file(&mut self, file_handles: &[PathBuf]) {
         if let Some(video_file) = filter_file_with_extention(file_handles, "mp4") {
-            self.video_file = Some(video_file.clone());
+            self.input_video_file = Some(video_file.clone());
             self.video_info = VideoInfo::get(video_file, &self.dependencies.ffprobe_path).ok();
+
+            // Generate default output file name for newly imported video file.
+            self.update_output_video_path();
 
             // Try to load the matching OSD and SRT files
             self.import_osd_file(&[matching_file_with_extension(video_file, "osd")]);
@@ -103,12 +118,39 @@ pub fn format_minutes_seconds(duration: &Duration) -> String {
     format!("{}:{:0>2}", minutes, seconds)
 }
 
-pub fn get_output_video_path(input_video_path: &Path) -> PathBuf {
-    let input_video_file_name = input_video_path.file_stem().unwrap().to_string_lossy();
-    let output_video_file_name = format!("{}_with_osd.mp4", input_video_file_name);
-    let mut output_video_path = input_video_path.parent().unwrap().to_path_buf();
-    output_video_path.push(output_video_file_name);
+pub fn generate_default_output_file_name(input_file_path: &PathBuf) -> String {
+    let input_file_name_no_ext = input_file_path
+        .file_stem()
+        .map_or("file".to_string(), |p| p.to_string_lossy().to_string());
+
+    format!("{}_with_osd", input_file_name_no_ext)
+}
+
+pub fn generate_output_file_path(input_file_path: &Path, output_file_name: &String) -> PathBuf {
+    let mut output_video_path: PathBuf = input_file_path.parent().unwrap().to_path_buf();
+    let mut output_file_name = output_file_name.clone();
+    if output_file_name.is_empty() {
+        output_file_name = "file".to_owned();
+    }
+    output_video_path.push(&output_file_name);
+    add_extension(&mut output_video_path, "mp4");
     output_video_path
+}
+
+fn add_extension(path: &mut std::path::PathBuf, extension: impl AsRef<std::path::Path>) {
+    if path.extension() == Some(extension.as_ref().as_os_str()) {
+        return;
+    }
+
+    match path.extension() {
+        Some(ext) => {
+            let mut ext = ext.to_os_string();
+            ext.push(".");
+            ext.push(extension.as_ref());
+            path.set_extension(ext)
+        }
+        None => path.set_extension(extension.as_ref()),
+    };
 }
 
 pub fn set_style(ctx: &egui::Context) {

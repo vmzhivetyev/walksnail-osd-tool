@@ -3,9 +3,8 @@ use std::fmt::Display;
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 
-use crate::util::Dimension;
-
 use super::FontFileError;
+use crate::util::Dimension;
 
 #[derive(Debug, Clone, PartialEq, Hash, Serialize, Deserialize, Derivative)]
 pub enum CharacterSizeClass {

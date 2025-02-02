@@ -7,7 +7,6 @@ use ffmpeg_sidecar::{
     iter::FfmpegIterator,
 };
 use image::{Rgba, RgbaImage};
-use rayon::iter::Empty;
 
 use super::{overlay_osd, overlay_srt_data, overlay_srt_debug_data};
 use crate::{

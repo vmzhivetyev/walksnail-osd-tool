@@ -12,7 +12,9 @@ use ffmpeg_sidecar::{
 };
 use image::RgbaImage;
 
-use super::{render_settings::RenderSettings, Encoder, FromFfmpegMessage, ToFfmpegMessage, VideoInfo};
+use super::{
+    render_settings::RenderSettings, Encoder, FromFfmpegMessage, ToFfmpegMessage, VideoInfo,
+};
 use crate::{
     font,
     osd::{self, OsdOptions},
@@ -89,6 +91,10 @@ pub fn start_video_render(
     ),
     io::Error,
 > {
+    if input_video == output_video {
+        panic!("This should never happen");
+    }
+
     let mut decoder_process = spawn_decoder(ffmpeg_path, input_video)?;
 
     let mut encoder_process = spawn_encoder(

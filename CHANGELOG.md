@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-02-02
+
+### Fixed
+
+- OSD font file is no longer reset when using the "Reset files" button.
+
+### Improved
+
+- New "Output File" section in the sidebar:
+    - Allows specifying the name of the output file.
+    - Displays a warning if the file already exists.
+    - Prevents using the same name as the input file.
+
+- Clearly indicate with color (in the sidebar) that the absence of an OSD font file (.png) prevents the render from being started.
+
 ## [1.1.4] - 2025-02-01
 
 ### Fixed

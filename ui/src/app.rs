@@ -22,13 +22,20 @@ use poll_promise::Promise;
 use crate::{
     osd_preview::create_osd_preview,
     render_status::RenderStatus,
-    util::{set_custom_fonts, set_style},
+    util::{generate_default_output_file_name, generate_output_file_path, set_custom_fonts, set_style},
 };
+
+// Let's try to come up with a proper architecture to manage UI state...
+#[derive(Default)]
+pub struct UIState {
+    pub output_file_name: String,
+}
 
 #[derive(Default)]
 pub struct WalksnailOsdTool {
     pub config_changed: Option<Instant>,
-    pub video_file: Option<PathBuf>,
+    pub input_video_file: Option<PathBuf>,
+    pub output_video_file: Option<PathBuf>,
     pub video_info: Option<VideoInfo>,
     pub osd_file: Option<OsdFile>,
     pub font_file: Option<FontFile>,
@@ -51,6 +58,7 @@ pub struct WalksnailOsdTool {
     pub app_update: AppUpdate,
     pub app_version: String,
     pub target: String,
+    pub ui_state: UIState,
 }
 
 impl WalksnailOsdTool {
@@ -203,6 +211,27 @@ impl eframe::App for WalksnailOsdTool {
 }
 
 impl WalksnailOsdTool {
+    pub fn update_output_video_path(&mut self) {
+        if let Some(input_video_file) = &self.input_video_file {
+            if self.output_video_file.is_none() || self.ui_state.output_file_name.is_empty() {
+                self.ui_state.output_file_name = generate_default_output_file_name(input_video_file);
+            }
+
+            self.output_video_file = Some(generate_output_file_path(
+                &input_video_file,
+                &self.ui_state.output_file_name,
+            ));
+
+            tracing::info!(
+                "changed output_video_file to: {}",
+                self.output_video_file.clone().unwrap().to_string_lossy()
+            );
+        } else {
+            self.output_video_file = None;
+            self.ui_state.output_file_name = "".to_owned();
+        }
+    }
+
     fn missing_dependencies_warning(&mut self, ctx: &egui::Context) {
         if !self.dependencies.dependencies_satisfied || self.encoders.is_empty() {
             egui::Window::new("Missing dependencies")
