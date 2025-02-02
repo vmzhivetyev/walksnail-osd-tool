@@ -12,7 +12,7 @@ use egui::{
 
 use crate::{
     osd_preview::{calculate_horizontal_offset, calculate_vertical_offset},
-    util::{handle_file_path_update, separator_with_space, tooltip_text},
+    util::{generate_default_output_file_name, generate_output_file_path, separator_with_space, tooltip_text},
     WalksnailOsdTool,
 };
 
@@ -482,20 +482,6 @@ impl WalksnailOsdTool {
                 Grid::new("render_options")
                     .min_col_width(self.ui_dimensions.options_column1_width)
                     .show(ui, |ui| {
-                        ui.label("Filename").on_hover_text(tooltip_text("Filename after rendering"));
-                        ui.horizontal(|ui| {
-                            ui.horizontal(|ui| {
-                                handle_file_path_update(
-                                    ui,
-                                    &self.input_video_file,
-                                    &mut self.output_video_file,
-                                    &mut self.filename_set,
-                                    &self.render_status,
-                                );
-                            });
-                        });
-                        ui.end_row();
-
                         ui.label("Encoder")
                             .on_hover_text(tooltip_text("Encoder used for rendering. In some cases not all available encoders are detected. Check the box to also show these."));
                         let displayed_encoders = self.displayed_encoders();

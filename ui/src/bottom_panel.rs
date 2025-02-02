@@ -19,10 +19,9 @@ impl WalksnailOsdTool {
     fn start_stop_render_button(&mut self, ui: &mut Ui) {
         let button_size = vec2(110.0, 40.0);
         if self.render_status.is_not_in_progress() {
-            let is_encoder_selected = self.get_selected_encoder() != None;
             if ui
                 .add_enabled(
-                    self.all_files_loaded() && is_encoder_selected,
+                    self.is_start_render_allowed(),
                     Button::new("Start render").min_size(button_size),
                 )
                 .on_disabled_hover_text("First load video, OSD, SRT and font files")
