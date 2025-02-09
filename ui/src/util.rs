@@ -53,6 +53,7 @@ impl WalksnailOsdTool {
             self.video_info = VideoInfo::get(video_file, &self.dependencies.ffprobe_path).ok();
 
             // Generate default output file name for newly imported video file.
+            self.ui_state.output_file_name = "".to_owned();
             self.update_output_video_path();
 
             // Try to load the matching OSD and SRT files
@@ -127,6 +128,9 @@ pub fn generate_default_output_file_name(input_file_path: &PathBuf) -> String {
 }
 
 pub fn generate_output_file_path(input_file_path: &Path, output_file_name: &String) -> PathBuf {
+    let input_file_path_str = input_file_path.to_string_lossy();
+    tracing::debug!("generate_output_file_path for {input_file_path_str}");
+
     let mut output_video_path: PathBuf = input_file_path.parent().unwrap().to_path_buf();
     let mut output_file_name = output_file_name.clone();
     if output_file_name.is_empty() {
