@@ -14,6 +14,16 @@ use tracing_subscriber::{filter, prelude::__tracing_subscriber_SubscriberExt, ut
 use super::WalksnailOsdTool;
 use crate::util::build_info::Build;
 
+pub const VIDEO_EXTENSIONS: &[&str] = &[
+    "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v", 
+    "3gp", "3g2", "asf", "rm", "rmvb", "vob", "ogv", "drc",
+    "mxf", "roq", "nsv", "f4v", "f4p", "f4a", "f4b"
+];
+
+pub const AVATAR_EXTENSIONS: &[&str] = &[
+    "osd", "png", "srt"
+];
+
 impl WalksnailOsdTool {
     pub fn all_files_loaded(&self) -> bool {
         self.video_loaded() && self.osd_loaded() && self.font_loaded()
@@ -48,7 +58,7 @@ impl WalksnailOsdTool {
     }
 
     pub fn import_video_file(&mut self, file_handles: &[PathBuf]) {
-        if let Some(video_file) = filter_file_with_extention(file_handles, "mp4") {
+        if let Some(video_file) = first_file_with_extentions(file_handles, VIDEO_EXTENSIONS) {
             self.input_video_file = Some(video_file.clone());
             self.video_info = VideoInfo::get(video_file, &self.dependencies.ffprobe_path).ok();
 
@@ -97,6 +107,24 @@ pub fn filter_file_with_extention<'a>(files: &'a [PathBuf], extention: &'a str) 
             }
         })
     })
+}
+
+pub fn first_file_with_extentions<'a>(files: &'a [PathBuf], extensions: &'a [&'a str]) -> Option<&'a PathBuf> {
+    filter_files_with_extensions(files, extensions).first().copied()
+}
+
+// finds ALL files matching any of the provided extensions
+pub fn filter_files_with_extensions<'a>(files: &'a [PathBuf], extensions: &'a [&'a str]) -> Vec<&'a PathBuf> {
+    files.iter().filter_map(|f| {
+        f.extension().and_then(|e| {
+            let ext_str = e.to_string_lossy();
+            if extensions.contains(&ext_str.as_ref()) {
+                Some(f)
+            } else {
+                None
+            }
+        })
+    }).collect()
 }
 
 #[tracing::instrument(ret, level = "info")]
