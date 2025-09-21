@@ -1,42 +1,42 @@
 use std::{
     cell::RefCell,
     collections::HashMap,
-    hash::{DefaultHasher, Hash, Hasher},
     path::PathBuf,
 };
 
 use derivative::Derivative;
 use image::{imageops::FilterType, io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 
-// Cache structure
+// Cache for resized glyphs with size limit (simplified key since size is constant per session)
 #[derive(Derivative, Clone, Debug)]
 pub struct ImageCache {
-    cache: RefCell<HashMap<u64, ImageBuffer<Rgba<u8>, Vec<u8>>>>,
+    cache: RefCell<HashMap<usize, ImageBuffer<Rgba<u8>, Vec<u8>>>>,
+    max_size: usize,
 }
 
 impl ImageCache {
-    pub fn new() -> Self {
+    pub fn new(max_size: usize) -> Self {
         ImageCache {
             cache: RefCell::new(HashMap::new()),
+            max_size,
         }
     }
 
-    fn generate_key(index: usize, size: &CharacterSizeClass) -> u64 {
-        let mut hasher = DefaultHasher::new();
-        index.hash(&mut hasher);
-        size.hash(&mut hasher);
-        hasher.finish()
+    pub fn get(&self, index: usize) -> Option<ImageBuffer<Rgba<u8>, Vec<u8>>> {
+        self.cache.borrow().get(&index).cloned()
     }
 
-    pub fn get(&self, index: usize, size: &CharacterSizeClass) -> Option<ImageBuffer<Rgba<u8>, Vec<u8>>> {
-        let key = Self::generate_key(index, size);
-        self.cache.borrow().get(&key).cloned() // Cloning the image to return a copy
+    pub fn insert(&self, index: usize, image: ImageBuffer<Rgba<u8>, Vec<u8>>) {
+        let mut cache = self.cache.borrow_mut();
+        
+        // If cache is full, don't add new entries (simple bounded cache)
+        if cache.len() >= self.max_size {
+            return;
+        }
+        
+        cache.insert(index, image);
     }
 
-    pub fn insert(&self, index: usize, size: &CharacterSizeClass, image: ImageBuffer<Rgba<u8>, Vec<u8>>) {
-        let key = Self::generate_key(index, size);
-        self.cache.borrow_mut().insert(key, image);
-    }
 }
 
 use super::{
@@ -68,12 +68,15 @@ impl FontFile {
         let characters = split_characters(&font_image, &font_character_size, &font_type);
         let character_count = characters.len() as u32;
 
+        // Create cache for resized glyphs (grows as needed, bounded)
+        let cache = ImageCache::new(256); // Reduced cache size to prevent memory bloat
+
         Ok(Self {
             file_path: path,
             font_type,
             font_character_size,
             characters,
-            cache: ImageCache::new(),
+            cache,
             character_count,
         })
     }
@@ -84,10 +87,12 @@ impl FontFile {
         size_class: &CharacterSizeClass,
         desired_size: Dimension<u32>,
     ) -> Option<ImageBuffer<Rgba<u8>, Vec<u8>>> {
-        if let Some(cached_image) = self.cache.get(index, size_class) {
-            return Some(cached_image.clone());
+        // Check cache first (simplified key since size is constant per session)
+        if let Some(cached_image) = self.cache.get(index) {
+            return Some(cached_image);
         }
 
+        // Cache miss - resize from original glyph
         let final_size = Dimension {
             width: ((desired_size.width as f32) * size_class.multiplier()).round() as u32,
             height: ((desired_size.height as f32) * size_class.multiplier()).round() as u32,
@@ -102,15 +107,14 @@ impl FontFile {
                     original_image,
                     final_size.width,
                     final_size.height,
-                    FilterType::Lanczos3,
+                    FilterType::Triangle,
                 )
             } else {
                 original_image.clone()
             };
 
-            // Cache the resized image
-            self.cache.insert(index, size_class, resized_image.clone());
-            println!("Cache glyph image {}", index);
+            // Cache the resized image (simplified key)
+            self.cache.insert(index, resized_image.clone());
             resized_image
         })
     }
