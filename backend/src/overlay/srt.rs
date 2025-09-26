@@ -2,7 +2,7 @@ use image::{Rgba, RgbaImage};
 use imageproc::drawing::draw_text_mut;
 use rusttype::{point, Font, Scale};
 
-use crate::srt::{SrtDebugFrameData, SrtFrameData, SrtOptions};
+use crate::srt::{SrtDebugFrameData, SrtFrameData, SrtOptions, DJISrtFrameData};
 
 #[inline]
 pub fn overlay_srt_data(
@@ -85,6 +85,59 @@ pub fn overlay_srt_data(
         font,
         &srt_string,
     );
+}
+
+#[inline]
+pub fn overlay_dji_srt_data(
+    image: &mut RgbaImage,
+    dji_srt_data: &DJISrtFrameData,
+    font: &rusttype::Font,
+    srt_options: &SrtOptions,
+) {
+    let _start = std::time::Instant::now();
+
+    let mut srt_string = String::new();
+
+    if srt_options.show_signal {
+        srt_string.push_str(&format!("Signal:{} ", dji_srt_data.signal));
+    }
+    if srt_options.show_channel {
+        srt_string.push_str(&format!("CH:{} ", dji_srt_data.channel));
+    }
+    if srt_options.show_flight_time {
+        srt_string.push_str(&format!("FlightTime:{} ", dji_srt_data.flight_time));
+    }
+    if srt_options.show_sbat {
+        srt_string.push_str(&format!("UAVBat:{:.1}V ", dji_srt_data.uav_bat)); // uav_bat -- sbat
+    }
+    if srt_options.show_gbat {
+        srt_string.push_str(&format!("GLSBat:{}% ", dji_srt_data.gls_bat)); // gls_bat -- gbat
+    }
+    if srt_options.show_uav_bat_cells {
+        srt_string.push_str(&format!("UAVCells:{} ", dji_srt_data.uav_bat_cells));
+    }
+    if srt_options.show_gls_bat_cells {
+        srt_string.push_str(&format!("GLSCells:{} ", dji_srt_data.gls_bat_cells));
+    }
+    if srt_options.show_latency {
+        srt_string.push_str(&format!("Delay:{}ms ", dji_srt_data.delay));
+    }
+    if srt_options.show_bitrate {
+        srt_string.push_str(&format!("Bitrate:{:.1}Mbps ", dji_srt_data.bitrate_mbps));
+    }
+    if srt_options.show_rc_signal {
+        srt_string.push_str(&format!("RCSignal:{} ", dji_srt_data.rc_signal));
+    }
+
+    let result = overlay_string(image, &srt_string, font, srt_options);
+
+    // tracing::info!(
+    //     "overlay_dji_srt_data done in {:?} for {} chars.",
+    //     _start.elapsed(),
+    //     srt_string.chars().count()
+    // );
+
+    result
 }
 
 #[inline]

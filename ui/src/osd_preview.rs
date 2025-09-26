@@ -1,18 +1,19 @@
 use backend::{
     font,
     osd::{self, OsdOptions},
-    overlay::{overlay_osd, overlay_srt_data, overlay_srt_debug_data},
+    overlay::{overlay_dji_srt_data, overlay_osd, overlay_srt_data, overlay_srt_debug_data},
     srt::{self, SrtOptions},
     util::Dimension,
 };
 use image::RgbaImage;
 
-#[tracing::instrument(skip(osd_frame, srt_frame, font), level = "debug")]
+#[tracing::instrument(skip(osd_frame, srt_file, srt_frame_index, font), level = "debug")]
 pub fn create_osd_preview(
     width: u32,
     height: u32,
     osd_frame: &osd::Frame,
-    srt_frame: Option<&srt::SrtFrame>,
+    srt_file: Option<&srt::SrtFile>,
+    srt_frame_index: Option<usize>,
     font: &font::FontFile,
     srt_font: &rusttype::Font,
     osd_options: &OsdOptions,
@@ -23,13 +24,19 @@ pub fn create_osd_preview(
     overlay_osd(&mut image, osd_frame, font, osd_options);
 
     if !srt_options.no_srt {
-        if let Some(frame) = &srt_frame {
-            if let Some(srt_data) = &frame.data {
-                overlay_srt_data(&mut image, srt_data, srt_font, srt_options);
-            }
-
-            if let Some(srt_debug_data) = &frame.debug_data {
-                overlay_srt_debug_data(&mut image, srt_debug_data, srt_font, srt_options);
+        if let (Some(srt_file), Some(frame_index)) = (srt_file, srt_frame_index) {
+            if let Some(frame_data) = srt_file.data.get_frame_data(frame_index) {
+                match frame_data {
+                    backend::srt::SrtFrameDataRef::Normal(data) => {
+                        overlay_srt_data(&mut image, data, srt_font, srt_options);
+                    }
+                    backend::srt::SrtFrameDataRef::Debug(data) => {
+                        overlay_srt_debug_data(&mut image, data, srt_font, srt_options);
+                    }
+                    backend::srt::SrtFrameDataRef::Dji(data) => {
+                        overlay_dji_srt_data(&mut image, data, srt_font, srt_options);
+                    }
+                }
             }
         }
     }

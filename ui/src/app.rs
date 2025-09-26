@@ -279,20 +279,25 @@ impl WalksnailOsdTool {
 
             let osd_frame_time = osd_frame.time_millis as f32 / 1000.0;
 
-            let srt_frame = if let Some(srt_file) = &self.srt_file {
-                srt_file
+            let (srt_file, srt_frame_index) = if let Some(srt_file) = &self.srt_file {
+                // Find the appropriate SRT frame index based on timing
+                let frame_index = srt_file
                     .frames
                     .iter()
-                    .find(|frame| frame.start_time_secs >= osd_frame_time)
+                    .position(|frame| frame.start_time_secs >= osd_frame_time)
+                    .unwrap_or(0); // Default to first frame if none found
+
+                (Some(srt_file), Some(frame_index))
             } else {
-                None
+                (None, None)
             };
 
             let rgba_image = create_osd_preview(
                 video_info.width,
                 video_info.height,
                 osd_frame,
-                srt_frame,
+                srt_file,
+                srt_frame_index,
                 font_file,
                 self.srt_font.as_ref().unwrap(),
                 &self.osd_options,

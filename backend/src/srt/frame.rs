@@ -3,12 +3,53 @@ use std::str::FromStr;
 use parse_display::FromStr;
 use regex::Regex;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq)]
+pub enum SrtData {
+    Normal(Vec<SrtFrameData>),
+    Debug(Vec<SrtDebugFrameData>),
+    Dji(Vec<DJISrtFrameData>),
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct SrtFrame {
     pub start_time_secs: f32,
     pub end_time_secs: f32,
-    pub data: Option<SrtFrameData>,
-    pub debug_data: Option<SrtDebugFrameData>,
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub enum SrtFrameDataRef<'a> {
+    Normal(&'a SrtFrameData),
+    Debug(&'a SrtDebugFrameData),
+    Dji(&'a DJISrtFrameData),
+}
+
+impl<'a> SrtFrameDataRef<'a> {
+    /// Helper method to get signal strength regardless of data type
+    pub fn signal(&self) -> Option<i16> {
+        match self {
+            SrtFrameDataRef::Normal(data) => Some(data.signal as i16),
+            SrtFrameDataRef::Debug(data) => Some(data.signal as i16),
+            SrtFrameDataRef::Dji(data) => Some(data.signal as i16),
+        }
+    }
+    
+    /// Helper method to get channel regardless of data type
+    pub fn channel(&self) -> Option<i16> {
+        match self {
+            SrtFrameDataRef::Normal(data) => Some(data.channel as i16),
+            SrtFrameDataRef::Debug(data) => Some(data.channel as i16),
+            SrtFrameDataRef::Dji(data) => Some(data.channel as i16),
+        }
+    }
+    
+    /// Helper method to get latency regardless of data type
+    pub fn latency(&self) -> Option<i32> {
+        match self {
+            SrtFrameDataRef::Normal(data) => Some(data.latency as i32),
+            SrtFrameDataRef::Debug(data) => Some(data.latency),
+            SrtFrameDataRef::Dji(data) => Some(data.delay as i32),
+        }
+    }
 }
 
 #[derive(Debug, FromStr, Clone, PartialEq)]
@@ -24,6 +65,21 @@ pub struct SrtFrameData {
     pub distance: u32,
 }
 
+#[derive(Debug, FromStr, Clone, PartialEq)]
+#[display("signal:{signal} ch:{channel} flightTime:{flight_time} uavBat:{uav_bat}V glsBat:{gls_bat}% uavBatCells:{uav_bat_cells} glsBatCells:{gls_bat_cells} delay:{delay}ms bitrate:{bitrate_mbps}Mbps rcSignal:{rc_signal}")]
+pub struct DJISrtFrameData {
+    pub signal: u8,
+    pub channel: u8,
+    pub flight_time: u32,
+    pub uav_bat: f32,
+    pub gls_bat: u8,  // percentage, so u8 is sufficient
+    pub uav_bat_cells: u8,
+    pub gls_bat_cells: u8,
+    pub delay: u32,
+    pub bitrate_mbps: f32,
+    pub rc_signal: u8,
+}
+
 // See https://walksnail.wiki/en/Debug
 #[derive(Debug, Clone, PartialEq)]
 pub struct SrtDebugFrameData {
@@ -32,7 +88,7 @@ pub struct SrtDebugFrameData {
     //pub flight_time: u32,
     //pub sky_bat: f32,
     //pub ground_bat: f32,
-    pub latency: i32,
+    pub latency: i32, // can be -1?
     //pub bitrate_mbps: f32,
     //pub distance: u32,
     pub sp1: i16,

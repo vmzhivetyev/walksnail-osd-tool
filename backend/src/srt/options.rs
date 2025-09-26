@@ -32,6 +32,12 @@ pub struct SrtOptions {
     pub show_gp: bool,
     pub show_stp: bool,
     pub show_gtp: bool,
+
+    // DJI-specific fields
+    pub show_flight_time: bool,
+    pub show_uav_bat_cells: bool,
+    pub show_gls_bat_cells: bool,
+    pub show_rc_signal: bool,
 }
 
 impl Default for SrtOptions {
@@ -65,6 +71,12 @@ impl Default for SrtOptions {
             show_gp: false,
             show_stp: false,
             show_gtp: false,
+
+            // DJI-specific fields
+            show_flight_time: true,
+            show_uav_bat_cells: false,
+            show_gls_bat_cells: false,
+            show_rc_signal: false,
         }
     }
 }

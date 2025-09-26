@@ -8,12 +8,12 @@ use ffmpeg_sidecar::{
 };
 use image::{Rgba, RgbaImage};
 
-use super::{overlay_osd, overlay_srt_data, overlay_srt_debug_data};
+use super::{overlay_osd, overlay_srt_data, overlay_srt_debug_data, overlay_dji_srt_data};
 use crate::{
     ffmpeg::{handle_decoder_events, FromFfmpegMessage, ToFfmpegMessage},
     font,
     osd::{self, OsdOptions},
-    srt::{self, SrtFrame, SrtOptions},
+    srt::{self, SrtFile, SrtFrame, SrtFrameDataRef, SrtOptions},
 };
 
 pub struct FrameOverlayIter<'a> {
@@ -21,24 +21,25 @@ pub struct FrameOverlayIter<'a> {
     decoder_process: FfmpegChild,
     osd_frames_iter: Peekable<IntoIter<osd::Frame>>,
     srt_frames_iter: Peekable<IntoIter<srt::SrtFrame>>,
+    srt_file: Option<srt::SrtFile>,
     font_file: font::FontFile,
     osd_options: OsdOptions,
     srt_options: SrtOptions,
     srt_font: rusttype::Font<'a>,
     current_osd_frame: osd::Frame,
-    current_srt_frame: Option<srt::SrtFrame>,
+    current_srt_frame_index: Option<usize>,
     ffmpeg_sender: Sender<FromFfmpegMessage>,
     ffmpeg_receiver: Receiver<ToFfmpegMessage>,
     chroma_key: Option<Rgba<u8>>,
 }
 
 impl<'a> FrameOverlayIter<'a> {
-    #[tracing::instrument(skip(decoder_iter, decoder_process, osd_frames, font_file), level = "debug")]
+    #[tracing::instrument(skip(decoder_iter, decoder_process, osd_frames, font_file, srt_file), level = "debug")]
     pub fn new(
         decoder_iter: FfmpegIterator,
         decoder_process: FfmpegChild,
         osd_frames: Vec<osd::Frame>,
-        srt_frames: Option<Vec<srt::SrtFrame>>,
+        srt_file: Option<srt::SrtFile>,
         font_file: font::FontFile,
         srt_font: rusttype::Font<'a>,
         osd_options: &OsdOptions,
@@ -49,8 +50,9 @@ impl<'a> FrameOverlayIter<'a> {
     ) -> Self {
         let mut osd_frames_iter = osd_frames.into_iter();
 
-        let mut srt_frames_iter = srt_frames
-            .map(|frames| frames.into_iter().peekable())
+        let mut srt_frames_iter = srt_file
+            .as_ref()
+            .map(|file| file.frames.clone().into_iter().peekable())
             .unwrap_or_else(|| Vec::<SrtFrame>::new().into_iter().peekable());
 
         let first_osd_frame = if osd_options.osd_playback_offset >= 0.0 {
@@ -59,7 +61,12 @@ impl<'a> FrameOverlayIter<'a> {
             osd_frames_iter.next().unwrap()
         };
 
-        let first_srt_frame = srt_frames_iter.next();
+        // Start with frame index 0 if we have SRT data
+        let first_srt_frame_index = if srt_file.is_some() {
+            Some(0)
+        } else {
+            None
+        };
 
         let chroma_key = chroma_key.map(|c| {
             Rgba([
@@ -69,17 +76,19 @@ impl<'a> FrameOverlayIter<'a> {
                 (c[3] * 255.0) as u8,
             ])
         });
+
         Self {
             decoder_iter,
             decoder_process,
             osd_frames_iter: osd_frames_iter.peekable(),
-            srt_frames_iter: srt_frames_iter,
+            srt_frames_iter,
+            srt_file,
             font_file,
             osd_options: osd_options.clone(),
             srt_options: srt_options.clone(),
             srt_font: srt_font.clone(),
             current_osd_frame: first_osd_frame,
-            current_srt_frame: first_srt_frame,
+            current_srt_frame_index: first_srt_frame_index,
             ffmpeg_sender,
             ffmpeg_receiver,
             chroma_key,
@@ -91,7 +100,7 @@ impl Iterator for FrameOverlayIter<'_> {
     type Item = OutputVideoFrame;
 
     fn next(&mut self) -> Option<Self::Item> {
-        //  On every iteration check if the render should be stopped
+        // On every iteration check if the render should be stopped
         while let Ok(ToFfmpegMessage::AbortRender) = self.ffmpeg_receiver.try_recv() {
             self.decoder_process.quit().unwrap();
         }
@@ -111,10 +120,14 @@ impl Iterator for FrameOverlayIter<'_> {
                     }
                 }
 
+                // Check if we need to advance to the next SRT frame
                 if let Some(next_srt_frame) = self.srt_frames_iter.peek() {
                     let next_srt_start_time_secs = next_srt_frame.start_time_secs;
                     if video_frame.timestamp > next_srt_start_time_secs {
-                        self.current_srt_frame = self.srt_frames_iter.next();
+                        self.srt_frames_iter.next(); // Consume the frame
+                        if let Some(current_index) = self.current_srt_frame_index {
+                            self.current_srt_frame_index = Some(current_index + 1);
+                        }
                     }
                 }
 
@@ -135,13 +148,19 @@ impl Iterator for FrameOverlayIter<'_> {
                 }
 
                 if !self.srt_options.no_srt {
-                    if let Some(frame) = &self.current_srt_frame {
-                        if let Some(srt_data) = &frame.data {
-                            overlay_srt_data(&mut frame_image, srt_data, &self.srt_font, &self.srt_options);
-                        }
-
-                        if let Some(srt_debug_data) = &frame.debug_data {
-                            overlay_srt_debug_data(&mut frame_image, srt_debug_data, &self.srt_font, &self.srt_options);
+                    if let (Some(srt_file), Some(frame_index)) = (&self.srt_file, self.current_srt_frame_index) {
+                        if let Some(frame_data) = srt_file.data.get_frame_data(frame_index) {
+                            match frame_data {
+                                SrtFrameDataRef::Normal(data) => {
+                                    overlay_srt_data(&mut frame_image, data, &self.srt_font, &self.srt_options);
+                                }
+                                SrtFrameDataRef::Debug(data) => {
+                                    overlay_srt_debug_data(&mut frame_image, data, &self.srt_font, &self.srt_options);
+                                }
+                                SrtFrameDataRef::Dji(data) => {
+                                    overlay_dji_srt_data(&mut frame_image, data, &self.srt_font, &self.srt_options);
+                                }
+                            }
                         }
                     }
                 }

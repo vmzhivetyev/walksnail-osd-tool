@@ -56,7 +56,7 @@ impl WalksnailOsdTool {
                         input_video_path,
                         output_video_path,
                         osd_file.frames.clone(),
-                        self.srt_file.as_ref().map(|file| file.frames.clone()),
+                        self.srt_file.take(),
                         font_file.clone(),
                         self.srt_font.as_ref().unwrap().clone(),
                         &self.osd_options,

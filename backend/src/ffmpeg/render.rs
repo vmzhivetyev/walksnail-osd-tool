@@ -17,7 +17,7 @@ use crate::{
     font,
     osd::{self, OsdOptions},
     overlay::FrameOverlayIter,
-    srt::{self, SrtOptions},
+    srt::{self, SrtFile, SrtOptions},
 };
 
 fn run_ready_frames_to_queue(
@@ -73,7 +73,7 @@ pub fn start_video_render(
     input_video: &PathBuf,
     output_video: &PathBuf,
     osd_frames: Vec<osd::Frame>,
-    srt_frames: Option<Vec<srt::SrtFrame>>,
+    srt_frames: Option<SrtFile>,
     font_file: font::FontFile,
     srt_font: rusttype::Font<'static>,
     osd_options: &OsdOptions,

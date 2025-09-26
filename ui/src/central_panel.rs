@@ -251,39 +251,71 @@ impl WalksnailOsdTool {
                                 changed |= true;
                             }
                         });
-                        ui.end_row();
-
-                        ui.label("SRT data").on_hover_text(tooltip_text(
+                        ui.end_row();ui.label("SRT data").on_hover_text(tooltip_text(
                             "Select data from the SRT file to be rendered on the video.",
                         ));
+
                         let options = &mut self.srt_options;
-                        let has_distance = self.srt_file.as_ref().map(|s| s.has_distance).unwrap_or(true);
-                        let has_debug = self.srt_file.as_ref().map(|s| s.has_debug).unwrap_or(false);
+
+                        // Determine what type of SRT data we have and what features are available
+                        let (has_distance, srt_data_type) = if let Some(srt_file) = &self.srt_file {
+                            let data_type = match &srt_file.data {
+                                backend::srt::SrtData::Normal(_) => "normal",
+                                backend::srt::SrtData::Debug(_) => "debug", 
+                                backend::srt::SrtData::Dji(_) => "dji",
+                            };
+                            (srt_file.has_distance, Some(data_type))
+                        } else {
+                            (true, None)
+                        };
+
+                        let is_debug = srt_data_type == Some("debug");
+                        let is_dji = srt_data_type == Some("dji");
+                        let is_normal = srt_data_type == Some("normal");
+
                         Grid::new("srt_selection").show(ui, |ui| {
+                            // Common fields available in all SRT types
                             changed |= ui.checkbox(&mut options.show_signal, "Signal/MCS").changed();
-                            changed |= ui
-                                .add_enabled(!has_debug, Checkbox::new(&mut options.show_time, "Time"))
-                                .changed();
                             changed |= ui.checkbox(&mut options.show_channel, "Channel").changed();
-                            changed |= ui
-                                .add_enabled(!has_debug, Checkbox::new(&mut options.show_gbat, "GBat"))
-                                .changed();
-                            changed |= ui
-                                .add_enabled(!has_debug, Checkbox::new(&mut options.show_sbat, "SBat"))
-                                .changed();
-                            ui.end_row();
-
                             changed |= ui.checkbox(&mut options.show_latency, "Delay").changed();
-                            changed |= ui
-                                .add_enabled(!has_debug, Checkbox::new(&mut options.show_bitrate, "Bitrate"))
-                                .changed();
-                            changed |= ui
-                                .add_enabled(has_distance, Checkbox::new(&mut options.show_distance, "Distance"))
-                                .changed();
                             ui.end_row();
 
-                            // debug srt data
-                            if has_debug {
+                            // Fields specific to normal SRT data
+                            // if is_normal || is_dji || is_debug || srt_data_type.is_none() {
+                                changed |= ui
+                                    .add_enabled(!is_debug, Checkbox::new(&mut options.show_time, "Time"))
+                                    .changed();
+                                changed |= ui
+                                    .add_enabled(!is_debug, Checkbox::new(&mut options.show_gbat, "GBat"))
+                                    .changed();
+                                changed |= ui
+                                    .add_enabled(!is_debug, Checkbox::new(&mut options.show_sbat, "SBat"))
+                                    .changed();
+                                changed |= ui
+                                    .add_enabled(!is_debug, Checkbox::new(&mut options.show_bitrate, "Bitrate"))
+                                    .changed();
+                                changed |= ui
+                                    .add_enabled(has_distance, Checkbox::new(&mut options.show_distance, "Distance"))
+                                    .changed();
+                                ui.end_row();
+                            // }
+
+                            // Fields specific to DJI SRT data
+                            if is_dji {
+                                changed |= ui.checkbox(&mut options.show_flight_time, "Flight Time").changed();
+                                changed |= ui.checkbox(&mut options.show_sbat, "UAV Battery").changed();
+                                changed |= ui.checkbox(&mut options.show_gbat, "GLS Battery").changed();
+                                changed |= ui.checkbox(&mut options.show_bitrate, "Bitrate").changed();
+                                ui.end_row();
+                                
+                                changed |= ui.checkbox(&mut options.show_uav_bat_cells, "UAV Cells").changed();
+                                changed |= ui.checkbox(&mut options.show_gls_bat_cells, "GLS Cells").changed();
+                                changed |= ui.checkbox(&mut options.show_rc_signal, "RC Signal").changed();
+                                ui.end_row();
+                            }
+
+                            // Debug SRT data fields
+                            if is_debug {
                                 ui.end_row();
 
                                 changed |= ui
@@ -331,6 +363,7 @@ impl WalksnailOsdTool {
                                     .on_hover_text("Error count")
                                     .changed();
                                 ui.end_row();
+                                
                                 changed |= ui
                                     .checkbox(&mut options.show_settings_cam, "Camera Set")
                                     .on_hover_text("Camera ISO/exposure parameters")
@@ -340,6 +373,7 @@ impl WalksnailOsdTool {
                                     .on_hover_text("Actual camera parameters")
                                     .changed();
                                 ui.end_row();
+                                
                                 changed |= ui
                                     .checkbox(&mut options.show_cct, "CCT")
                                     .on_hover_text("Correlated Color Temperature")
@@ -352,6 +386,13 @@ impl WalksnailOsdTool {
                             }
                         });
                         ui.end_row();
+
+                        // Show SRT type info if available
+                        if let Some(data_type) = srt_data_type {
+                            ui.label(format!("SRT Type: {}", data_type.to_uppercase()))
+                                .on_hover_text(tooltip_text(&format!("Detected {} SRT data format", data_type)));
+                            ui.end_row();
+                        }
 
                         ui.label("Disable SRT rendering")
                             .on_hover_text(tooltip_text("Do not render SRT."));
