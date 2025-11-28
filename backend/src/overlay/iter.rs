@@ -146,7 +146,7 @@ impl Iterator for FrameOverlayIter<'_> {
                     }
                 }
 
-                video_frame.data = frame_image.as_raw().to_vec();
+                video_frame.data = frame_image.into_raw();
 
                 // tracing::info!(
                 //     "next frame prepared in {:?}.",

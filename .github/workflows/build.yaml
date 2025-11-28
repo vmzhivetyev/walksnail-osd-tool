@@ -88,15 +88,15 @@ jobs:
 
       - name: Build (Windows)
         if: ${{ matrix.targets.name == 'windows64'}}
-        run: cargo build --release --features windows-installer
+        run: cargo build --release --package walksnail-osd-tool --features windows-installer
 
       - name: Build (MacOS)
         if: ${{ matrix.targets.name == 'macos-intel' || matrix.targets.name == 'macos-arm'}}
-        run: cargo build --release --target ${{ matrix.targets.target }} --features macos-app-bundle
+        run: cargo build --release --target ${{ matrix.targets.target }} --package walksnail-osd-tool --features macos-app-bundle
 
       - name: Build (Linux)
         if: ${{ matrix.targets.name == 'linux64'}}
-        run: cargo build --release --target ${{ matrix.targets.target }}
+        run: cargo build --release --target ${{ matrix.targets.target }} --package walksnail-osd-tool
 
       - name: Extract ffmpeg
         if: ${{ matrix.targets.name != 'linux64' }}
@@ -123,7 +123,7 @@ jobs:
       - name: Create Mac App bundle
         if: ${{ matrix.targets.name == 'macos-intel' || matrix.targets.name == 'macos-arm'}}
         run: |
-          cargo bundle --release --target ${{ matrix.targets.target }} --features macos-app-bundle
+          cargo bundle --release --target ${{ matrix.targets.target }} --package walksnail-osd-tool --features macos-app-bundle
           cp ${{ github.workspace }}/ext/ffmpeg/${{ matrix.targets.name }}/ffmpeg ${{ github.workspace }}/target/${{ matrix.targets.target }}/release/bundle/osx/Walksnail\ OSD\ Tool.app/Contents/MacOS/ffmpeg
           cp ${{ github.workspace }}/ext/ffmpeg/${{ matrix.targets.name }}/ffprobe ${{ github.workspace }}/target/${{ matrix.targets.target }}/release/bundle/osx/Walksnail\ OSD\ Tool.app/Contents/MacOS/ffprobe
           cd ${{ github.workspace }}/target/${{ matrix.targets.target }}/release/bundle/osx/

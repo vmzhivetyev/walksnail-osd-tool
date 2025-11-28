@@ -4,6 +4,67 @@ use rusttype::{point, Font, Scale};
 
 use crate::srt::{SrtDebugFrameData, SrtFrameData, SrtOptions};
 
+/// Fast, adaptive buffered overlay using font metrics and no hardcoded values
+pub fn overlay_srt_buffered(
+    image: &mut RgbaImage,
+    srt_string: &str,
+    font: &rusttype::Font,
+    srt_options: &SrtOptions,
+) {
+    let image_dimensions = image.dimensions();
+    let scale = rusttype::Scale::uniform(srt_options.scale / 1080.0 * image_dimensions.1 as f32);
+    let max_width = image_dimensions.0 as f32;
+    let words: Vec<&str> = srt_string.split(' ').collect();
+    let mut lines: Vec<String> = Vec::new();
+    let mut current_line = String::new();
+    for word in words {
+        let test_line = if current_line.is_empty() {
+            word.to_string()
+        } else {
+            format!("{} {}", current_line, word)
+        };
+        let line_width: f32 = font.layout(&test_line, scale, point(0.0, 0.0))
+            .map(|g| g.unpositioned().h_metrics().advance_width)
+            .sum();
+        if line_width <= max_width {
+            current_line = test_line;
+        } else {
+            if !current_line.is_empty() {
+                lines.push(current_line.clone());
+            }
+            current_line = word.to_string();
+        }
+    }
+    if !current_line.is_empty() {
+        lines.push(current_line);
+    }
+    // Calculate buffer size
+    let text_width = lines.iter()
+        .map(|line| font.layout(line, scale, point(0.0, 0.0))
+            .map(|g| g.unpositioned().h_metrics().advance_width)
+            .sum::<f32>())
+        .fold(0.0f32, |a, b| a.max(b))
+        .ceil() as u32;
+    let line_height = (scale.y * 1.2).ceil() as u32;
+    let text_height = (line_height * lines.len() as u32).max(line_height);
+    // Create buffer
+    let mut text_image = RgbaImage::new(text_width, text_height);
+    for (i, line) in lines.iter().enumerate() {
+        draw_text_mut(
+            &mut text_image,
+            Rgba([240u8, 240u8, 240u8, 255u8]),
+            0,
+            (i as u32 * line_height) as i32,
+            scale,
+            font,
+            line,
+        );
+    }
+    let x_pos = (srt_options.position.x / 100.0 * image_dimensions.0 as f32).round() as i64;
+    let y_pos = (srt_options.position.y / 100.0 * image_dimensions.1 as f32).round() as i64;
+    image::imageops::overlay(image, &text_image, x_pos, y_pos);
+}
+
 #[inline]
 pub fn overlay_srt_data(
     image: &mut RgbaImage,
@@ -70,21 +131,9 @@ pub fn overlay_srt_data(
     let srt_string =
         format!("{signal_str}{channel_str}{time_str}{gbat_str}{sbat_str}{latency_str}{bitrate_str}{distance_str}");
 
-    let image_dimensions = image.dimensions();
+    // let image_dimensions = image.dimensions(); // not needed
 
-    let x_pos = srt_options.position.x / 100.0 * image_dimensions.0 as f32;
-    let y_pos = srt_options.position.y / 100.0 * image_dimensions.1 as f32;
-    let scale = srt_options.scale / 1080.0 * image_dimensions.1 as f32;
-
-    draw_text_mut(
-        image,
-        Rgba([240u8, 240u8, 240u8, 10u8]),
-        x_pos as i32,
-        y_pos as i32,
-        rusttype::Scale::uniform(scale),
-        font,
-        &srt_string,
-    );
+        overlay_srt_buffered(image, &srt_string, font, srt_options);
 }
 
 #[inline]

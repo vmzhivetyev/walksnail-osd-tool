@@ -145,7 +145,8 @@ pub fn start_video_render(
     let encoder_stdin = encoder_process.take_stdin().expect("Failed to get `stdin` for encoder");
 
     let (ready_frames_queue_in, ready_frames_queue_out) =
-        crossbeam_channel::bounded::<ffmpeg_sidecar::event::OutputVideoFrame>(100);
+        crossbeam_channel::bounded::<ffmpeg_sidecar::event::OutputVideoFrame>(256); // Much smaller buffer to prevent memory bloat
+
 
     thread::Builder::new()
         .name("Push ready frames to queue".into())

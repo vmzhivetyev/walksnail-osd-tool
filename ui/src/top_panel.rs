@@ -2,7 +2,7 @@ use std::time::Instant;
 
 use egui::{vec2, Align2, Button, Frame, Label, RichText, Sense, TextStyle, Ui, Visuals, Window};
 
-use crate::util::{AVATAR_EXTENSIONS, VIDEO_EXTENSIONS};
+use crate::util::{VIDEO_EXTENSIONS, AVATAR_EXTENSIONS};
 
 use super::WalksnailOsdTool;
 
@@ -27,8 +27,8 @@ impl WalksnailOsdTool {
             .clicked()
         {
             if let Some(file_handles) = rfd::FileDialog::new()
-                .add_filter("Avatar files", AVATAR_EXTENSIONS)
                 .add_filter("Video files", VIDEO_EXTENSIONS)
+                .add_filter("Avatar files", AVATAR_EXTENSIONS)
                 .pick_files()
             {
                 tracing::info!("Opened files {:?}", file_handles);
