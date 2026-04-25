@@ -45,7 +45,7 @@ impl SrtFile {
                     start_time_secs: i.start_time.into_duration().as_secs_f32(),
                     end_time_secs: i.end_time.into_duration().as_secs_f32(),
                     data,
-                    debug_data: debug_data,
+                    debug_data,
                 })
             })
             .collect::<Result<Vec<_>, _>>()?;

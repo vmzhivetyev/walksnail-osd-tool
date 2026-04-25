@@ -73,7 +73,7 @@ impl<'a> FrameOverlayIter<'a> {
             decoder_iter,
             decoder_process,
             osd_frames_iter: osd_frames_iter.peekable(),
-            srt_frames_iter: srt_frames_iter,
+            srt_frames_iter,
             font_file,
             osd_options: osd_options.clone(),
             srt_options: srt_options.clone(),

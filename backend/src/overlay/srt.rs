@@ -213,18 +213,16 @@ pub fn overlay_srt_debug_data(
         srt_string.push_str(&format!("[RB:{:.2} {:.2}] ", srt_debug_data.rb, srt_debug_data.rb_ext));
     }
 
-    let result = overlay_string(image, &srt_string, font, srt_options);
+    overlay_string(image, &srt_string, font, srt_options);
 
     // tracing::info!(
     //     "overlay_srt_debug_data done in {:?} for {} chars.",
     //     _start.elapsed(),
     //     srt_string.chars().count()
     // );
-
-    result
 }
 
-fn overlay_string(image: &mut RgbaImage, srt_string: &String, font: &rusttype::Font, srt_options: &SrtOptions) {
+fn overlay_string(image: &mut RgbaImage, srt_string: &str, font: &rusttype::Font, srt_options: &SrtOptions) {
     let image_dimensions = image.dimensions();
     let scale = Scale::uniform(srt_options.scale / 1080.0 * image_dimensions.1 as f32);
 

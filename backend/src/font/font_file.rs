@@ -4,6 +4,7 @@ use derivative::Derivative;
 use image::{imageops::FilterType, io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
 
 // Cache for resized glyphs with size limit (simplified key since size is constant per session)
+#[allow(clippy::type_complexity)]
 #[derive(Derivative, Clone, Debug)]
 pub struct ImageCache {
     cache: RefCell<HashMap<usize, ImageBuffer<Rgba<u8>, Vec<u8>>>>,

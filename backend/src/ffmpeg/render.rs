@@ -67,6 +67,7 @@ fn run_ready_frames_from_queue_to_encoder(
     }
 }
 
+#[allow(clippy::type_complexity)]
 #[tracing::instrument(skip(osd_frames, srt_frames, font_file), err)]
 pub fn start_video_render(
     ffmpeg_path: &PathBuf,
@@ -268,7 +269,7 @@ pub fn spawn_encoder(
     if &video_encoder.name == "prores_ks" {
         output_video.set_extension("mov");
     } else {
-        if chroma_key == None && !video_encoder.name.contains("nvenc") {
+        if chroma_key.is_none() && !video_encoder.name.contains("nvenc") {
             encoder_command.pix_fmt("yuv420p");
         }
     }
