@@ -20,7 +20,7 @@ jobs:
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.85.0
+          toolchain: 1.91.0
 
       - name: Install packages (Linux)
         if: ${{ matrix.target == 'ubuntu-latest' }}
@@ -46,7 +46,7 @@ jobs:
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.85.0
+          toolchain: 1.91.0
 
       - name: Cache dependencies
         uses: Swatinem/rust-cache@v2
@@ -64,7 +64,7 @@ jobs:
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.85.0
+          toolchain: 1.91.0
           components: rustfmt
 
       - name: Run cargo fmt
@@ -80,7 +80,7 @@ jobs:
       - name: Install toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: 1.85.0
+          toolchain: 1.91.0
           components: clippy
 
       - name: Cache dependencies
