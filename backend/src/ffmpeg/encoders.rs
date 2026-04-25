@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 pub enum Codec {
     H264,
     H265,
+    AV1,
     VP9,
     ProRes,
 }
@@ -16,6 +17,7 @@ impl Display for Codec {
         match self {
             Codec::H264 => write!(f, "H.264"),
             Codec::H265 => write!(f, "H.265 (HEVC)"),
+            Codec::AV1 => write!(f, "AV1"),
             Codec::VP9 => write!(f, "VP9"),
             Codec::ProRes => write!(f, "Apple ProRes"),
         }
@@ -123,6 +125,12 @@ impl Encoder {
                 "hevc_nvenc", Codec::H265, true,
                 Some(&["-qp", "19", "-b:v", "0k"]),
                 &hvc1tag
+            ),
+
+            #[cfg(any(target_os = "windows", target_os = "linux"))]
+            Encoder::new(
+                "av1_nvenc", Codec::AV1, true,
+                Some(&["-qp", "25", "-b:v", "0k"])
             ),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]
