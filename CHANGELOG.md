@@ -4,6 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-04-25
+
+### Added
+
+- NVIDIA NVENC AV1 encoder (`av1_nvenc`) support on Windows and Linux.
+
+## [1.2.3] - 2025-11-14
+
+### Changed
+
+- NVENC encoders now use `-preset p7 -tune hq` for higher quality output (both with and without upscaling).
+- Improved overlay rendering performance: faster OSD glyph blending using `ab_glyph`, refactored SRT overlay logic.
+
 ## [1.2.2] - 2025-07-06
 
 ### Changed
