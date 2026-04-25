@@ -2,7 +2,7 @@ name: Continuous integration
 
 on: 
   push:
-    branches: master
+    branches: [master]
   pull_request:
 
 jobs:
@@ -24,7 +24,7 @@ jobs:
 
       - name: Install packages (Linux)
         if: ${{ matrix.target == 'ubuntu-latest' }}
-        uses: awalsh128/cache-apt-pkgs-action@latest
+        uses: awalsh128/cache-apt-pkgs-action@acb598e5ddbc6f68a970c5da0688d2f3a9f04d05 # v1.6.0
         with:
           packages: libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev libxkbcommon-dev libssl-dev libgtk-3-dev # libgtk-3-dev is used by rfd
           version: 1.0
@@ -34,7 +34,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run cargo check
-        run: cargo check --all-targets --all-features
+        run: cargo check --locked --all-targets --all-features
 
   test:
     name: Tests
@@ -52,7 +52,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run cargo test
-        run: cargo test --all-targets --all-features
+        run: cargo test --locked --all-targets --all-features
 
   formatting:
     name: Formatting
@@ -87,4 +87,4 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Run cargo clippy
-        run: cargo clippy --all-targets --all-features -- -D warnings
+        run: cargo clippy --locked --all-targets --all-features -- -D warnings

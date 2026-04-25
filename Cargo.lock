@@ -1519,7 +1519,7 @@ dependencies = [
 [[package]]
 name = "ffprobe"
 version = "0.3.3"
-source = "git+https://github.com/avsaase/ffprobe-rs/?branch=suppress-console-windows#8c863431ebf0df913e325ec490589023b193402f"
+source = "git+https://github.com/avsaase/ffprobe-rs/?rev=8c863431ebf0df913e325ec490589023b193402f#8c863431ebf0df913e325ec490589023b193402f"
 dependencies = [
  "serde",
  "serde_json",
