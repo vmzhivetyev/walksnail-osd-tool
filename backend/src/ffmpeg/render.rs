@@ -147,7 +147,6 @@ pub fn start_video_render(
     let (ready_frames_queue_in, ready_frames_queue_out) =
         crossbeam_channel::bounded::<ffmpeg_sidecar::event::OutputVideoFrame>(256); // Much smaller buffer to prevent memory bloat
 
-
     thread::Builder::new()
         .name("Push ready frames to queue".into())
         .spawn(move || {
@@ -228,7 +227,14 @@ pub fn spawn_encoder(
 
     if upscale {
         if video_encoder.name.contains("nvenc") {
-            encoder_command.args(["-vf", "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:3", "-preset", "p7", "-tune", "hq"]);
+            encoder_command.args([
+                "-vf",
+                "format=rgb24,hwupload_cuda,scale_cuda=-2:1440:3",
+                "-preset",
+                "p7",
+                "-tune",
+                "hq",
+            ]);
         } else {
             encoder_command.args(["-vf", "scale=-2:1440:flags=bicubic"]);
         }

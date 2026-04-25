@@ -15,8 +15,11 @@ fn fast_overlay(bottom: &mut RgbaImage, top: &RgbaImage, x: i64, y: i64) {
     let top_dims = top.dimensions();
 
     // Check if overlay is completely outside bounds
-    if x >= bottom_dims.0 as i64 || y >= bottom_dims.1 as i64 ||
-       x + top_dims.0 as i64 <= 0 || y + top_dims.1 as i64 <= 0 {
+    if x >= bottom_dims.0 as i64
+        || y >= bottom_dims.1 as i64
+        || x + top_dims.0 as i64 <= 0
+        || y + top_dims.1 as i64 <= 0
+    {
         return;
     }
 
@@ -43,7 +46,8 @@ fn fast_overlay(bottom: &mut RgbaImage, top: &RgbaImage, x: i64, y: i64) {
         for ty in offset_y..(end_y - start_y + offset_y) {
             for tx in offset_x..(end_x - start_x + offset_x) {
                 let top_pixel = top.get_pixel(tx, ty);
-                if top_pixel[3] == 255 { // Fully opaque
+                if top_pixel[3] == 255 {
+                    // Fully opaque
                     bottom.put_pixel(start_x + tx - offset_x, start_y + ty - offset_y, *top_pixel);
                 }
                 // Skip fully transparent pixels (alpha = 0)
@@ -81,7 +85,7 @@ pub fn overlay_osd(image: &mut RgbaImage, osd_frame: &osd::Frame, font: &font::F
         if character.index == 0 || osd_options.get_mask(&character.grid_position) {
             continue;
         }
-        
+
         if let Some(character_image) = font.get_character(
             character.index as usize,
             &character_size_class,

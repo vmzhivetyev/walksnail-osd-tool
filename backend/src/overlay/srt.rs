@@ -5,12 +5,7 @@ use rusttype::{point, Font, Scale};
 use crate::srt::{SrtDebugFrameData, SrtFrameData, SrtOptions};
 
 /// Fast, adaptive buffered overlay using font metrics and no hardcoded values
-pub fn overlay_srt_buffered(
-    image: &mut RgbaImage,
-    srt_string: &str,
-    font: &rusttype::Font,
-    srt_options: &SrtOptions,
-) {
+pub fn overlay_srt_buffered(image: &mut RgbaImage, srt_string: &str, font: &rusttype::Font, srt_options: &SrtOptions) {
     let image_dimensions = image.dimensions();
     let scale = rusttype::Scale::uniform(srt_options.scale / 1080.0 * image_dimensions.1 as f32);
     let max_width = image_dimensions.0 as f32;
@@ -23,7 +18,8 @@ pub fn overlay_srt_buffered(
         } else {
             format!("{} {}", current_line, word)
         };
-        let line_width: f32 = font.layout(&test_line, scale, point(0.0, 0.0))
+        let line_width: f32 = font
+            .layout(&test_line, scale, point(0.0, 0.0))
             .map(|g| g.unpositioned().h_metrics().advance_width)
             .sum();
         if line_width <= max_width {
@@ -39,10 +35,13 @@ pub fn overlay_srt_buffered(
         lines.push(current_line);
     }
     // Calculate buffer size
-    let text_width = lines.iter()
-        .map(|line| font.layout(line, scale, point(0.0, 0.0))
-            .map(|g| g.unpositioned().h_metrics().advance_width)
-            .sum::<f32>())
+    let text_width = lines
+        .iter()
+        .map(|line| {
+            font.layout(line, scale, point(0.0, 0.0))
+                .map(|g| g.unpositioned().h_metrics().advance_width)
+                .sum::<f32>()
+        })
         .fold(0.0f32, |a, b| a.max(b))
         .ceil() as u32;
     let line_height = (scale.y * 1.2).ceil() as u32;
@@ -133,7 +132,7 @@ pub fn overlay_srt_data(
 
     // let image_dimensions = image.dimensions(); // not needed
 
-        overlay_srt_buffered(image, &srt_string, font, srt_options);
+    overlay_srt_buffered(image, &srt_string, font, srt_options);
 }
 
 #[inline]

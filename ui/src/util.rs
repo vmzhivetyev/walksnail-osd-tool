@@ -15,14 +15,11 @@ use super::WalksnailOsdTool;
 use crate::util::build_info::Build;
 
 pub const VIDEO_EXTENSIONS: &[&str] = &[
-    "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v", 
-    "3gp", "3g2", "asf", "rm", "rmvb", "vob", "ogv", "drc",
-    "mxf", "roq", "nsv", "f4v", "f4p", "f4a", "f4b"
+    "mp4", "mov", "avi", "mkv", "wmv", "flv", "webm", "m4v", "3gp", "3g2", "asf", "rm", "rmvb", "vob", "ogv", "drc",
+    "mxf", "roq", "nsv", "f4v", "f4p", "f4a", "f4b",
 ];
 
-pub const AVATAR_EXTENSIONS: &[&str] = &[
-    "osd", "png", "srt"
-];
+pub const AVATAR_EXTENSIONS: &[&str] = &["osd", "png", "srt"];
 
 impl WalksnailOsdTool {
     pub fn all_files_loaded(&self) -> bool {
@@ -115,16 +112,19 @@ pub fn first_file_with_extentions<'a>(files: &'a [PathBuf], extensions: &'a [&'a
 
 // finds ALL files matching any of the provided extensions
 pub fn filter_files_with_extensions<'a>(files: &'a [PathBuf], extensions: &'a [&'a str]) -> Vec<&'a PathBuf> {
-    files.iter().filter_map(|f| {
-        f.extension().and_then(|e| {
-            let ext_str = e.to_string_lossy();
-            if extensions.contains(&ext_str.as_ref()) {
-                Some(f)
-            } else {
-                None
-            }
+    files
+        .iter()
+        .filter_map(|f| {
+            f.extension().and_then(|e| {
+                let ext_str = e.to_string_lossy();
+                if extensions.contains(&ext_str.as_ref()) {
+                    Some(f)
+                } else {
+                    None
+                }
+            })
         })
-    }).collect()
+        .collect()
 }
 
 #[tracing::instrument(ret, level = "info")]

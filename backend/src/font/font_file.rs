@@ -1,8 +1,4 @@
-use std::{
-    cell::RefCell,
-    collections::HashMap,
-    path::PathBuf,
-};
+use std::{cell::RefCell, collections::HashMap, path::PathBuf};
 
 use derivative::Derivative;
 use image::{imageops::FilterType, io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
@@ -28,15 +24,14 @@ impl ImageCache {
 
     pub fn insert(&self, index: usize, image: ImageBuffer<Rgba<u8>, Vec<u8>>) {
         let mut cache = self.cache.borrow_mut();
-        
+
         // If cache is full, don't add new entries (simple bounded cache)
         if cache.len() >= self.max_size {
             return;
         }
-        
+
         cache.insert(index, image);
     }
-
 }
 
 use super::{

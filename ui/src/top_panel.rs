@@ -2,7 +2,7 @@ use std::time::Instant;
 
 use egui::{vec2, Align2, Button, Frame, Label, RichText, Sense, TextStyle, Ui, Visuals, Window};
 
-use crate::util::{VIDEO_EXTENSIONS, AVATAR_EXTENSIONS};
+use crate::util::{AVATAR_EXTENSIONS, VIDEO_EXTENSIONS};
 
 use super::WalksnailOsdTool;
 
