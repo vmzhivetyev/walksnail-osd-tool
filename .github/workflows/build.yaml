@@ -100,11 +100,11 @@ jobs:
 
       - name: Build (MacOS)
         if: ${{ matrix.targets.name == 'macos-intel' || matrix.targets.name == 'macos-arm'}}
-        run: bash build.sh ${{ matrix.targets.name }} release package
+        run: bash build.sh ${{ matrix.targets.name }} --package
 
       - name: Build (Linux)
         if: ${{ matrix.targets.name == 'linux64'}}
-        run: bash build.sh linux release package
+        run: bash build.sh linux --package
 
       - name: Create Windows installer
         if: ${{ matrix.targets.name == 'windows64'}}
