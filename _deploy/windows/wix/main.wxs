@@ -176,14 +176,7 @@
             <ComponentRef Id="ffmpeg_license" />
             <ComponentRef Id="ffmpeg_readme" />
 
-            <Feature
-                Id="StartMenu"
-                Title="Start menu shortcut"
-                Description="Add a shortcut to [ProductName] to the start menu"
-                Level="1" Absent='allow'>
-                <ComponentRef Id='ApplicationShortcut' />
-            </Feature>
-
+            <ComponentRef Id='ApplicationShortcut' />
 
         </Feature>
 
