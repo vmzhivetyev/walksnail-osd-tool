@@ -86,7 +86,12 @@ fn run_overlay_frames_from_queue_to_encoder(
 
 /// Read the live view frames the encoder writes to its stdout and pass them to the UI.
 /// Frames the UI has not caught up with are dropped; stdout is always drained so the encoder never blocks on it.
-fn run_live_view_frames_to_ui(mut encoder_stdout: impl Read, width: u32, height: u32, frame_to_ui_tx: Sender<RgbaImage>) {
+fn run_live_view_frames_to_ui(
+    mut encoder_stdout: impl Read,
+    width: u32,
+    height: u32,
+    frame_to_ui_tx: Sender<RgbaImage>,
+) {
     let frame_size = width as usize * height as usize * 4;
     loop {
         let mut buffer = vec![0u8; frame_size];
@@ -195,11 +200,12 @@ pub fn start_video_render(
         })
         .expect("Failed to spawn producer thread");
 
-    let (overlay_frames_for_ui_tx, encoder_frames_for_ui_tx) = match (render_settings.rendering_live_view, live_view_from_encoder) {
-        (false, _) => (None, None),
-        (true, true) => (None, Some(frames_for_ui_tx)),
-        (true, false) => (Some(frames_for_ui_tx), None),
-    };
+    let (overlay_frames_for_ui_tx, encoder_frames_for_ui_tx) =
+        match (render_settings.rendering_live_view, live_view_from_encoder) {
+            (false, _) => (None, None),
+            (true, true) => (None, Some(frames_for_ui_tx)),
+            (true, false) => (Some(frames_for_ui_tx), None),
+        };
 
     thread::Builder::new()
         .name("Overlay frames from queue to encoder".into())
@@ -213,7 +219,9 @@ pub fn start_video_render(
     // Read live view frames from the encoder's stdout ourselves. With stdout taken, ffmpeg-sidecar only parses stderr:
     // its stdout reader picks the frame format by output order, which breaks with a file output plus a stdout output.
     if let Some(frame_to_ui_tx) = encoder_frames_for_ui_tx {
-        let encoder_stdout = encoder_process.take_stdout().expect("Failed to get `stdout` for encoder");
+        let encoder_stdout = encoder_process
+            .take_stdout()
+            .expect("Failed to get `stdout` for encoder");
         let (width, height) = (video_info.width, video_info.height);
         thread::Builder::new()
             .name("Live view frames to UI".into())
@@ -324,10 +332,7 @@ pub fn spawn_encoder(
         };
         encoder_command.filter_complex(filter_graph);
 
-        encoder_command
-            .map("[out]")
-            .map("0:a?")
-            .codec_audio("copy");
+        encoder_command.map("[out]").map("0:a?").codec_audio("copy");
     }
 
     if is_nvenc {

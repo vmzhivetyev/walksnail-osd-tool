@@ -55,9 +55,7 @@ impl RenderStatus {
         };
 
         match message {
-            FromFfmpegMessage::EncoderFatalError(e) => {
-                self.status = Status::Error { progress_pct, error: e }
-            }
+            FromFfmpegMessage::EncoderFatalError(e) => self.status = Status::Error { progress_pct, error: e },
 
             FromFfmpegMessage::EncoderProgress(p) => {
                 let frame = p.frame as f32;

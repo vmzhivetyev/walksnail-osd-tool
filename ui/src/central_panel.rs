@@ -389,7 +389,9 @@ impl WalksnailOsdTool {
 
                     // The video frame (if any) is the bottom layer and sets the size, the OSD preview is drawn on top.
                     let bottom_layer = video_frame.unwrap_or(handle);
-                    let image = Image::new(bottom_layer).max_width(preview_width).max_height(preview_height);
+                    let image = Image::new(bottom_layer)
+                        .max_width(preview_width)
+                        .max_height(preview_height);
                     let rect = ui.add(image.bg_fill(Color32::DARK_GRAY)).rect;
                     if video_frame.is_some() {
                         Image::new(handle).paint_at(ui, rect);
