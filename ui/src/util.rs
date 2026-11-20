@@ -147,7 +147,7 @@ pub fn format_minutes_seconds(duration: &Duration) -> String {
     format!("{}:{:0>2}", minutes, seconds)
 }
 
-pub fn generate_default_output_file_name(input_file_path: &PathBuf) -> String {
+pub fn generate_default_output_file_name(input_file_path: &Path) -> String {
     let input_file_name_no_ext = input_file_path
         .file_stem()
         .map_or("file".to_string(), |p| p.to_string_lossy().to_string());
@@ -155,12 +155,12 @@ pub fn generate_default_output_file_name(input_file_path: &PathBuf) -> String {
     format!("{}_with_osd", input_file_name_no_ext)
 }
 
-pub fn generate_output_file_path(input_file_path: &Path, output_file_name: &String) -> PathBuf {
+pub fn generate_output_file_path(input_file_path: &Path, output_file_name: &str) -> PathBuf {
     let input_file_path_str = input_file_path.to_string_lossy();
     tracing::debug!("generate_output_file_path for {input_file_path_str}");
 
     let mut output_video_path: PathBuf = input_file_path.parent().unwrap().to_path_buf();
-    let mut output_file_name = output_file_name.clone();
+    let mut output_file_name = output_file_name.to_owned();
     if output_file_name.is_empty() {
         output_file_name = "file".to_owned();
     }
@@ -363,7 +363,7 @@ pub fn check_updates() -> Result<Option<GitHubReleaseItem>, LookupError> {
             .iter()
             .find(|release| {
                 Version::parse(release.tag_name.trim_start_matches('v'))
-                    .map_or(false, |version| should_update_to_version(&current_version, &version))
+                    .is_ok_and(|version| should_update_to_version(&current_version, &version))
             })
             .cloned();
         Ok(update_target)

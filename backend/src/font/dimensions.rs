@@ -71,7 +71,7 @@ pub fn detect_font_character_size(font_file_size: Dimension<u32>) -> Result<(Dim
     // This will never change neither in Betaflight nor in iNAV so we just hardcode it.
     let vertical_characters_count = 256;
 
-    if font_file_size.height % vertical_characters_count != 0 {
+    if !font_file_size.height.is_multiple_of(vertical_characters_count) {
         return Err(FontFileError::InvalidFontFileHeight {
             height: font_file_size.height,
         });
@@ -85,7 +85,7 @@ pub fn detect_font_character_size(font_file_size: Dimension<u32>) -> Result<(Dim
     // * 36x54
     let single_char_width = single_char_height * 2 / 3;
 
-    if font_file_size.width % single_char_width != 0 {
+    if !font_file_size.width.is_multiple_of(single_char_width) {
         return Err(FontFileError::InvalidFontFileWidth {
             width: font_file_size.width,
         });
