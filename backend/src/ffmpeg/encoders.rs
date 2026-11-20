@@ -130,7 +130,8 @@ impl Encoder {
             #[cfg(any(target_os = "windows", target_os = "linux"))]
             Encoder::new(
                 "av1_nvenc", Codec::AV1, true,
-                Some(&["-qp", "25", "-b:v", "0k"])
+                // AV1 QP ranges 0-255 (not 0-51 like H.264/HEVC); 54 matches hevc_nvenc -qp 19 in PSNR.
+                Some(&["-qp", "54", "-b:v", "0k"])
             ),
 
             #[cfg(any(target_os = "windows", target_os = "linux"))]

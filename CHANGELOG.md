@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2026-11-20
+
+### Added
+
+- The preview shows the video frame under the OSD before rendering, and the live view during a render shows the composited video (one frame per second).
+- The preview frame slider follows the render position while rendering, and is disabled until the render ends.
+
+### Changed
+
+- Much faster rendering: ffmpeg now decodes the video and composites the OSD/SRT overlay itself, instead of every frame being piped through the app and back. Together with the faster NVENC preset below, a Walksnail DVR render with `av1_nvenc` went from 2.3x to 5.4x real-time speed.
+- NVENC encoders now use `-preset p5` instead of `p7`: nearly 2x faster at the same file size, with no visible quality difference.
+- AV1 constant quality now uses `-qp 54` instead of `25` (AV1 QP ranges 0-255, so `25` produced near-lossless files larger than the source).
+
+### Fixed
+
+- SRT debug files from newer firmware (`CH:256`) failed to parse, so no SRT data was shown.
+- OSD glyphs could keep their old size after changing the character size class or loading a video with a different resolution.
+
 ## [1.3.1] - 2026-04-26
 
 ### Fixed

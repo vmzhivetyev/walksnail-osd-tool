@@ -58,6 +58,7 @@ impl WalksnailOsdTool {
         if let Some(video_file) = first_file_with_extentions(file_handles, VIDEO_EXTENSIONS) {
             self.input_video_file = Some(video_file.clone());
             self.video_info = VideoInfo::get(video_file, &self.dependencies.ffprobe_path).ok();
+            self.osd_preview.video_frame = Default::default();
 
             // Generate default output file name for newly imported video file.
             self.ui_state.output_file_name = "".to_owned();

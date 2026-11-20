@@ -376,8 +376,26 @@ impl WalksnailOsdTool {
                     let preview_width = ui.available_width();
                     let aspect_ratio = video_info.width as f32 / video_info.height as f32;
                     let preview_height = preview_width / aspect_ratio;
-                    let image = Image::new(handle).max_width(preview_width).max_height(preview_height);
+
+                    // During a render with live view the preview texture already is the composited video.
+                    let showing_live_view =
+                        self.render_status.is_in_progress() && self.render_settings.rendering_live_view;
+                    let video_frame = self
+                        .osd_preview
+                        .video_frame
+                        .texture_handle
+                        .as_ref()
+                        .filter(|_| !showing_live_view);
+
+                    // The video frame (if any) is the bottom layer and sets the size, the OSD preview is drawn on top.
+                    let bottom_layer = video_frame.unwrap_or(handle);
+                    let image = Image::new(bottom_layer)
+                        .max_width(preview_width)
+                        .max_height(preview_height);
                     let rect = ui.add(image.bg_fill(Color32::DARK_GRAY)).rect;
+                    if video_frame.is_some() {
+                        Image::new(handle).paint_at(ui, rect);
+                    }
 
                     if self.osd_preview.mask_edit_mode_enabled {
                         self.draw_grid(ui, ctx, rect);
@@ -387,7 +405,9 @@ impl WalksnailOsdTool {
                         ui.label("Preview frame").on_hover_text(tooltip_text(
                             "The selected frame is also used for centering the OSD under OSD Options.",
                         ));
-                        let preview_frame_slider = ui.add(
+                        // During a render the slider follows the render position instead.
+                        let preview_frame_slider = ui.add_enabled(
+                            self.render_status.is_not_in_progress(),
                             Slider::new(
                                 &mut self.osd_preview.preview_frame,
                                 1..=self.osd_file.as_ref().map(|f| f.frame_count).unwrap_or(1),

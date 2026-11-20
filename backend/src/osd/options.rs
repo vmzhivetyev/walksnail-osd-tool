@@ -8,6 +8,10 @@ use crate::{
     util::{Coordinates, Dimension},
 };
 
+fn default_playback_speed_factor() -> f32 {
+    1.0
+}
+
 #[derive(Clone, Serialize, Deserialize, Derivative)]
 #[derivative(Default, Debug)]
 pub struct OsdOptions {
@@ -16,7 +20,7 @@ pub struct OsdOptions {
     pub adjust_playback_speed: bool,
     pub no_osd: bool,
     #[derivative(Default(value = "1.0"))]
-    #[serde(skip)]
+    #[serde(skip, default = "default_playback_speed_factor")]
     pub osd_playback_speed_factor: f32,
     pub masked_grid_positions: HashSet<Coordinates<u32>>,
     #[derivative(Default(value = "0.0"))]

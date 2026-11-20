@@ -1,37 +1,22 @@
-use std::{cell::RefCell, collections::HashMap, path::PathBuf};
+use std::{cell::RefCell, collections::HashMap, path::PathBuf, sync::Arc};
 
 use derivative::Derivative;
-use image::{imageops::FilterType, io::Reader, DynamicImage, GenericImageView, ImageBuffer, Rgba, RgbaImage};
+use image::{imageops::FilterType, io::Reader, DynamicImage, GenericImageView, RgbaImage};
 
-// Cache for resized glyphs with size limit (simplified key since size is constant per session)
-#[allow(clippy::type_complexity)]
-#[derive(Derivative, Clone, Debug)]
-pub struct ImageCache {
-    cache: RefCell<HashMap<usize, ImageBuffer<Rgba<u8>, Vec<u8>>>>,
-    max_size: usize,
+/// Resized glyphs, keyed by glyph index and final size, so a change of character size class or
+/// video resolution never returns a glyph of the wrong size.
+#[derive(Clone, Debug, Default)]
+struct GlyphCache {
+    cache: RefCell<HashMap<(usize, u32, u32), Arc<RgbaImage>>>,
 }
 
-impl ImageCache {
-    pub fn new(max_size: usize) -> Self {
-        ImageCache {
-            cache: RefCell::new(HashMap::new()),
-            max_size,
-        }
+impl GlyphCache {
+    fn get(&self, index: usize, size: &Dimension<u32>) -> Option<Arc<RgbaImage>> {
+        self.cache.borrow().get(&(index, size.width, size.height)).cloned()
     }
 
-    pub fn get(&self, index: usize) -> Option<ImageBuffer<Rgba<u8>, Vec<u8>>> {
-        self.cache.borrow().get(&index).cloned()
-    }
-
-    pub fn insert(&self, index: usize, image: ImageBuffer<Rgba<u8>, Vec<u8>>) {
-        let mut cache = self.cache.borrow_mut();
-
-        // If cache is full, don't add new entries (simple bounded cache)
-        if cache.len() >= self.max_size {
-            return;
-        }
-
-        cache.insert(index, image);
+    fn insert(&self, index: usize, size: &Dimension<u32>, image: Arc<RgbaImage>) {
+        self.cache.borrow_mut().insert((index, size.width, size.height), image);
     }
 }
 
@@ -50,7 +35,7 @@ pub struct FontFile {
     pub font_character_size: Dimension<u32>,
     #[derivative(Debug = "ignore")]
     characters: Vec<RgbaImage>,
-    cache: ImageCache,
+    cache: GlyphCache,
 }
 
 impl FontFile {
@@ -64,8 +49,7 @@ impl FontFile {
         let characters = split_characters(&font_image, &font_character_size, &font_type);
         let character_count = characters.len() as u32;
 
-        // Create cache for resized glyphs (grows as needed, bounded)
-        let cache = ImageCache::new(256); // Reduced cache size to prevent memory bloat
+        let cache = GlyphCache::default();
 
         Ok(Self {
             file_path: path,
@@ -82,17 +66,15 @@ impl FontFile {
         index: usize,
         size_class: &CharacterSizeClass,
         desired_size: Dimension<u32>,
-    ) -> Option<ImageBuffer<Rgba<u8>, Vec<u8>>> {
-        // Check cache first (simplified key since size is constant per session)
-        if let Some(cached_image) = self.cache.get(index) {
-            return Some(cached_image);
-        }
-
-        // Cache miss - resize from original glyph
+    ) -> Option<Arc<RgbaImage>> {
         let final_size = Dimension {
             width: ((desired_size.width as f32) * size_class.multiplier()).round() as u32,
             height: ((desired_size.height as f32) * size_class.multiplier()).round() as u32,
         };
+
+        if let Some(cached_image) = self.cache.get(index, &final_size) {
+            return Some(cached_image);
+        }
 
         // this allows us to use single color fonts for multicolor osd files.
         let wrapped_char_index = index % self.character_count as usize;
@@ -109,8 +91,8 @@ impl FontFile {
                 original_image.clone()
             };
 
-            // Cache the resized image (simplified key)
-            self.cache.insert(index, resized_image.clone());
+            let resized_image = Arc::new(resized_image);
+            self.cache.insert(index, &final_size, resized_image.clone());
             resized_image
         })
     }
@@ -120,7 +102,7 @@ fn split_characters(
     font_image: &DynamicImage,
     character_size: &Dimension<u32>,
     font_type: &FontType,
-) -> Vec<ImageBuffer<Rgba<u8>, Vec<u8>>> {
+) -> Vec<RgbaImage> {
     let columns: u32 = font_type.raw_value();
     let (width, height) = font_image.dimensions();
     let font_file_dimensions = Dimension::new(width, height);

@@ -2,7 +2,7 @@ use backend::ffmpeg::{start_video_render, ToFfmpegMessage};
 use egui::{vec2, Align, Button, Color32, Layout, ProgressBar, RichText, Ui};
 
 use super::{util::format_minutes_seconds, WalksnailOsdTool};
-use crate::render_status::Status;
+use crate::{app::osd_playback_speed_factor, render_status::Status};
 
 impl WalksnailOsdTool {
     pub fn render_bottom_panel(&mut self, ctx: &egui::Context) {
@@ -44,13 +44,8 @@ impl WalksnailOsdTool {
                     &self.video_info,
                     self.get_selected_encoder(),
                 ) {
-                    self.osd_options.osd_playback_speed_factor = if self.osd_options.adjust_playback_speed {
-                        let video_duration = video_info.duration;
-                        let osd_duration = osd_file.duration;
-                        video_duration.as_secs_f32() / osd_duration.as_secs_f32()
-                    } else {
-                        1.0
-                    };
+                    self.osd_options.osd_playback_speed_factor =
+                        osd_playback_speed_factor(&self.osd_options, video_info, osd_file);
                     match start_video_render(
                         &self.dependencies.ffmpeg_path,
                         input_video_path,
@@ -71,14 +66,14 @@ impl WalksnailOsdTool {
                             self.frames_for_ui_rx = Some(frames_for_ui_rx);
                         }
                         Err(_) => {
-                            self.render_status.decoder_status = Status::Error {
+                            self.render_status.status = Status::Error {
                                 progress_pct: 0.0,
                                 error: "Failed to start video render".to_string(),
                             }
                         }
                     };
                 } else {
-                    self.render_status.decoder_status = Status::Error {
+                    self.render_status.status = Status::Error {
                         progress_pct: 0.0,
                         error: "Failed to start video render. Unexpected state detected.".to_string(),
                     }
@@ -99,13 +94,13 @@ impl WalksnailOsdTool {
     }
 
     fn render_progress(&mut self, ui: &mut Ui) {
-        match &self.render_status.decoder_status {
+        match &self.render_status.status {
             Status::Idle => {}
             Status::InProgress {
                 time_remaining,
                 fps,
                 speed,
-                bitrate_kbps: _,
+                bitrate_kbps,
                 progress_pct,
             } => {
                 ui.vertical(|ui| {
@@ -117,22 +112,12 @@ impl WalksnailOsdTool {
                         } else {
                             "––:––".into()
                         };
-                        let encoder_bitrate = match &self.render_status.encoder_status {
-                            Status::InProgress {
-                                time_remaining: _,
-                                fps: _,
-                                speed: _,
-                                bitrate_kbps: encoder_bitrate,
-                                progress_pct: _,
-                            } => encoder_bitrate,
-                            _ => &0.0,
-                        };
                         ui.monospace(format!(
                             "Time remaining: {}, fps: {:.1}, speed: {:.3}x, bitrate: {:.1}Mbps",
                             time_remaining_string,
                             fps,
                             speed,
-                            encoder_bitrate / 1000.0
+                            bitrate_kbps / 1000.0
                         ));
                     });
                 });
