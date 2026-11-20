@@ -221,7 +221,9 @@ mod tests {
     #[test]
     fn parse_debug_srt_frame_data_with_sky_section_and_channel_256() {
         let line = "CH:256 MCS:4 SP[ 48 151  47 152] GP[ 49  50  48  43] GTP:14 GTP0:01 STP:10 STP0:00 GSNR:24.7 SSNR:20.8 Gtemp:68 Stemp:61 Delay:37ms Frame:60  Gerr:0 SErr:0 12, [iso:0,mode=max, exp:0] [gain:0.00 exp:0.000ms, Lx:0] [cct:0, rb:0.000 0.000], SKY:[brF:5697.5, slot0F:5695, bestF:S=5380,G=5180, freq:0000,0000,0000,0000,0000,0000,0000,0000, s-avrp:0,0,0,0,0,0,0,0, g-avrp:-88,-82,-86,-88,-87,-85,-83,-87]";
-        let parsed = line.parse::<SrtDebugFrameData>().expect("Failed to parse SRT debug frame data");
+        let parsed = line
+            .parse::<SrtDebugFrameData>()
+            .expect("Failed to parse SRT debug frame data");
         assert_eq!(parsed.channel, 256);
         assert_eq!(parsed.signal, 4);
         assert_eq!(parsed.latency, 37);
