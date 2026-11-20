@@ -323,7 +323,7 @@ fn handle_encoder_events(ffmpeg_event: FfmpegEvent, ffmpeg_sender: &Sender<FromF
                 tracing::error!("ffmpeg fatal error: {}", &e);
                 ffmpeg_sender.send(FromFfmpegMessage::EncoderFatalError(e)).unwrap();
             } else {
-                println!("ffmpeg encoder >>> {}", &e);
+                println!("ffmpeg encoder >>> {}", e);
             }
         }
         FfmpegEvent::LogEOF => {

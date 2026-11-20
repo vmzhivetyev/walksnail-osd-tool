@@ -180,12 +180,12 @@ impl WalksnailOsdTool {
                                 .selected_text(self.osd_options.character_size_class.clone().map_or(String::from("No video"), |s| format!("{:?}", s)))
                                 .width(100.0)
                                 .show_ui(ui, |ui| {
-                                    if self.osd_options.character_size_class.is_some() {
-                                        changed |= ui.selectable_value(self.osd_options.character_size_class.as_mut().unwrap(), CharacterSizeClass::XSmall, "XS").changed();
-                                        changed |= ui.selectable_value(self.osd_options.character_size_class.as_mut().unwrap(), CharacterSizeClass::Small, "S").changed();
-                                        changed |= ui.selectable_value(self.osd_options.character_size_class.as_mut().unwrap(), CharacterSizeClass::Normal, "Normal").changed();
-                                        changed |= ui.selectable_value(self.osd_options.character_size_class.as_mut().unwrap(), CharacterSizeClass::Large, "L").changed();
-                                        changed |= ui.selectable_value(self.osd_options.character_size_class.as_mut().unwrap(), CharacterSizeClass::XLarge, "XL").changed();
+                                    if let Some(size_class) = self.osd_options.character_size_class.as_mut() {
+                                        changed |= ui.selectable_value(size_class, CharacterSizeClass::XSmall, "XS").changed();
+                                        changed |= ui.selectable_value(size_class, CharacterSizeClass::Small, "S").changed();
+                                        changed |= ui.selectable_value(size_class, CharacterSizeClass::Normal, "Normal").changed();
+                                        changed |= ui.selectable_value(size_class, CharacterSizeClass::Large, "L").changed();
+                                        changed |= ui.selectable_value(size_class, CharacterSizeClass::XLarge, "XL").changed();
                                     }
                                 });
                             ui.end_row();
@@ -457,7 +457,7 @@ impl WalksnailOsdTool {
             }
         }
 
-        let line_stroke = Stroke::new(1.0, Color32::GRAY.gamma_multiply(0.5));
+        let line_stroke = Stroke::new(1.0_f32, Color32::GRAY.gamma_multiply(0.5));
 
         for i in 0..=53 {
             let x = top_left.x + i as f32 * cell_width + horizontal_offset;
@@ -516,7 +516,7 @@ impl WalksnailOsdTool {
                         let mut constant_quality_available = false;
 
                         if let Some(selected_encoder) = selected_encoder {
-                            if selected_encoder.constant_quality_args != None {
+                            if selected_encoder.constant_quality_args.is_some() {
                                 constant_quality_available = true;
                             } else {
                                 changed |= self.render_settings.keep_quality;
@@ -569,11 +569,11 @@ impl WalksnailOsdTool {
         if self.render_settings.show_undetected_encoders {
             return self.encoders.clone();
         }
-        return self.detected_encoders.clone();
+        self.detected_encoders.clone()
     }
 
-    pub fn sort_and_filter_encoders(encoders: &Vec<Encoder>) -> Vec<Encoder> {
-        let mut filtered_encoders: Vec<Encoder> = encoders.iter().filter(|e| e.detected).map(|x| x.clone()).collect();
+    pub fn sort_and_filter_encoders(encoders: &[Encoder]) -> Vec<Encoder> {
+        let mut filtered_encoders: Vec<Encoder> = encoders.iter().filter(|e| e.detected).cloned().collect();
 
         filtered_encoders.sort_by(|a, b| {
             const CODEC_PRIORITY: [Codec; 4] = [Codec::H265, Codec::H264, Codec::VP9, Codec::ProRes];

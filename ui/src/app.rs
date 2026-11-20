@@ -109,7 +109,7 @@ impl WalksnailOsdTool {
                 ffprobe_path,
             },
             encoders,
-            detected_encoders: detected_encoders,
+            detected_encoders,
             srt_font: Some(srt_font),
             osd_options,
             srt_options,
@@ -218,7 +218,7 @@ impl WalksnailOsdTool {
             }
 
             self.output_video_file = Some(generate_output_file_path(
-                &input_video_file,
+                input_video_file,
                 &self.ui_state.output_file_name,
             ));
 
@@ -263,7 +263,7 @@ impl WalksnailOsdTool {
         if let Some(video_info) = &self.video_info {
             let image = egui::ColorImage::from_rgba_unmultiplied(
                 [video_info.width as usize, video_info.height as usize],
-                &rgba_image,
+                rgba_image,
             );
 
             let handle = ctx.load_texture("OSD preview", image, egui::TextureOptions::default());
@@ -336,7 +336,7 @@ impl WalksnailOsdTool {
             }
         }
         if let Some(img) = &img {
-            self.set_osd_preview(ctx, &img);
+            self.set_osd_preview(ctx, img);
 
             // tracing::info!(
             //     "converting rgba image into egui image done in {:?}.",
@@ -348,7 +348,7 @@ impl WalksnailOsdTool {
     fn save_config_if_changed(&mut self) {
         if self
             .config_changed
-            .map_or(false, |t| t.elapsed() > Duration::from_millis(2000))
+            .is_some_and(|t| t.elapsed() > Duration::from_millis(2000))
         {
             let config: AppConfig = self.into();
             config.save();
