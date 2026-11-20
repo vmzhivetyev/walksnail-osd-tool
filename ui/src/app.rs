@@ -1,16 +1,17 @@
 use std::{
     path::PathBuf,
+    thread,
     time::{Duration, Instant},
 };
 
 use backend::{
     config::AppConfig,
-    ffmpeg::{Encoder, FromFfmpegMessage, RenderSettings, ToFfmpegMessage, VideoInfo},
+    ffmpeg::{extract_video_frame, Encoder, FromFfmpegMessage, RenderSettings, ToFfmpegMessage, VideoInfo},
     font::{self, FontFile},
     osd::{OsdFile, OsdOptions},
     srt::{SrtFile, SrtOptions},
 };
-use crossbeam_channel::{Receiver, Sender};
+use crossbeam_channel::{Receiver, Sender, TryRecvError};
 use derivative::Derivative;
 use egui::{
     pos2, text::LayoutJob, vec2, Align2, Color32, Frame, Grid, TextFormat, TextStyle, TextureHandle, Visuals, Window,
@@ -21,9 +22,18 @@ use poll_promise::Promise;
 
 use crate::{
     osd_preview::create_osd_preview,
-    render_status::RenderStatus,
+    render_status::{RenderStatus, Status},
     util::{generate_default_output_file_name, generate_output_file_path, set_custom_fonts, set_style},
 };
+
+/// How much faster the OSD has to play to match the video, when "adjust playback speed" is on.
+pub fn osd_playback_speed_factor(osd_options: &OsdOptions, video_info: &VideoInfo, osd_file: &OsdFile) -> f32 {
+    if osd_options.adjust_playback_speed {
+        video_info.duration.as_secs_f32() / osd_file.duration.as_secs_f32()
+    } else {
+        1.0
+    }
+}
 
 // Let's try to come up with a proper architecture to manage UI state...
 #[derive(Default)]
@@ -58,6 +68,8 @@ pub struct WalksnailOsdTool {
     pub app_update: AppUpdate,
     pub app_version: String,
     pub target: String,
+    /// Whether a render was in progress during the previous UI update.
+    pub was_rendering: bool,
     pub ui_state: UIState,
 }
 
@@ -138,6 +150,20 @@ pub struct OsdPreview {
     #[derivative(Default(value = "1"))]
     pub preview_frame: u32,
     pub mask_edit_mode_enabled: bool,
+    pub video_frame: VideoFramePreview,
+}
+
+/// Which video frame to show, identified by video file and time in seconds.
+type VideoFrameKey = (PathBuf, f32);
+
+/// The video frame shown under the OSD preview. Frames are decoded by ffmpeg on a background thread,
+/// one at a time: while one is being decoded, only the most recently wanted frame is fetched next.
+#[derive(Default)]
+pub struct VideoFramePreview {
+    pub texture_handle: Option<TextureHandle>,
+    shown: Option<VideoFrameKey>,
+    wanted: Option<VideoFrameKey>,
+    in_flight: Option<Receiver<(VideoFrameKey, Option<RgbaImage>)>>,
 }
 
 pub struct UiDimensions {
@@ -195,7 +221,9 @@ impl eframe::App for WalksnailOsdTool {
         }
 
         self.receive_ffmpeg_message();
+        self.follow_render_position(ctx);
         self.show_rendered_frame_from_ffmpeg(ctx);
+        self.poll_video_frame(ctx);
         self.poll_update_check();
 
         self.render_top_panel(ctx);
@@ -279,6 +307,15 @@ impl WalksnailOsdTool {
 
             let osd_frame_time = osd_frame.time_millis as f32 / 1000.0;
 
+            // Same mapping as the render uses to decide when an OSD frame appears, plus a millisecond so the
+            // video frame is one that already shows this OSD frame.
+            let speed_factor = osd_playback_speed_factor(&self.osd_options, video_info, osd_file);
+            let video_time = (self.osd_options.osd_playback_offset + osd_frame_time) * speed_factor + 0.001;
+            let video_time = video_time.clamp(0.0, video_info.duration.as_secs_f32());
+            if let Some(video_file) = &self.input_video_file {
+                self.osd_preview.video_frame.wanted = Some((video_file.clone(), video_time));
+            }
+
             let srt_frame = if let Some(srt_file) = &self.srt_file {
                 srt_file
                     .frames
@@ -300,9 +337,82 @@ impl WalksnailOsdTool {
             );
 
             self.set_osd_preview(ctx, &rgba_image);
+            self.fetch_video_frame_if_needed(ctx);
         } else {
             self.osd_preview.texture_handle = None;
         }
+    }
+
+    fn fetch_video_frame_if_needed(&mut self, ctx: &egui::Context) {
+        let video_frame = &mut self.osd_preview.video_frame;
+        if video_frame.in_flight.is_some() || video_frame.wanted == video_frame.shown {
+            return;
+        }
+        let (Some(wanted), Some(video_info)) = (video_frame.wanted.clone(), &self.video_info) else {
+            return;
+        };
+
+        let (tx, rx) = crossbeam_channel::bounded(1);
+        let ffmpeg_path = self.dependencies.ffmpeg_path.clone();
+        let (width, height) = (video_info.width, video_info.height);
+        let ctx = ctx.clone();
+        thread::spawn(move || {
+            let image = extract_video_frame(&ffmpeg_path, &wanted.0, wanted.1, width, height)
+                .map_err(|e| tracing::warn!("Failed to extract video frame for preview: {e}"))
+                .ok();
+            let _ = tx.send((wanted, image));
+            ctx.request_repaint();
+        });
+        video_frame.in_flight = Some(rx);
+    }
+
+    pub fn poll_video_frame(&mut self, ctx: &egui::Context) {
+        let Some(rx) = &self.osd_preview.video_frame.in_flight else {
+            return;
+        };
+        let result = match rx.try_recv() {
+            Ok(result) => result,
+            Err(TryRecvError::Empty) => return,
+            Err(TryRecvError::Disconnected) => {
+                self.osd_preview.video_frame.in_flight = None;
+                return;
+            }
+        };
+
+        let (key, image) = result;
+        let video_frame = &mut self.osd_preview.video_frame;
+        video_frame.in_flight = None;
+        video_frame.shown = Some(key);
+        video_frame.texture_handle = image.map(|image| {
+            let size = [image.width() as usize, image.height() as usize];
+            let image = egui::ColorImage::from_rgba_unmultiplied(size, &image);
+            ctx.load_texture("Video frame preview", image, egui::TextureOptions::default())
+        });
+
+        self.fetch_video_frame_if_needed(ctx);
+    }
+
+    /// While rendering, keep the preview slider on the OSD frame at the render position.
+    /// When the render ends (or is stopped), refresh the preview at that position.
+    fn follow_render_position(&mut self, ctx: &egui::Context) {
+        let rendering = self.render_status.is_in_progress();
+
+        if let (Status::InProgress { progress_pct, .. }, Some(video_info), Some(osd_file)) =
+            (&self.render_status.status, &self.video_info, &self.osd_file)
+        {
+            let video_time = progress_pct * video_info.duration.as_secs_f32();
+            let speed_factor = osd_playback_speed_factor(&self.osd_options, video_info, osd_file);
+            let offset = self.osd_options.osd_playback_offset;
+            // Same rule as the render: an OSD frame is shown once the video time passes its scaled time.
+            let frames_shown = osd_file
+                .frames
+                .partition_point(|frame| (offset + frame.time_millis as f32 / 1000.0) * speed_factor < video_time);
+            self.osd_preview.preview_frame = (frames_shown as u32).clamp(1, osd_file.frame_count.max(1));
+        } else if self.was_rendering {
+            self.update_osd_preview(ctx);
+        }
+
+        self.was_rendering = rendering;
     }
 
     pub fn receive_ffmpeg_message(&mut self) {

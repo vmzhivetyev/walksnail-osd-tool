@@ -72,6 +72,7 @@ impl WalksnailOsdTool {
             self.osd_file = None;
             self.srt_file = None;
             self.osd_preview.texture_handle = None;
+            self.osd_preview.video_frame = Default::default();
             self.osd_preview.preview_frame = 1;
             self.render_status.reset();
             self.update_output_video_path(); // this will reset it to empty since input_video_file is none.
